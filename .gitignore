@@ -1,0 +1,32 @@
+# Node.js dependencies
+node_modules/
+
+# Composer PHP dependencies
+vendor/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+*.min.js
+*.min.css
+
+# Environment configurations
+.env
+wp-config.php
+
+# Cache and logs
+*.log
+
+# Backup files
+*~
+*.bak
+
+# VCS
+.svn/
+
+# IDE and editors
+.idea/
+.vscode/
