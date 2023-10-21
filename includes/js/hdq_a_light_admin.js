@@ -7,7 +7,65 @@
 window.addEventListener("load", (event) => {
 	console.log("HD Quiz Save Results Light INIT");
 	hdq_a_light_start();
+    initializeFieldLogic();
 });
+
+function initializeFieldLogic() {
+    const joltzFields = document.querySelectorAll('[name="hdq_joltz_brand_id"], [name="hdq_joltz_brand_secret"]');
+    const btcFields = document.querySelectorAll('[name="hdq_btcpay_url"], [name="hdq_btcpay_api_key"]');
+    const saveButton = document.querySelector('#hdq_save_settings');
+
+    function disableFields(fields) {
+        fields.forEach(field => {
+            field.setAttribute('disabled', 'disabled');
+            field.value = ''; // Clear the field value
+        });
+    }
+
+    function enableFields(fields) {
+        fields.forEach(field => {
+            field.removeAttribute('disabled');
+        });
+    }
+
+    joltzFields.forEach(field => {
+        field.addEventListener('input', function() {
+            if (field.value.trim() !== '') {
+                disableFields(btcFields);
+            } else {
+                const otherFieldsFilled = Array.from(joltzFields).some(input => input.value.trim() !== '');
+                if (!otherFieldsFilled) {
+                    enableFields(btcFields);
+                }
+            }
+        });
+    });
+
+    btcFields.forEach(field => {
+        field.addEventListener('input', function() {
+            if (field.value.trim() !== '') {
+                disableFields(joltzFields);
+            } else {
+                const otherFieldsFilled = Array.from(btcFields).some(input => input.value.trim() !== '');
+                if (!otherFieldsFilled) {
+                    enableFields(joltzFields);
+                }
+            }
+        });
+    });
+
+    if (saveButton) {
+        saveButton.addEventListener('click', function(e) {
+            let joltzFilled = Array.from(joltzFields).some(input => input.value.trim() !== '');
+            let btcFilled = Array.from(btcFields).some(input => input.value.trim() !== '');
+
+            if (joltzFilled && btcFilled) {
+                e.preventDefault();
+                alert('Please fill out either Joltz or BTCPay Server details, not both.');
+            }
+        });
+    }
+}
 
 function hdq_a_light_start() {
 	hdq_a_light_load_active_tab();

@@ -22,10 +22,31 @@ $opt_name_joltz_secret = 'hdq_joltz_secret';
 $data_field_name_joltz = 'hdq_joltz_brand_id';
 $data_field_name_joltz_secret = 'hdq_joltz_brand_secret';
 
+// Declare BTCPay Server variables for settings form
+$opt_name_btcpay_url = 'hdq_btcpay_url';
+$opt_name_btcpay_api_key = 'hdq_btcpay_api_key';
+$data_field_name_btcpay_url = 'hdq_btcpay_url';
+$data_field_name_btcpay_api_key = 'hdq_btcpay_api_key';
+
 // Read in existing option values from database
 $opt_val1 = sanitize_text_field(get_option($opt_name1));
 $opt_val_joltz = sanitize_text_field(get_option($opt_name_joltz));
 $opt_val_joltz_secret = sanitize_text_field(get_option($opt_name_joltz_secret));
+$opt_val_btcpay_url = sanitize_text_field(get_option($opt_name_btcpay_url));
+$opt_val_btcpay_api_key = sanitize_text_field(get_option($opt_name_btcpay_api_key));
+
+if (!empty($opt_val_joltz) || !empty($opt_val_joltz_secret)) {
+    if (!empty($opt_val_btcpay_url) || !empty($opt_val_btcpay_api_key)) {
+        // Possibly notify the user that they can't fill in both sets of fields.
+        // You can use WordPress's admin notice mechanism or any other notification system you have in place
+        add_action('admin_notices', function() {
+            echo '<div class="notice notice-error is-dismissible">';
+            echo '<p>You cannot fill in both Joltz and BTCPay Server details. Please fill only one set of fields.</p>';
+            echo '</div>';
+        });
+        return;
+    }
+}
 
 // See if the user has posted us some information
 if (isset($_POST['hdq_about_options_nonce'])) {
@@ -45,10 +66,28 @@ if (isset($_POST['hdq_about_options_nonce'])) {
         } else {
             $opt_val_joltz_secret = "";
         }
+
+        // Check if the BTCPay Server URL field is set and sanitize its value
+        if (isset($_POST[$data_field_name_btcpay_url])) {
+            $opt_val_btcpay_url = sanitize_text_field($_POST[$data_field_name_btcpay_url]);
+        } else {
+            $opt_val_btcpay_url = "";
+        }
+
+        // Check if the BTCPay Server API Key field is set and sanitize its value
+        if (isset($_POST[$data_field_name_btcpay_api_key])) {
+            $opt_val_btcpay_api_key = sanitize_text_field($_POST[$data_field_name_btcpay_api_key]);
+        } else {
+            $opt_val_btcpay_api_key = "";
+        }
         
         // Save the sanitized Joltz values to the database
         update_option($opt_name_joltz, $opt_val_joltz);
         update_option($opt_name_joltz_secret, $opt_val_joltz_secret);
+
+        // Save the sanitized BTCPay Server values to the database
+        update_option($opt_name_btcpay_url, $opt_val_btcpay_url);
+        update_option($opt_name_btcpay_api_key, $opt_val_btcpay_api_key);
 
         // Read the posted value for the original field
         if (isset($_POST[$data_field_name1])) {
@@ -183,7 +222,17 @@ if (isset($_POST['hdq_about_options_nonce'])) {
                         <div class="hdq_row">
                             <label for="<?php echo $data_field_name_joltz_secret; ?>">Joltz Secret Key:</label>
                             <input type="text" id="<?php echo $data_field_name_joltz_secret; ?>" name="<?php echo $data_field_name_joltz_secret; ?>" value="<?php echo $opt_val_joltz_secret; ?>">
-                        </div>                                                                                                        
+                        </div>
+                        
+                        <div class="hdq_row">
+                            <label for="<?php echo $data_field_name_btcpay_url; ?>">BTCPay Server URL:</label>
+                            <input type="text" id="<?php echo $data_field_name_btcpay_url; ?>" name="<?php echo $data_field_name_btcpay_url; ?>" value="<?php echo $opt_val_btcpay_url; ?>">
+                        </div>
+
+                        <div class="hdq_row">
+                            <label for="<?php echo $data_field_name_btcpay_api_key; ?>">BTCPay Server API Key:</label>
+                            <input type="text" id="<?php echo $data_field_name_btcpay_api_key; ?>" name="<?php echo $data_field_name_btcpay_api_key; ?>" value="<?php echo $opt_val_btcpay_api_key; ?>">
+                        </div>
 
                         <div class="hdq_row" style="text-align:right">
                             <input type="submit" class="hdq_button2" id="hdq_save_settings" value="SAVE">
