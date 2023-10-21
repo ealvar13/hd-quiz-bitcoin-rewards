@@ -16,20 +16,48 @@ $opt_name1 = 'hdq_a_l_members_only';
 $hidden_field_name = 'hd_submit_hidden';
 $data_field_name1 = 'hdq_a_l_members_only';
 
-// Read in existing option value from database
+// Declare Joltz variables for settings form
+$opt_name_joltz = 'hdq_joltz_brand_id';
+$opt_name_joltz_secret = 'hdq_joltz_secret';
+$data_field_name_joltz = 'hdq_joltz_brand_id';
+$data_field_name_joltz_secret = 'hdq_joltz_brand_secret';
+
+// Read in existing option values from database
 $opt_val1 = sanitize_text_field(get_option($opt_name1));
+$opt_val_joltz = sanitize_text_field(get_option($opt_name_joltz));
+$opt_val_joltz_secret = sanitize_text_field(get_option($opt_name_joltz_secret));
 
 // See if the user has posted us some information
 if (isset($_POST['hdq_about_options_nonce'])) {
     $hdq_nonce = $_POST['hdq_about_options_nonce'];
-    if (wp_verify_nonce($hdq_nonce, 'hdq_about_options_nonce') != false) {
-        // Read their posted value
+
+    if (wp_verify_nonce($hdq_nonce, 'hdq_about_options_nonce') !== false) {
+        // Check if the Joltz Brand ID field is set and sanitize its value
+        if (isset($_POST[$data_field_name_joltz])) {
+            $opt_val_joltz = sanitize_text_field($_POST[$data_field_name_joltz]);
+        } else {
+            $opt_val_joltz = "";
+        }
+
+        // Check if the Joltz Brand Secret field is set and sanitize its value
+        if (isset($_POST[$data_field_name_joltz_secret])) {
+            $opt_val_joltz_secret = sanitize_text_field($_POST[$data_field_name_joltz_secret]);
+        } else {
+            $opt_val_joltz_secret = "";
+        }
+        
+        // Save the sanitized Joltz values to the database
+        update_option($opt_name_joltz, $opt_val_joltz);
+        update_option($opt_name_joltz_secret, $opt_val_joltz_secret);
+
+        // Read the posted value for the original field
         if (isset($_POST[$data_field_name1])) {
             $opt_val1 = sanitize_text_field($_POST[$data_field_name1]);
         } else {
             $opt_val1 = "";
         }
-        // Save the posted value in the database
+
+        // Save the original field's value in the database
         update_option($opt_name1, $opt_val1);
     }
 }
@@ -126,7 +154,7 @@ if (isset($_POST['hdq_about_options_nonce'])) {
                     <input type="hidden" name="hdq_submit_hidden" value="Y">
                     <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 2rem">
-                        <div class="hdq_row">
+                        <div class="hdq_row" style="grid-column: span 2;">
                             <label for="hdq_a_l_members_only">Only save results for logged in users
                                 <span class="hdq_tooltip hdq_tooltip_question">?<span class="hdq_tooltip_content"><span>By default, all results will be saved, and non-logged-in users will show up as
                                             <code>--</code></span></span></span></label>
@@ -146,6 +174,16 @@ if (isset($_POST['hdq_about_options_nonce'])) {
 
                             </div>
                         </div>
+
+                        <div class="hdq_row">
+                            <label for="<?php echo $data_field_name_joltz; ?>">Joltz Brand Id:</label>
+                            <input type="text" id="<?php echo $data_field_name_joltz; ?>" name="<?php echo $data_field_name_joltz; ?>" value="<?php echo $opt_val_joltz; ?>">
+                        </div>
+
+                        <div class="hdq_row">
+                            <label for="<?php echo $data_field_name_joltz_secret; ?>">Joltz Secret Key:</label>
+                            <input type="text" id="<?php echo $data_field_name_joltz_secret; ?>" name="<?php echo $data_field_name_joltz_secret; ?>" value="<?php echo $opt_val_joltz_secret; ?>">
+                        </div>                                                                                                        
 
                         <div class="hdq_row" style="text-align:right">
                             <input type="submit" class="hdq_button2" id="hdq_save_settings" value="SAVE">
