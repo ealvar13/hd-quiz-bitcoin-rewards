@@ -87,4 +87,3 @@ if (isset($_POST['hdq_about_options_nonce'])) {
         update_option($opt_name1, $opt_val1);
     }
 }
-?>

@@ -1,6 +1,7 @@
 <?php
-// Indlude the settings logic from settings.php
+// Indlude the logic from settings.php and 
 include 'settings.php';
+include 'rewards.php';
 
 // show results and settings tabs
 wp_enqueue_style(
@@ -34,7 +35,7 @@ wp_enqueue_script(
             <div id="hdq_tabs">
                 <ul>
                     <li class="hdq_active_tab" data-hdq-content="hdq_tab_content">Results</li>
-                    <li data-hdq-content="hdq_tab_results">Rewards</li>
+                    <li data-hdq-content="hdq_tab_rewards">Rewards</li>
                     <li data-hdq-content="hdq_tab_settings">Settings</li>
                 </ul>
                 <div class="clear"></div>
@@ -160,6 +161,54 @@ wp_enqueue_script(
                     </div>
                 </form>
             </div>
+            <div id="hdq_tab_rewards" class="hdq_tab">
+                <form id="hdq_settings" method="post">
+                    <input type="hidden" name="hdq_submit_hidden" value="Y">
+                    <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 2rem">
+                        <div class="hdq_row" style="grid-column: span 2;">
+                            <label for="hdq_a_l_members_only">Only save results for logged in users
+                                <span class="hdq_tooltip hdq_tooltip_question">?<span class="hdq_tooltip_content"><span>By default, all results will be saved, and non-logged-in users will show up as
+                                            <code>--</code></span></span></span></label>
+                            <div class="hdq_check_row">
+                                <div class="hdq-options-check">
+                                    <input type="checkbox" id="hdq_a_l_members_only" name="hdq_a_l_members_only" value="yes" <?php if ($opt_val1 == "yes") {
+                                                                                                                                    echo 'checked = ""';
+                                                                                                                                } ?> />
+                                    <label for="hdq_a_l_members_only"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hdq_row" style="grid-column: span 2;">
+                            <h3>Available Quizzes</h3>
+                            <?php 
+                            $quizzes = fetch_all_quizzes();
+                            if (!empty($quizzes)) {
+                                echo '<ul>';
+                                foreach ($quizzes as $quiz) {
+                                    echo '<li style="display: flex; align-items: center; gap: 1rem;">';
+                                    echo '<strong>' . esc_html($quiz['name']) . '</strong> ';
+                                    echo '<code>' . esc_html($quiz['shortcode']) . '</code>';
+
+                                    // Checkbox for enabling bitcoin rewards for each quiz
+                                    echo '<div class="hdq_check_row" style="display: flex; align-items: center; gap: 0.5rem;">';
+                                    echo '  <input type="checkbox" id="enable_bitcoin_reward_for_' . esc_attr($quiz['id']) . '" name="enable_bitcoin_reward_for_' . esc_attr($quiz['id']) . '" value="yes" style="margin-right: 0.5rem;" />';
+                                    echo '  <label for="enable_bitcoin_reward_for_' . esc_attr($quiz['id']) . '">Enable bitcoin rewards</label>';
+                                    echo '</div>';
+
+                                    echo '</li>';
+                                }
+                                echo '</ul>';
+                            } else {
+                                echo '<p>No quizzes found.</p>';
+                            }
+                            ?>
+                        </div>
+
+                    </div>
+                </form>
+            </div>                                                                                                                    
         </div>
     </div>
 </div>
