@@ -130,7 +130,7 @@ wp_enqueue_script(
                             </div>
                         </div>
 
-                        <label for="hdq_a_l_members_only" style="grid-column: span 2;">Enter either Joltz or BTCPay Server Details and click SAVE
+                        <label style="grid-column: span 2;">Enter either Joltz or BTCPay Server Details and click SAVE
                                 <span class="hdq_tooltip hdq_tooltip_question">?<span class="hdq_tooltip_content"><span>Only one is allowed. If one is filled, filling the other will erase the existing info.
                         </label>
                         
@@ -186,21 +186,27 @@ wp_enqueue_script(
                         <tbody>
                         <?php 
                         foreach ($quizzes as $quiz) {
+                            $quiz_id = $quiz['id'];
+        
+                            // Fetch saved data for this quiz from the database
+                            $reward_enabled_saved_value = get_option("enable_bitcoin_reward_for_" . $quiz_id, '');
+                            $sats_saved_value = get_option("sats_per_answer_for_" . $quiz_id, '');
+                            $retries_saved_value = get_option("max_retries_for_" . $quiz_id, '');
                         ?>
                             <tr>
                                 <td><strong><?php echo esc_html($quiz['name']); ?></strong></td>
                                 <td><code><?php echo esc_html($quiz['shortcode']); ?></code></td>
                                 <td>
                                     <div class="hdq-options-check">
-                                        <input type="checkbox" id="enable_bitcoin_reward_for_<?php echo esc_attr($quiz['id']); ?>" name="enable_bitcoin_reward_for_<?php echo esc_attr($quiz['id']); ?>" value="yes">
+                                    <input type="checkbox" id="enable_bitcoin_reward_for_<?php echo esc_attr($quiz['id']); ?>" name="enable_bitcoin_reward_for_<?php echo esc_attr($quiz['id']); ?>" value="yes" <?php checked($reward_enabled_saved_value, 'yes'); ?>>
                                         <label for="enable_bitcoin_reward_for_<?php echo esc_attr($quiz['id']); ?>"></label>
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="number" step="1" min="0" id="sats_per_answer_for_<?php echo esc_attr($quiz['id']); ?>" name="sats_per_answer_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter amount">
+                                    <input type="number" step="1" min="0" id="sats_per_answer_for_<?php echo esc_attr($quiz['id']); ?>" name="sats_per_answer_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter amount" value="<?php echo esc_attr($sats_saved_value); ?>">
                                 </td>
                                 <td>
-                                    <input type="number" step="1" min="0" id="max_retries_for_<?php echo esc_attr($quiz['id']); ?>" name="max_retries_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter retries">
+                                    <input type="number" step="1" min="0" id="max_retries_for_<?php echo esc_attr($quiz['id']); ?>" name="max_retries_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter retries" value="<?php echo esc_attr($retries_saved_value); ?>">
                                 </td>
                             </tr>
                         <?php 
@@ -209,6 +215,8 @@ wp_enqueue_script(
                         </tbody>
                     </table>
                     
+                    <button type="submit" name="hdq_rewards_save" class="hdq_button3">Save Rewards Settings</button>    
+
                     <?php 
                     } else {
                         echo '<p>No quizzes found.</p>';
