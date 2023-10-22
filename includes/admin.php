@@ -165,50 +165,57 @@ wp_enqueue_script(
                 <form id="hdq_settings" method="post">
                     <input type="hidden" name="hdq_submit_hidden" value="Y">
                     <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 2rem">
-                        <div class="hdq_row" style="grid-column: span 2;">
-                            <label for="hdq_a_l_members_only">Only save results for logged in users
-                                <span class="hdq_tooltip hdq_tooltip_question">?<span class="hdq_tooltip_content"><span>By default, all results will be saved, and non-logged-in users will show up as
-                                            <code>--</code></span></span></span></label>
-                            <div class="hdq_check_row">
-                                <div class="hdq-options-check">
-                                    <input type="checkbox" id="hdq_a_l_members_only" name="hdq_a_l_members_only" value="yes" <?php if ($opt_val1 == "yes") {
-                                                                                                                                    echo 'checked = ""';
-                                                                                                                                } ?> />
-                                    <label for="hdq_a_l_members_only"></label>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="hdq_row" style="grid-column: span 2;">
-                            <h3>Available Quizzes</h3>
-                            <?php 
-                            $quizzes = fetch_all_quizzes();
-                            if (!empty($quizzes)) {
-                                echo '<ul>';
-                                foreach ($quizzes as $quiz) {
-                                    echo '<li style="display: flex; align-items: center; gap: 1rem;">';
-                                    echo '<strong>' . esc_html($quiz['name']) . '</strong> ';
-                                    echo '<code>' . esc_html($quiz['shortcode']) . '</code>';
+                    <h3>Available Quizzes</h3>
+                    
+                    <?php 
+                    $quizzes = fetch_all_quizzes();
+                    if (!empty($quizzes)) {
+                    ?>
 
-                                    // Checkbox for enabling bitcoin rewards for each quiz
-                                    echo '<div class="hdq_check_row" style="display: flex; align-items: center; gap: 0.5rem;">';
-                                    echo '  <input type="checkbox" id="enable_bitcoin_reward_for_' . esc_attr($quiz['id']) . '" name="enable_bitcoin_reward_for_' . esc_attr($quiz['id']) . '" value="yes" style="margin-right: 0.5rem;" />';
-                                    echo '  <label for="enable_bitcoin_reward_for_' . esc_attr($quiz['id']) . '">Enable bitcoin rewards</label>';
-                                    echo '</div>';
-
-                                    echo '</li>';
-                                }
-                                echo '</ul>';
-                            } else {
-                                echo '<p>No quizzes found.</p>';
-                            }
-                            ?>
-                        </div>
-
-                    </div>
+                    <table class="hdq_a_light_table">
+                        <thead>
+                            <tr>
+                                <th>Quiz Name</th>
+                                <th>Shortcode</th>
+                                <th>Bitcoin Rewards Enabled</th>
+                                <th>Sats per correct answer</th>
+                                <th>Max number retries</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php 
+                        foreach ($quizzes as $quiz) {
+                        ?>
+                            <tr>
+                                <td><strong><?php echo esc_html($quiz['name']); ?></strong></td>
+                                <td><code><?php echo esc_html($quiz['shortcode']); ?></code></td>
+                                <td>
+                                    <div class="hdq-options-check">
+                                        <input type="checkbox" id="enable_bitcoin_reward_for_<?php echo esc_attr($quiz['id']); ?>" name="enable_bitcoin_reward_for_<?php echo esc_attr($quiz['id']); ?>" value="yes">
+                                        <label for="enable_bitcoin_reward_for_<?php echo esc_attr($quiz['id']); ?>"></label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="number" step="1" min="0" id="sats_per_answer_for_<?php echo esc_attr($quiz['id']); ?>" name="sats_per_answer_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter amount">
+                                </td>
+                                <td>
+                                    <input type="number" step="1" min="0" id="max_retries_for_<?php echo esc_attr($quiz['id']); ?>" name="max_retries_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter retries">
+                                </td>
+                            </tr>
+                        <?php 
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                    
+                    <?php 
+                    } else {
+                        echo '<p>No quizzes found.</p>';
+                    }
+                    ?>
                 </form>
-            </div>                                                                                                                    
+            </div>                                                                                                        
         </div>
     </div>
 </div>
