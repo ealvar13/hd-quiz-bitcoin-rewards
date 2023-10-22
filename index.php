@@ -49,7 +49,7 @@ add_action('init', 'hdq_br_create_settings_page');
 
 // Settings Page Callback: Load the Bitcoin Rewards settings page
 function hdq_br_settings_page_callback() {
-    require dirname(__FILE__) . '/includes/settings.php';
+    require dirname(__FILE__) . '/includes/admin.php';
 }
 
 
