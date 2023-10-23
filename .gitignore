@@ -30,3 +30,8 @@ wp-config.php
 # IDE and editors
 .idea/
 .vscode/
+
+# Scratch files
+scratch.php
+scratch.js
+scratch.css

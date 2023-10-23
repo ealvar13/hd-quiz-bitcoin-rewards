@@ -35,7 +35,7 @@ add_action('init', 'hdq_br_check_hd_quiz_active');
 /* Include the basic required files
 ------------------------------------------------------- */
 // require dirname(__FILE__) . '/includes/functions.php'; // commenting out for now, general functions for Bitcoin rewards
-
+require dirname(__FILE__) . '/includes/lightning_address.php';
 
 /* Create HD Quiz Bitcoin Rewards Settings page
 ------------------------------------------------------- */
