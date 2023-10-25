@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Functions for configuring bitcoin rewards for each quiz.
+ */
+
 // Process form submission
 if (isset($_POST['hdq_rewards_save'])) {
     $hdq_nonce = $_POST['hdq_about_options_nonce'];
