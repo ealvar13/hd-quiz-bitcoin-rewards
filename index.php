@@ -36,6 +36,7 @@ add_action('init', 'hdq_br_check_hd_quiz_active');
 ------------------------------------------------------- */
 // require dirname(__FILE__) . '/includes/functions.php'; // commenting out for now, general functions for Bitcoin rewards
 require dirname(__FILE__) . '/includes/lightning_address.php';
+require dirname(__FILE__) . '/includes/db_operations.php';
 
 /* Create HD Quiz Bitcoin Rewards Settings page
 ------------------------------------------------------- */
@@ -46,6 +47,9 @@ function hdq_br_create_settings_page() {
     add_action('admin_menu', 'hdq_br_register_settings_page', 11);
 }
 add_action('init', 'hdq_br_create_settings_page');
+
+// Hook the table creation function to plugin activation
+register_activation_hook(__FILE__, 'create_custom_bitcoin_table');
 
 // Settings Page Callback: Load the Bitcoin Rewards settings page
 function hdq_br_settings_page_callback() {

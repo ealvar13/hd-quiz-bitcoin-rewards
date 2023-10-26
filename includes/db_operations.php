@@ -10,7 +10,7 @@ function create_custom_bitcoin_table() {
 
     $sql = "CREATE TABLE $table_name (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
-        user_id mediumint(9) DEFAULT '--',
+        user_id mediumint(9) DEFAULT NULL,
         lightning_address varchar(255) DEFAULT '' NOT NULL,
         quiz_result varchar(255) DEFAULT '' NOT NULL,
         timestamp datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -20,4 +20,7 @@ function create_custom_bitcoin_table() {
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
     dbDelta( $sql );
+
+    // Log to debug.log
+    error_log("create_custom_bitcoin_table function was triggered!");
 }
