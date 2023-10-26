@@ -14,6 +14,14 @@ if (!defined('ABSPATH')) {
     die('Invalid request.');
 }
 
+// Start the PHP session, used to store Lightning Address until completion of quiz.
+function start_session() {
+    if(!session_id()) {
+        session_start();
+    }
+}
+add_action('init', 'start_session', 1);
+
 // Define plugin version
 if (!defined('HDQ_BR_PLUGIN_VERSION')) {
     define('HDQ_BR_PLUGIN_VERSION', '0.1');
