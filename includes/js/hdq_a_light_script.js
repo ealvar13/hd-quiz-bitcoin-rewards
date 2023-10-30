@@ -67,3 +67,14 @@ async function validateLightningAddress(event) {
         event.preventDefault(); // Stop the form submission in either case
     }
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Wait for the DOM to be fully loaded before adding the event listener
+    let finishButton = document.querySelector(".hdq_finsh_button");
+    if(finishButton) { // check if the element exists
+        finishButton.addEventListener("click", function() {
+            console.log("Hello world");
+        });
+    }
+});
+

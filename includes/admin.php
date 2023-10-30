@@ -1,7 +1,14 @@
 <?php
-// Indlude the logic from settings.php and 
+// Include the logic from settings.php and 
 include 'settings.php';
 include 'rewards.php';
+
+function compute_rewards($correct_answers, $quiz_id) {
+    // Fetch the sats per correct answer for this specific quiz from the database
+    $sats_per_correct_answer = get_option("sats_per_answer_for_" . $quiz_id, 0); // default to 0 if not set
+    return $correct_answers * $sats_per_correct_answer;
+}
+
 
 // show results and settings tabs
 wp_enqueue_style(
@@ -66,6 +73,7 @@ wp_enqueue_script(
                             <th>Datetime (MM-DD-YYY)</th>
                             <th>Score</th>
                             <th>User</th>
+                            <th>Rewards</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -92,6 +100,7 @@ wp_enqueue_script(
                                     <td><?php echo $d["datetime"]; ?></td>
                                     <td><?php echo $d["score"][0]; ?>/<?php echo $d["score"][1]; ?></td>
                                     <td><?php echo $d["quizTaker"][1]; ?></td>
+                                    <td><?php echo compute_rewards($d["score"][0], $d['quizID']); ?></td>
                                 </tr>
                         <?php
                                 // limit total results for super large datasets
