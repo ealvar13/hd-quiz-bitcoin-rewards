@@ -53,7 +53,7 @@ async function validateLightningAddress(event) {
 
         // If it's a valid lightning address, make the AJAX call
         jQuery.ajax({
-            url: my_ajax_object.ajaxurl,
+            url: hdq_data.ajaxurl, // Use 'hdq_data' instead of 'my_ajax_object'
             type: 'POST',
             data: {
                 action: 'store_lightning_address',
@@ -69,12 +69,51 @@ async function validateLightningAddress(event) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Wait for the DOM to be fully loaded before adding the event listener
-    let finishButton = document.querySelector(".hdq_finsh_button");
-    if(finishButton) { // check if the element exists
+    let finishButton = document.querySelector(".hdq_finsh_button"); // Ensure the class name is correct
+    if (finishButton) {
         finishButton.addEventListener("click", function() {
-            console.log("Hello world");
+            // Timeout to allow result to be populated and to fetch quiz ID
+            setTimeout(function() {
+                let resultElement = document.querySelector('.hdq_result');
+                if (resultElement) {
+                    let scoreText = resultElement.textContent;
+                    let correctAnswers = parseInt(scoreText.split(' / ')[0], 10);
+                    
+                    // Get the quiz ID from the finish button's data-id attribute
+                    let quizID = finishButton.getAttribute('data-id');
+                    
+                    // Now fetch the sats per correct answer using this quiz ID
+                    fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
+                            let totalSats = correctAnswers * satsPerCorrect;
+                            console.log(`Quiz ID: ${quizID}`);
+                            console.log(`Quiz score: ${scoreText}`);
+                            console.log(`Sats per correct answer: ${satsPerCorrect}`);
+                            console.log(`Total Satoshis earned: ${totalSats}`);
+                        })
+                        .catch(error => console.error('Error:', error));
+                } else {
+                    console.log('Quiz score not found.');
+                }
+            }, 500); // The delay in milliseconds; adjust if necessary
         });
     }
 });
+
+
+
+// // Testing this API endpoint
+
+// let quizID = 3; // Replace this with the actual quiz ID you get from your front end logic
+
+// fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
+//     .then(response => response.json())
+//     .then(data => {
+//         let satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
+//         console.log(`Sats per correct answer for quiz ID ${quizID}: ${satsPerCorrect}`);
+//         // Use satsPerCorrect here as needed
+//     })
+//     .catch(error => console.error('Error:', error));
 

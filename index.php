@@ -14,6 +14,10 @@ if (!defined('ABSPATH')) {
     die('Invalid request.');
 }
 
+// Set a custom error log location.  REMOVE IN PRODUCTION
+ini_set('log_errors', 'On');
+ini_set('error_log', dirname(__FILE__) . '/custom_error_log.log');
+
 // Start the PHP session, used to store Lightning Address until completion of quiz.
 function start_session() {
     if(!session_id()) {
@@ -45,6 +49,7 @@ add_action('init', 'hdq_br_check_hd_quiz_active');
 // require dirname(__FILE__) . '/includes/functions.php'; // commenting out for now, general functions for Bitcoin rewards
 require dirname(__FILE__) . '/includes/lightning_address.php';
 require dirname(__FILE__) . '/includes/db_operations.php';
+require dirname(__FILE__) . '/includes/api_endpoints.php';
 
 /* Create HD Quiz Bitcoin Rewards Settings page
 ------------------------------------------------------- */

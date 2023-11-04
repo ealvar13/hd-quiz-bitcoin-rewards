@@ -21,10 +21,23 @@ add_action('wp_enqueue_scripts', 'hdq_enqueue_lightning_style');
 
 // Enqueue the JavaScript file
 function hdq_enqueue_lightning_script() {
-    $script_path = plugin_dir_url( __FILE__ ) . 'js/hdq_a_light_script.js';
+    global $post; // Ensure you have access to the global post object
+    $quiz_id = $post->ID; // This assumes that you are on a single quiz post. Adjust if necessary.
+    
+    // Get the Satoshi value for the current quiz
+    $sats_field = "sats_per_answer_for_" . $quiz_id;
+    $sats_value = get_option($sats_field, 0); // Default to 0 if not set
+    error_log('Quiz ID on the front end: ' . $quiz_id);
+    error_log('Sats per answer: ' . $sats_value);
 
+    $script_path = plugin_dir_url(__FILE__) . 'js/hdq_a_light_script.js';
     wp_enqueue_script('hdq-lightning-script', $script_path, array('jquery'), '1.0.0', true);
-    wp_localize_script('hdq-lightning-script', 'my_ajax_object', array('ajaxurl' => admin_url('admin-ajax.php')));
+
+    // Localize the script with your data including the sats value.
+    wp_localize_script('hdq-lightning-script', 'hdq_data', array(
+        'ajaxurl' => admin_url('admin-ajax.php'),
+        'satsPerAnswer' => $sats_value
+    ));
 }
 add_action('wp_enqueue_scripts', 'hdq_enqueue_lightning_script');
 
