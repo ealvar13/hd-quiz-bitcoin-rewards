@@ -68,10 +68,48 @@ async function validateLightningAddress(event) {
     }
 }
 
+async function generateBolt11(email, totalSats) {
+    try {
+        // Fetch LNURLPay base URL
+        const baseUrl = await getPayUrl(email); // getPayUrl returns the base URL for LNURLPay
+        if (!baseUrl) throw new Error("Could not get LNURLPay base URL.");
+
+        // Remove the '.well-known' part from the base URL
+        const cleanUrl = baseUrl.replace('/.well-known', '');
+
+        // Append '/callback' to the clean URL to form the callback URL
+        const callbackUrl = `${cleanUrl}/callback`;
+
+        // Determine the amount to send in millisatoshis (totalSats * 1000)
+        let amount = totalSats * 1000; // Convert satoshis to millisatoshis
+
+        // Make a GET request to the callback URL with the amount parameter
+        const payquery = `${callbackUrl}?amount=${amount}`;
+        const prData = await getUrl(payquery); // getUrl should handle the GET request and return the response
+
+        // Process the payment request response
+        if (prData && prData.status === 'OK' && prData.pr) {
+            return prData.pr.toUpperCase(); // Returning the BOLT11 string in uppercase if it exists
+        } else {
+            throw new Error(`Payment request generation failed: ${prData.reason || 'unknown reason'}`);
+        }
+    } catch (error) {
+        console.error("Error in generating BOLT11:", error);
+        return null;
+    }
+}
+
+
+
+
+
 document.addEventListener("DOMContentLoaded", function() {
     let finishButton = document.querySelector(".hdq_finsh_button"); // Ensure the class name is correct
     if (finishButton) {
         finishButton.addEventListener("click", function() {
+            // Retrieve the users lightning address again here
+            let email = document.getElementById("lightning_address").value;
+
             // Timeout to allow result to be populated and to fetch quiz ID
             setTimeout(function() {
                 let resultElement = document.querySelector('.hdq_result');
@@ -92,6 +130,17 @@ document.addEventListener("DOMContentLoaded", function() {
                             console.log(`Quiz score: ${scoreText}`);
                             console.log(`Sats per correct answer: ${satsPerCorrect}`);
                             console.log(`Total Satoshis earned: ${totalSats}`);
+                            generateBolt11(email, totalSats)
+                                .then(bolt11 => {
+                                    if (bolt11) {
+                                        console.log(`BOLT11 Invoice: ${bolt11}`);
+                                        // Here you could now display the BOLT11 invoice to the user
+                                        // or perform additional actions like copying it to the clipboard
+                                    } else {
+                                        console.log(`Failed to generate BOLT11 Invoice.`);
+                                    }
+                                })
+                                .catch(error => console.error('Error generating BOLT11:', error));
                         })
                         .catch(error => console.error('Error:', error));
                 } else {
