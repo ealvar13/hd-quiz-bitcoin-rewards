@@ -68,28 +68,48 @@ async function validateLightningAddress(event) {
     }
 }
 
-async function generateBolt11(email, totalSats) {
+function getPayUrl(email) {
     try {
-        // Fetch LNURLPay base URL
-        const baseUrl = await getPayUrl(email); // getPayUrl returns the base URL for LNURLPay
-        if (!baseUrl) throw new Error("Could not get LNURLPay base URL.");
+        const parts = email.split('@');
+        const domain = parts[1];
+        const username = parts[0];
+        const transformUrl = `https://${domain}/.well-known/lnurlp/${username}`;
+        console.log("Transformed URL:", transformUrl);
+        return transformUrl;
+    } catch (error) {
+        console.error("Exception, possibly malformed LN Address:", error);
+        return null;
+    }
+}
 
-        // Remove the '.well-known' part from the base URL
-        const cleanUrl = baseUrl.replace('/.well-known', '');
+async function getUrl(path) {
+    try {
+        const response = await fetch(path);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch from the URL:", error);
+        return null;
+    }
+}
 
-        // Append '/callback' to the clean URL to form the callback URL
-        const callbackUrl = `${cleanUrl}/callback`;
+async function getBolt11(email, amount) {
+    try {
+        const purl = getPayUrl(email);
+        if (!purl) throw new Error("Invalid URL generated");
 
-        // Determine the amount to send in millisatoshis (totalSats * 1000)
-        let amount = totalSats * 1000; // Convert satoshis to millisatoshis
+        const lnurlDetails = await getUrl(purl);
+        if (!lnurlDetails || !lnurlDetails.callback) throw new Error("LNURL details not found");
 
-        // Make a GET request to the callback URL with the amount parameter
-        const payquery = `${callbackUrl}?amount=${amount}`;
-        const prData = await getUrl(payquery); // getUrl should handle the GET request and return the response
+        let minAmount = lnurlDetails.minSendable;
+        let payAmount = amount && amount * 1000 > minAmount ? amount * 1000 : minAmount;
 
-        // Process the payment request response
-        if (prData && prData.status === 'OK' && prData.pr) {
-            return prData.pr.toUpperCase(); // Returning the BOLT11 string in uppercase if it exists
+        const payquery = `${lnurlDetails.callback}?amount=${payAmount}`;
+        console.log("Amount:", amount, "Payquery:", payquery);
+
+        const prData = await getUrl(payquery);
+        if (prData && prData.pr) {
+            return prData.pr.toUpperCase();
         } else {
             throw new Error(`Payment request generation failed: ${prData.reason || 'unknown reason'}`);
         }
@@ -98,9 +118,57 @@ async function generateBolt11(email, totalSats) {
         return null;
     }
 }
+// Comment out for now while we try a server-side approach
+// async function payBolt11Invoice(bolt11) {
+//     const btcpayServerUrl = hdq_data.btcpayUrl;
+//     const apiKey = hdq_data.btcpayApiKey;
+//     const storeId = "HomCFd17Con8Gnwnocr5Dj9V35qksKLYSTq5DrNTwkad"; // Hardcoded for now
+//     const cryptoCode = "BTC"; // Hardcoded as BTC
 
+//     const requestBody = {
+//         BOLT11: bolt11,
+//         // You can add additional parameters like 'amount', 'maxFeePercent', etc., if needed
+//     };
 
+//     try {
+//         const response = await fetch(`${btcpayServerUrl}/api/v1/stores/${storeId}/lightning/${cryptoCode}/invoices/pay`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `token ${apiKey}`
+//             },
+//             body: JSON.stringify(requestBody)
+//         });
 
+//         const data = await response.json();
+
+//         if (response.ok) {
+//             console.log('Payment Successful:', data);
+//             return data;
+//         } else {
+//             console.error('Payment Failed:', data);
+//             return null;
+//         }
+//     } catch (error) {
+//         console.error('Error in paying BOLT11 Invoice:', error);
+//         return null;
+//     }
+// }
+
+// Function to send payment request to your server
+function sendPaymentRequest(bolt11) {
+    return fetch(hdq_data.ajaxurl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+            'action': 'pay_bolt11_invoice',
+            'bolt11': bolt11
+        })
+    })
+    .then(response => response.json());
+}
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -130,12 +198,26 @@ document.addEventListener("DOMContentLoaded", function() {
                             console.log(`Quiz score: ${scoreText}`);
                             console.log(`Sats per correct answer: ${satsPerCorrect}`);
                             console.log(`Total Satoshis earned: ${totalSats}`);
-                            generateBolt11(email, totalSats)
+
+                            // Corrected: Access BTCPay Server details from hdq_data
+                            // console.log(`BTCPay Server URL: ${hdq_data.btcpayUrl}`);
+                            // console.log(`BTCPay Server API Key: ${hdq_data.btcpayApiKey}`);
+
+                            getBolt11(email, totalSats)
                                 .then(bolt11 => {
                                     if (bolt11) {
                                         console.log(`BOLT11 Invoice: ${bolt11}`);
-                                        // Here you could now display the BOLT11 invoice to the user
-                                        // or perform additional actions like copying it to the clipboard
+                                        // Pay the BOLT11 Invoice using BTCPay Server
+                                        sendPaymentRequest(bolt11)
+                                            .then(paymentResponse => {
+                                                if (paymentResponse) {
+                                                    console.log('Payment response:', paymentResponse);
+                                                    // Additional logic after successful payment
+                                                } else {
+                                                    console.log('Payment failed or no response.');
+                                                }
+                                            })
+                                            .catch(error => console.error('Error paying BOLT11 Invoice:', error));
                                     } else {
                                         console.log(`Failed to generate BOLT11 Invoice.`);
                                     }
@@ -150,19 +232,3 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-
-
-
-// // Testing this API endpoint
-
-// let quizID = 3; // Replace this with the actual quiz ID you get from your front end logic
-
-// fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
-//     .then(response => response.json())
-//     .then(data => {
-//         let satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
-//         console.log(`Sats per correct answer for quiz ID ${quizID}: ${satsPerCorrect}`);
-//         // Use satsPerCorrect here as needed
-//     })
-//     .catch(error => console.error('Error:', error));
-
