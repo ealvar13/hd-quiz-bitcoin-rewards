@@ -42,7 +42,7 @@ function hdq_enqueue_lightning_script() {
         'ajaxurl' => admin_url('admin-ajax.php'),
         'satsPerAnswer' => $sats_value,
         'btcpayUrl' => $btcpay_url,
-        'btcpayApiKey' => $btcpay_api_key
+        'btcpayApiKey' => $btcpay_api_key,
     ));
 }
 add_action('wp_enqueue_scripts', 'hdq_enqueue_lightning_script');
@@ -79,7 +79,7 @@ add_action('wp_ajax_nopriv_store_lightning_address', 'store_lightning_address_in
 function hdq_pay_bolt11_invoice() {
     $btcpayServerUrl = get_option('hdq_btcpay_url', '');
     $apiKey = get_option('hdq_btcpay_api_key', '');
-    $storeId = "Avs6wUaaGPvLDJC936LSA3yebqTAuY4TkSexD8pxJXNR"; // Hardcoded for now
+    $storeId = get_option('hdq_btcpay_store_id', '');
     $cryptoCode = "BTC"; // Hardcoded as BTC
 
     $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';

@@ -157,13 +157,18 @@ wp_enqueue_script(
                             <label for="<?php echo $data_field_name_btcpay_url; ?>">BTCPay Server URL:</label>
                             <input type="text" id="<?php echo $data_field_name_btcpay_url; ?>" name="<?php echo $data_field_name_btcpay_url; ?>" value="<?php echo $opt_val_btcpay_url; ?>">
                         </div>
+                        
+                        <div class="hdq_row">
+                            <label for="<?php echo $data_field_name_btcpay_store_id; ?>">BTCPay Server Store ID:</label>
+                            <input type="text" id="<?php echo $data_field_name_btcpay_store_id; ?>" name="<?php echo $data_field_name_btcpay_store_id; ?>" value="<?php echo $opt_val_btcpay_store_id; ?>">
+                        </div>
 
                         <div class="hdq_row">
                             <label for="<?php echo $data_field_name_btcpay_api_key; ?>">BTCPay Server API Key:</label>
                             <input type="text" id="<?php echo $data_field_name_btcpay_api_key; ?>" name="<?php echo $data_field_name_btcpay_api_key; ?>" value="<?php echo $opt_val_btcpay_api_key; ?>">
                         </div>
 
-                        <div class="hdq_row" style="text-align:right">
+                        <div class="hdq_row">
                             <input type="submit" class="hdq_button2" id="hdq_save_settings" value="SAVE">
                         </div>
 

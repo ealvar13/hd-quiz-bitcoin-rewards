@@ -11,8 +11,10 @@ $data_field_name_joltz_secret = 'hdq_joltz_brand_secret';
 
 // Declare BTCPay Server variables for settings form
 $opt_name_btcpay_url = 'hdq_btcpay_url';
+$opt_name_btcpay_store_id = 'hdq_btcpay_store_id';
 $opt_name_btcpay_api_key = 'hdq_btcpay_api_key';
 $data_field_name_btcpay_url = 'hdq_btcpay_url';
+$data_field_name_btcpay_store_id = 'hdq_btcpay_store_id';
 $data_field_name_btcpay_api_key = 'hdq_btcpay_api_key';
 
 // Read in existing option values from database
@@ -61,6 +63,13 @@ if (isset($_POST['hdq_about_options_nonce'])) {
             $opt_val_btcpay_url = "";
         }
 
+        // Check if the BTCPay Server Store ID field is set and sanitize its value
+        if (isset($_POST[$data_field_name_btcpay_store_id])) {
+            $opt_val_btcpay_store_id = sanitize_text_field($_POST[$data_field_name_btcpay_store_id]);
+        } else {
+            $opt_val_btcpay_store_id = "";
+        }
+
         // Check if the BTCPay Server API Key field is set and sanitize its value
         if (isset($_POST[$data_field_name_btcpay_api_key])) {
             $opt_val_btcpay_api_key = sanitize_text_field($_POST[$data_field_name_btcpay_api_key]);
@@ -75,6 +84,7 @@ if (isset($_POST['hdq_about_options_nonce'])) {
         // Save the sanitized BTCPay Server values to the database
         update_option($opt_name_btcpay_url, $opt_val_btcpay_url);
         update_option($opt_name_btcpay_api_key, $opt_val_btcpay_api_key);
+        update_option($opt_name_btcpay_store_id, $opt_val_btcpay_store_id);
 
         // Read the posted value for the original field
         if (isset($_POST[$data_field_name1])) {

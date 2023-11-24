@@ -118,42 +118,6 @@ async function getBolt11(email, amount) {
         return null;
     }
 }
-// Comment out for now while we try a server-side approach
-// async function payBolt11Invoice(bolt11) {
-//     const btcpayServerUrl = hdq_data.btcpayUrl;
-//     const apiKey = hdq_data.btcpayApiKey;
-//     const storeId = "HomCFd17Con8Gnwnocr5Dj9V35qksKLYSTq5DrNTwkad"; // Hardcoded for now
-//     const cryptoCode = "BTC"; // Hardcoded as BTC
-
-//     const requestBody = {
-//         BOLT11: bolt11,
-//         // You can add additional parameters like 'amount', 'maxFeePercent', etc., if needed
-//     };
-
-//     try {
-//         const response = await fetch(`${btcpayServerUrl}/api/v1/stores/${storeId}/lightning/${cryptoCode}/invoices/pay`, {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Authorization': `token ${apiKey}`
-//             },
-//             body: JSON.stringify(requestBody)
-//         });
-
-//         const data = await response.json();
-
-//         if (response.ok) {
-//             console.log('Payment Successful:', data);
-//             return data;
-//         } else {
-//             console.error('Payment Failed:', data);
-//             return null;
-//         }
-//     } catch (error) {
-//         console.error('Error in paying BOLT11 Invoice:', error);
-//         return null;
-//     }
-// }
 
 // Function to send payment request to your server
 function sendPaymentRequest(bolt11) {
@@ -198,10 +162,6 @@ document.addEventListener("DOMContentLoaded", function() {
                             console.log(`Quiz score: ${scoreText}`);
                             console.log(`Sats per correct answer: ${satsPerCorrect}`);
                             console.log(`Total Satoshis earned: ${totalSats}`);
-
-                            // Corrected: Access BTCPay Server details from hdq_data
-                            // console.log(`BTCPay Server URL: ${hdq_data.btcpayUrl}`);
-                            // console.log(`BTCPay Server API Key: ${hdq_data.btcpayApiKey}`);
 
                             getBolt11(email, totalSats)
                                 .then(bolt11 => {
