@@ -113,3 +113,42 @@ function hdq_pay_bolt11_invoice() {
 // Register the new AJAX action
 add_action('wp_ajax_pay_bolt11_invoice', 'hdq_pay_bolt11_invoice');        // If the user is logged in
 add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'hdq_pay_bolt11_invoice'); // If the user is not logged in
+
+function hdq_save_quiz_results() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+
+    // Get current user information
+    $current_user = wp_get_current_user();
+    
+    // Collect data from the AJAX request
+    $user_id = is_user_logged_in() ? $current_user->user_login : '0';
+    $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
+    $quiz_result = isset($_POST['quiz_result']) ? sanitize_text_field($_POST['quiz_result']) : '';
+    $satoshis_earned = isset($_POST['satoshis_earned']) ? intval($_POST['satoshis_earned']) : 0;
+    $quiz_name = isset($_POST['quiz_name']) ? sanitize_text_field($_POST['quiz_name']) : '';
+    $send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
+    $satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;
+
+    // Insert data into the database
+    $wpdb->insert(
+        $table_name,
+        array(
+            'user_id' => $user_id,
+            'lightning_address' => $lightning_address,
+            'quiz_result' => $quiz_result,
+            'satoshis_earned' => $satoshis_earned,
+            'quiz_name' => $quiz_name,
+            'send_success' => $send_success,
+            'satoshis_sent' => $satoshis_sent
+        ),
+        array('%s', '%s', '%s', '%d', '%s', '%d', '%d')
+    );
+
+    // Send a response back to the AJAX request
+    echo json_encode(array('success' => true));
+    wp_die();
+}
+
+add_action('wp_ajax_hdq_save_quiz_results', 'hdq_save_quiz_results');        // If the user is logged in
+add_action('wp_ajax_nopriv_hdq_save_quiz_results', 'hdq_save_quiz_results'); // If the user is not logged in

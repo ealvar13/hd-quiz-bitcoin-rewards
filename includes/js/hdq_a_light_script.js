@@ -134,6 +134,32 @@ function sendPaymentRequest(bolt11) {
     .then(response => response.json());
 }
 
+async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent) {
+    try {
+        const response = await fetch(hdq_data.ajaxurl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'action': 'hdq_save_quiz_results',
+                'lightning_address': lightningAddress,
+                'quiz_result': quizResult,
+                'satoshis_earned': satoshisEarned,
+                'quiz_name': quizName,
+                'send_success': sendSuccess,
+                'satoshis_sent': satoshisSent
+            })
+        });
+        const data = await response.json();
+        console.log('Quiz results saved:', data);
+        return data;
+    } catch (error) {
+        console.error('Error saving quiz results:', error);
+        return null;
+    }
+}
+
 
 document.addEventListener("DOMContentLoaded", function() {
     let finishButton = document.querySelector(".hdq_finsh_button"); // Ensure the class name is correct
@@ -141,6 +167,7 @@ document.addEventListener("DOMContentLoaded", function() {
         finishButton.addEventListener("click", function() {
             // Retrieve the users lightning address again here
             let email = document.getElementById("lightning_address").value;
+            let quizName = document.querySelector(".wp-block-post-title").textContent; // Fetching quiz name from the DOM
 
             // Timeout to allow result to be populated and to fetch quiz ID
             setTimeout(function() {
@@ -172,7 +199,11 @@ document.addEventListener("DOMContentLoaded", function() {
                                             .then(paymentResponse => {
                                                 if (paymentResponse) {
                                                     console.log('Payment response:', paymentResponse);
-                                                    // Additional logic after successful payment
+                                                    saveQuizResults(email, scoreText, totalSats, quizName, 1, totalSats)
+                                                        .then(saveResponse => {
+                                                            // Handle the response from saving quiz results
+                                                            console.log('Quiz Results Save Response:', saveResponse);
+                                                        });
                                                 } else {
                                                     console.log('Payment failed or no response.');
                                                 }
