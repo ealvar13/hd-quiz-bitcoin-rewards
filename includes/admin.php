@@ -61,10 +61,24 @@ wp_enqueue_script(
                 }
                 ?>
 
-                <h3>
-                    <?php echo $total; ?> records in table
-                </h3>
+                <?php
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
 
+                // Query to count the total number of records
+                $total_query = "SELECT COUNT(*) FROM $table_name";
+                $total_records = $wpdb->get_var($total_query);
+
+                echo "<h3>" . esc_html($total_records) . " records in table</h3>";
+                ?>
+
+
+                <?php
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+                $query = "SELECT * FROM $table_name ORDER BY timestamp DESC LIMIT 1000"; // Limiting to 1000 rows for performance
+                $results = $wpdb->get_results($query, ARRAY_A);
+                ?>
 
                 <table class="hdq_a_light_table">
                     <thead>
@@ -72,41 +86,29 @@ wp_enqueue_script(
                             <th>Quiz Name</th>
                             <th>Datetime (MM-DD-YYY)</th>
                             <th>Score</th>
-                            <th>User</th>
-                            <th>Rewards</th>
+                            <th>Satoshis Earned</th>
+                            <th>Send Success</th>
+                            <th>Satoshis Sent</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                        if ($data != "" && $data != null) {
+                        if ($results) {
+                            foreach ($results as $row) {
+                                // Format the timestamp
+                                $formatted_date = date("m-d-Y", strtotime($row['timestamp']));
 
-                            $data = array_reverse($data);
-                            $x = 0;
-                            foreach ($data as $d) {
-                                $x++;
-                                $d["quizName"] = sanitize_text_field($d["quizName"]);
-                                $d["datetime"] = sanitize_text_field($d["datetime"]);
-                                $d["quizTaker"][1] = sanitize_text_field($d["quizTaker"][1]);
-                                $d["score"][0] = intval($d["score"][0]);
-                                $d["score"][1] = intval($d["score"][1]);
-                                $d["passPercent"] = intval($d["passPercent"]);
+                                // Format send success
+                                $send_success = $row['send_success'] ? 'Yes' : 'No';
 
-                                $passFail = "fail";
-                                if ($d["score"][0] / $d["score"][1] * 100 >= $d["passPercent"]) {
-                                    $passFail = "pass";
-                                } ?>
-                                <tr class="<?php echo $passFail; ?>">
-                                    <td><?php echo $d["quizName"]; ?></td>
-                                    <td><?php echo $d["datetime"]; ?></td>
-                                    <td><?php echo $d["score"][0]; ?>/<?php echo $d["score"][1]; ?></td>
-                                    <td><?php echo $d["quizTaker"][1]; ?></td>
-                                    <td><?php echo compute_rewards($d["score"][0], $d['quizID']); ?></td>
-                                </tr>
-                        <?php
-                                // limit total results for super large datasets
-                                if ($x >= 1000) {
-                                    break;
-                                }
+                                echo "<tr>";
+                                echo "<td>" . esc_html($row['quiz_name']) . "</td>";
+                                echo "<td>" . esc_html($formatted_date) . "</td>";
+                                echo "<td>" . esc_html($row['quiz_result']) . "</td>";
+                                echo "<td>" . intval($row['satoshis_earned']) . "</td>";
+                                echo "<td>" . esc_html($send_success) . "</td>";
+                                echo "<td>" . intval($row['satoshis_sent']) . "</td>";
+                                echo "</tr>";
                             }
                         }
                         ?>
@@ -195,17 +197,19 @@ wp_enqueue_script(
                                 <th>Bitcoin Rewards Enabled</th>
                                 <th>Sats per correct answer</th>
                                 <th>Max number retries</th>
+                                <th>Max Satoshi Budget</th> 
                             </tr>
                         </thead>
                         <tbody>
                         <?php 
                         foreach ($quizzes as $quiz) {
                             $quiz_id = $quiz['id'];
-        
+
                             // Fetch saved data for this quiz from the database
                             $reward_enabled_saved_value = get_option("enable_bitcoin_reward_for_" . $quiz_id, '');
                             $sats_saved_value = get_option("sats_per_answer_for_" . $quiz_id, '');
                             $retries_saved_value = get_option("max_retries_for_" . $quiz_id, '');
+                            $max_budget_saved_value = get_option("max_satoshi_budget_for_" . $quiz_id, ''); // Fetch max budget value
                         ?>
                             <tr>
                                 <td><strong><?php echo esc_html($quiz['name']); ?></strong></td>
@@ -222,6 +226,9 @@ wp_enqueue_script(
                                 <td>
                                     <input type="number" step="1" min="0" id="max_retries_for_<?php echo esc_attr($quiz['id']); ?>" name="max_retries_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter retries" value="<?php echo esc_attr($retries_saved_value); ?>">
                                 </td>
+                                <td>
+                                    <input type="number" step="1" min="0" id="max_satoshi_budget_for_<?php echo esc_attr($quiz['id']); ?>" name="max_satoshi_budget_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter max budget" value="<?php echo esc_attr($max_budget_saved_value); ?>">
+                                </td>
                             </tr>
                         <?php 
                         }
@@ -237,7 +244,7 @@ wp_enqueue_script(
                     }
                     ?>
                 </form>
-            </div>                                                                                                        
+            </div>                                                                                  
         </div>
     </div>
 </div>

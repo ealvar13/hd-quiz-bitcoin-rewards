@@ -134,7 +134,7 @@ function sendPaymentRequest(bolt11) {
     .then(response => response.json());
 }
 
-async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent) {
+async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID) {
     try {
         const response = await fetch(hdq_data.ajaxurl, {
             method: 'POST',
@@ -146,6 +146,7 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
                 'lightning_address': lightningAddress,
                 'quiz_result': quizResult,
                 'satoshis_earned': satoshisEarned,
+                'quiz_id': quizID,
                 'quiz_name': quizName,
                 'send_success': sendSuccess,
                 'satoshis_sent': satoshisSent
@@ -168,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // Retrieve the users lightning address again here
             let email = document.getElementById("lightning_address").value;
             let quizName = document.querySelector(".wp-block-post-title").textContent; // Fetching quiz name from the DOM
+            let quizID = finishButton.getAttribute('data-id'); // Fetching quiz ID from the finish button's data-id attribute
 
             // Timeout to allow result to be populated and to fetch quiz ID
             setTimeout(function() {
@@ -199,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                             .then(paymentResponse => {
                                                 if (paymentResponse) {
                                                     console.log('Payment response:', paymentResponse);
-                                                    saveQuizResults(email, scoreText, totalSats, quizName, 1, totalSats)
+                                                    saveQuizResults(email, scoreText, totalSats, quizName, 1, totalSats, quizID)
                                                         .then(saveResponse => {
                                                             // Handle the response from saving quiz results
                                                             console.log('Quiz Results Save Response:', saveResponse);

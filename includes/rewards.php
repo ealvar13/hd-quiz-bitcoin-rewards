@@ -27,10 +27,15 @@ if (isset($_POST['hdq_rewards_save'])) {
             $retries_field = "max_retries_for_" . $quiz_id;
             $retries_value = isset($_POST[$retries_field]) ? sanitize_text_field($_POST[$retries_field]) : "";
 
-            // Now you'd save these values to the database. You can either save it individually or group it into an array and save as a single option.
+            // Fetch and sanitize the Max Satoshi Budget value
+            $max_budget_field = "max_satoshi_budget_for_" . $quiz_id;
+            $max_budget_value = isset($_POST[$max_budget_field]) ? sanitize_text_field($_POST[$max_budget_field]) : "";
+
+            // Now save these values to the database.
             update_option($reward_enabled_field, $reward_enabled_value);
             update_option($sats_field, $sats_value);
             update_option($retries_field, $retries_value);
+            update_option($max_budget_field, $max_budget_value);
         }
     }
 }
