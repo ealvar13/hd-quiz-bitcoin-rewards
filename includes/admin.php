@@ -9,6 +9,34 @@ function compute_rewards($correct_answers, $quiz_id) {
     return $correct_answers * $sats_per_correct_answer;
 }
 
+function check_quiz_budgets() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+
+    // Get all quizzes
+    $quizzes = fetch_all_quizzes();
+    $budgets = [];
+
+    foreach ($quizzes as $quiz) {
+        // Fetch total satoshis sent for each quiz
+        $total_sent = $wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(satoshis_sent) FROM $table_name WHERE quiz_name = %s",
+            $quiz['name']
+        ));
+
+        // Fetch the set budget for the quiz
+        $max_budget = get_option("max_satoshi_budget_for_" . $quiz['id'], 0);
+
+        // Compare and store result
+        $budgets[$quiz['name']] = [
+            'total_sent' => $total_sent,
+            'max_budget' => $max_budget,
+            'within_budget' => ($total_sent <= $max_budget)
+        ];
+    }
+
+    return $budgets;
+}
 
 // show results and settings tabs
 wp_enqueue_style(
@@ -178,6 +206,9 @@ wp_enqueue_script(
                 </form>
             </div>
             <div id="hdq_tab_rewards" class="hdq_tab">
+                <?php
+                $total_sent_values = check_quiz_budgets();
+                ?>
                 <form id="hdq_settings" method="post">
                     <input type="hidden" name="hdq_submit_hidden" value="Y">
                     <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
@@ -198,6 +229,7 @@ wp_enqueue_script(
                                 <th>Sats per correct answer</th>
                                 <th>Max number retries</th>
                                 <th>Max Satoshi Budget</th> 
+                                <th>Total Satoshi Sent</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -210,6 +242,7 @@ wp_enqueue_script(
                             $sats_saved_value = get_option("sats_per_answer_for_" . $quiz_id, '');
                             $retries_saved_value = get_option("max_retries_for_" . $quiz_id, '');
                             $max_budget_saved_value = get_option("max_satoshi_budget_for_" . $quiz_id, ''); // Fetch max budget value
+                            $total_sent = isset($total_sent_values[$quiz['name']]) ? $total_sent_values[$quiz['name']] : 0; // Fetch total sent value
                         ?>
                             <tr>
                                 <td><strong><?php echo esc_html($quiz['name']); ?></strong></td>
@@ -228,6 +261,9 @@ wp_enqueue_script(
                                 </td>
                                 <td>
                                     <input type="number" step="1" min="0" id="max_satoshi_budget_for_<?php echo esc_attr($quiz['id']); ?>" name="max_satoshi_budget_for_<?php echo esc_attr($quiz['id']); ?>" placeholder="Enter max budget" value="<?php echo esc_attr($max_budget_saved_value); ?>">
+                                </td>
+                                <td>
+                                    <?php echo esc_html($total_sent['total_sent']); ?>
                                 </td>
                             </tr>
                         <?php 

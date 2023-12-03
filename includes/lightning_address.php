@@ -47,19 +47,78 @@ function hdq_enqueue_lightning_script() {
 }
 add_action('wp_enqueue_scripts', 'hdq_enqueue_lightning_script');
 
-/**
- * Display a user input form to collect the Lightning Address at the start of the quiz.
- */
-function la_input_lightning_address_on_quiz_start() {
-    echo '<div class="hdq_row">';
-    echo '<label for="lightning_address" class="hdq_input">Enter your Lightning Address: </label>';
-    echo '<input type="text" id="lightning_address" name="lightning_address" class="hdq_lightning_input" placeholder="bolt@lightning.com">';
-    echo '<input type="submit" class="hdq_button" id="hdq_save_settings" value="SAVE" style="margin-left:10px;" onclick="validateLightningAddress(event);">';
-    echo '</div>';
+// Fetch the total satoshis sent for the current quiz
+function get_total_sent_for_quiz($quiz_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+
+    // Fetch the quiz name using the quiz ID
+    $quiz_term = get_term_by('id', $quiz_id, 'quiz');
+    if (!$quiz_term) {
+        error_log("Quiz term not found for ID: $quiz_id");
+        return 0; // Return 0 if the quiz is not found
+    }
+    $quiz_name = $quiz_term->name;
+
+    // Fetch total satoshis sent for the specific quiz
+    $total_sent = $wpdb->get_var($wpdb->prepare(
+        "SELECT SUM(satoshis_sent) FROM $table_name WHERE quiz_name = %s",
+        $quiz_name
+    ));
+    return $total_sent;
 }
 
-// Attach our function to the 'hdq_before' action.
-add_action('hdq_before', 'la_input_lightning_address_on_quiz_start');
+
+function should_enable_rewards($quiz_id, $lightning_address) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+
+    // Check if rewards are enabled for this quiz
+    $rewards_enabled = get_option("enable_bitcoin_reward_for_" . $quiz_id) === 'yes';
+    
+    // Fetch quiz name using the term associated with the quiz ID
+    $quiz_term = get_term_by('id', $quiz_id, 'quiz');
+    if (!$quiz_term) {
+        error_log("Quiz term not found for quiz ID $quiz_id");
+        return false; // Return false if the quiz is not found
+    }
+    $quiz_name = $quiz_term->name;
+
+    // Check if the quiz is over budget
+    $max_budget = get_option("max_satoshi_budget_for_" . $quiz_id);
+    $total_sent = $wpdb->get_var($wpdb->prepare(
+        "SELECT SUM(satoshis_sent) FROM $table_name WHERE quiz_name = %s",
+        $quiz_name
+    ));
+    $over_budget = ($total_sent >= $max_budget);
+    error_log("Max budget for quiz ID $quiz_id: $max_budget");
+    error_log("Total sent for quiz ID $quiz_id: $total_sent");
+    error_log("Quiz ID $quiz_id over budget: " . ($over_budget ? 'Yes' : 'No'));
+
+    return $rewards_enabled && !$over_budget;
+}
+
+
+
+/**
+ * Check if rewards are enabled. If so, display a user input form to collect the Lightning Address at the start of the quiz.
+ */
+function la_input_lightning_address_on_quiz_start($quiz_id) {
+    // Here we check if we should enable rewards for this quiz
+    // For the second parameter, we can pass an empty string or a default value as the user has not entered an address yet
+    if (should_enable_rewards($quiz_id, '')) {
+        echo '<div class="hdq_row">';
+        echo '<label for="lightning_address" class="hdq_input">Enter your Lightning Address: </label>';
+        echo '<input type="text" id="lightning_address" name="lightning_address" class="hdq_lightning_input" placeholder="bolt@lightning.com">';
+        echo '<input type="submit" class="hdq_button" id="hdq_save_settings" value="SAVE" style="margin-left:10px;" onclick="validateLightningAddress(event);">';
+        echo '</div>';
+    } else {
+        // If rewards should not be enabled, display a message or hide the form
+        echo '<div class="hdq_row">Rewards are not currently available for this quiz.</div>';
+    }
+}
+
+add_action('hdq_before', 'la_input_lightning_address_on_quiz_start', 10, 1);
 
 // Store the lightning address for the session
 function store_lightning_address_in_session() {
