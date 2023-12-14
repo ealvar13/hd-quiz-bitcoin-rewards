@@ -18,6 +18,7 @@ function create_custom_bitcoin_table() {
         satoshis_earned mediumint(9) DEFAULT 0 NOT NULL,
         send_success boolean DEFAULT FALSE NOT NULL,      
         satoshis_sent mediumint(9) DEFAULT 0 NOT NULL,
+        quiz_id mediumint(9) DEFAULT 0 NOT NULL,
         PRIMARY KEY (id)
     ) $charset_collate;";
 

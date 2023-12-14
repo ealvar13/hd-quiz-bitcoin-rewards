@@ -114,19 +114,55 @@ function la_input_lightning_address_on_quiz_start($quiz_id) {
         echo '</div>';
     } else {
         // If rewards should not be enabled, display a message or hide the form
-        echo '<div class="hdq_row">Rewards are not currently available for this quiz.</div>';
+        echo '<div class="hdq_row">Rewards are not currently available for this quiz.  You can still take the quiz if you want though ; )</div>';
     }
 }
 
 add_action('hdq_before', 'la_input_lightning_address_on_quiz_start', 10, 1);
 
-// Store the lightning address for the session
+// Function to count the attempts a user's lightning address has made for a specific quiz
+function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+
+    $count = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $table_name WHERE lightning_address = %s AND quiz_id = %d",
+        $lightning_address, 
+        $quiz_id
+    ));
+
+    error_log("Retrieved count for $lightning_address, Quiz ID $quiz_id: $count");
+
+    $max_retries = get_option("max_retries_for_" . $quiz_id, 0);
+    $max_retries_exceeded = intval($count) >= $max_retries;
+
+    return ['count' => intval($count), 'max_retries_exceeded' => $max_retries_exceeded];
+}
+
+
 function store_lightning_address_in_session() {
-    if (isset($_POST['address'])) {
-        $_SESSION['lightning_address'] = sanitize_text_field($_POST['address']);
-        echo 'Address stored successfully.';
+    if (isset($_POST['address']) && isset($_POST['quiz_id'])) {
+        $lightning_address = sanitize_text_field($_POST['address']);
+        $quiz_id = intval($_POST['quiz_id']); // Fetch quiz_id from the POST data
+        error_log("POST Data: " . print_r($_POST, true));
+
+        $max_retries = get_option("max_retries_for_" . $quiz_id, 0);
+        $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
+        $attempts = $attempt_data['count']; // Access the count of attempts
+        $max_retries_exceeded = $attempt_data['max_retries_exceeded'];
+
+        error_log("Max retries: $max_retries");
+        error_log("Attempts: $attempts");
+        $_SESSION['max_retries_exceeded'] = $max_retries_exceeded;
+
+        if (!$max_retries_exceeded) {
+            $_SESSION['lightning_address'] = $lightning_address;
+            echo 'Address stored successfully.';
+        } else {
+            echo 'Maximum attempts reached for this Lightning Address. You can still take the quiz, but you won\'t get sats ; )';
+        }
     } else {
-        echo 'No address provided.';
+        echo 'No address or quiz ID provided.';
     }
     wp_die();
 }
@@ -134,13 +170,32 @@ function store_lightning_address_in_session() {
 add_action('wp_ajax_store_lightning_address', 'store_lightning_address_in_session');        // If the user is logged in
 add_action('wp_ajax_nopriv_store_lightning_address', 'store_lightning_address_in_session'); // If the user is not logged in
 
-// Function to handle the payment of a BOLT11 invoice via BTCPay Server
 function hdq_pay_bolt11_invoice() {
+    global $wpdb;
+
+    error_log("POST Data: " . print_r($_POST, true)); // Debug log to check all POST data
+    // Retrieve quiz_id from POST data
+    $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+    error_log("Quiz ID from post data: " . $quiz_id);
+
+
+    $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
+    $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+
+    // Get attempt count and check if maximum retries have been exceeded
+    $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
+    error_log("Attempt data: " . print_r($attempt_data, true));
+    if ($attempt_data['max_retries_exceeded']) {
+        echo json_encode(['error' => 'Maximum attempts reached for this Lightning Address.']);
+        wp_die();
+    }
+
+    $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
+    $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
     $btcpayServerUrl = get_option('hdq_btcpay_url', '');
     $apiKey = get_option('hdq_btcpay_api_key', '');
     $storeId = get_option('hdq_btcpay_store_id', '');
     $cryptoCode = "BTC"; // Hardcoded as BTC
-
     $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
 
     // Remove any trailing slashes
@@ -148,7 +203,6 @@ function hdq_pay_bolt11_invoice() {
 
     // Construct the correct URL
     $url = $btcpayServerUrl . "/api/v1/stores/" . $storeId . "/lightning/" . $cryptoCode . "/invoices/pay";
-
     $body = json_encode(['BOLT11' => $bolt11]);
 
     $response = wp_remote_post($url, [
@@ -204,9 +258,10 @@ function hdq_save_quiz_results() {
             'satoshis_earned' => $satoshis_earned,
             'quiz_name' => $quiz_name,
             'send_success' => $send_success,
-            'satoshis_sent' => $satoshis_sent
+            'satoshis_sent' => $satoshis_sent,
+            'quiz_id' => $quiz_id // Include quiz_id in the array
         ),
-        array('%s', '%s', '%s', '%d', '%s', '%d', '%d')
+        array('%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d') // Update the format string accordingly
     );
 
     // Send a response back to the AJAX request

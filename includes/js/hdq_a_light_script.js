@@ -38,34 +38,41 @@ async function validateLightningAddressWithUrl(email) {
 async function validateLightningAddress(event) {
     const email = document.getElementById("lightning_address").value;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    
+
+    // Retrieve the quiz ID from the finish button's data-id attribute
+    const finishButton = document.querySelector(".hdq_finsh_button");
+    const quizID = finishButton ? finishButton.getAttribute('data-id') : null;
+    console.log(`Quiz ID from validateLightningAddress: ${quizID}`);
+
     if (!emailRegex.test(email)) {
         alert("Please enter a valid lightning address format.");
         event.preventDefault(); // Stop the form submission
-    } else {
-        const isValidLightningAddress = await validateLightningAddressWithUrl(email);
-
-        if (!isValidLightningAddress) {
-            alert("Invalid or Inactive Lightning Address.");
-            event.preventDefault(); // Stop the form submission
-            return;
-        }
-
-        // If it's a valid lightning address, make the AJAX call
-        jQuery.ajax({
-            url: hdq_data.ajaxurl, // Use 'hdq_data' instead of 'my_ajax_object'
-            type: 'POST',
-            data: {
-                action: 'store_lightning_address',
-                address: email
-            },
-            success: function(response) {
-                console.log(response); // Log server's response.
-                alert("Lightning Address stored successfully.");
-            }
-        });
-        event.preventDefault(); // Stop the form submission in either case
+        return;
     }
+
+    const isValidLightningAddress = await validateLightningAddressWithUrl(email);
+
+    if (!isValidLightningAddress) {
+        alert("Invalid or Inactive Lightning Address.");
+        event.preventDefault(); // Stop the form submission
+        return;
+    }
+
+    // If it's a valid lightning address, make the AJAX call
+    jQuery.ajax({
+        url: hdq_data.ajaxurl,
+        type: 'POST',
+        data: {
+            action: 'store_lightning_address',
+            address: email,
+            quiz_id: quizID // Correctly pass quiz_id
+        },
+        success: function(response) {
+            console.log(response); // Log server's response.
+            alert(response); // Show the server response instead of a static message
+        }
+    });
+    event.preventDefault(); // Stop the form submission in either case
 }
 
 function getPayUrl(email) {
@@ -120,7 +127,7 @@ async function getBolt11(email, amount) {
 }
 
 // Function to send payment request to your server
-function sendPaymentRequest(bolt11) {
+function sendPaymentRequest(bolt11, quizID, lightningAddress) {
     return fetch(hdq_data.ajaxurl, {
         method: 'POST',
         headers: {
@@ -128,7 +135,9 @@ function sendPaymentRequest(bolt11) {
         },
         body: new URLSearchParams({
             'action': 'pay_bolt11_invoice',
-            'bolt11': bolt11
+            'bolt11': bolt11,
+            'quiz_id': quizID,
+            'lightning_address': lightningAddress
         })
     })
     .then(response => response.json());
@@ -136,6 +145,7 @@ function sendPaymentRequest(bolt11) {
 
 async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID) {
     try {
+        console.log(`Sending AJAX request with Quiz ID: ${quizID}`);
         const response = await fetch(hdq_data.ajaxurl, {
             method: 'POST',
             headers: {
@@ -161,7 +171,6 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
     }
 }
 
-
 document.addEventListener("DOMContentLoaded", function() {
     let finishButton = document.querySelector(".hdq_finsh_button"); // Ensure the class name is correct
     if (finishButton) {
@@ -178,10 +187,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     let scoreText = resultElement.textContent;
                     let correctAnswers = parseInt(scoreText.split(' / ')[0], 10);
                     
-                    // Get the quiz ID from the finish button's data-id attribute
-                    let quizID = finishButton.getAttribute('data-id');
-                    
-                    // Now fetch the sats per correct answer using this quiz ID
+                    // Fetch the sats per correct answer using this quiz ID
                     fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
                         .then(response => response.json())
                         .then(data => {
@@ -197,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                     if (bolt11) {
                                         console.log(`BOLT11 Invoice: ${bolt11}`);
                                         // Pay the BOLT11 Invoice using BTCPay Server
-                                        sendPaymentRequest(bolt11)
+                                        sendPaymentRequest(bolt11, quizID, email)
                                             .then(paymentResponse => {
                                                 if (paymentResponse) {
                                                     console.log('Payment response:', paymentResponse);
@@ -225,3 +231,4 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
