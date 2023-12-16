@@ -205,6 +205,7 @@ function hdq_pay_bolt11_invoice() {
     $url = $btcpayServerUrl . "/api/v1/stores/" . $storeId . "/lightning/" . $cryptoCode . "/invoices/pay";
     $body = json_encode(['BOLT11' => $bolt11]);
 
+    // Send payment request to BTCPay Server
     $response = wp_remote_post($url, [
         'headers' => [
             'Content-Type'  => 'application/json',
@@ -215,9 +216,21 @@ function hdq_pay_bolt11_invoice() {
     ]);
 
     if (is_wp_error($response)) {
+        error_log('Payment request error: ' . $response->get_error_message());
         echo json_encode(['error' => 'Payment request failed', 'details' => $response->get_error_message()]);
     } else {
-        echo wp_remote_retrieve_body($response);
+        $responseBody = wp_remote_retrieve_body($response);
+        error_log('BTCPay Server response: ' . $responseBody);
+
+        // Decode JSON response
+        $decodedResponse = json_decode($responseBody, true);
+
+        // Check if the payment status is 'Complete'
+        if (isset($decodedResponse['status']) && $decodedResponse['status'] === 'Complete') {
+            echo json_encode(['success' => true, 'details' => $decodedResponse]);
+        } else {
+            echo json_encode(['success' => false, 'details' => $decodedResponse]);
+        }
     }
 
     wp_die();

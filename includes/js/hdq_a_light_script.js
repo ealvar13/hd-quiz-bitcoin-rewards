@@ -126,7 +126,6 @@ async function getBolt11(email, amount) {
     }
 }
 
-// Function to send payment request to your server
 function sendPaymentRequest(bolt11, quizID, lightningAddress) {
     return fetch(hdq_data.ajaxurl, {
         method: 'POST',
@@ -140,7 +139,21 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress) {
             'lightning_address': lightningAddress
         })
     })
-    .then(response => response.json());
+    .then(response => response.json())
+    .then(data => {
+        console.log('Raw payment response data:', data); // Added for debugging
+        if (data && data.details && data.details.status === "Complete") {
+            console.log('Payment Successful:', data.details);
+            return { success: true, data: data.details };
+        } else {
+            console.log('Payment Not Successful:', data.details || data);
+            return { success: false, data: data.details || data };
+        }
+    })
+    .catch(error => {
+        console.error('Error in Payment Request:', error);
+        return { success: false, error: error };
+    });
 }
 
 async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID) {
@@ -202,19 +215,18 @@ document.addEventListener("DOMContentLoaded", function() {
                                 .then(bolt11 => {
                                     if (bolt11) {
                                         console.log(`BOLT11 Invoice: ${bolt11}`);
-                                        // Pay the BOLT11 Invoice using BTCPay Server
                                         sendPaymentRequest(bolt11, quizID, email)
                                             .then(paymentResponse => {
-                                                if (paymentResponse) {
-                                                    console.log('Payment response:', paymentResponse);
-                                                    saveQuizResults(email, scoreText, totalSats, quizName, 1, totalSats, quizID)
-                                                        .then(saveResponse => {
-                                                            // Handle the response from saving quiz results
-                                                            console.log('Quiz Results Save Response:', saveResponse);
-                                                        });
-                                                } else {
-                                                    console.log('Payment failed or no response.');
-                                                }
+                                                let paymentSuccessful = paymentResponse.success;
+                                                console.log('Payment response:', paymentResponse);
+
+                                                // Determine satoshis sent based on payment success
+                                                let satoshisToSend = paymentSuccessful ? totalSats : 0;
+
+                                                saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID)
+                                                    .then(saveResponse => {
+                                                        console.log('Quiz Results Save Response:', saveResponse);
+                                                    });
                                             })
                                             .catch(error => console.error('Error paying BOLT11 Invoice:', error));
                                     } else {
