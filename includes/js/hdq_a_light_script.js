@@ -1,3 +1,29 @@
+// Function for the modal that displays user instructions at the start of the quiz
+function setupModal() {
+    // Function to open the modal
+    function openModal() {
+        jQuery('#la-modal').show();
+    }
+
+    // Function to close the modal
+    function closeModal() {
+        jQuery('#la-modal').hide();
+    }
+
+    // Event listener for the close button of the modal
+    jQuery('.la-close').click(function() {
+        closeModal();
+    });
+
+    // Event listener for the 'Start Quiz' button in the modal
+    jQuery('#la-start-quiz').click(function() {
+        closeModal();
+    });
+
+    // Automatically open the modal when the function is called
+    openModal();
+}
+
 function getPayUrl(email) {
     try {
         const parts = email.split('@');
@@ -185,6 +211,8 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    setupModal(); // Call the setupModal function to activate the modal functionality
+    
     let finishButton = document.querySelector(".hdq_finsh_button"); // Ensure the class name is correct
     if (finishButton) {
         finishButton.addEventListener("click", function() {

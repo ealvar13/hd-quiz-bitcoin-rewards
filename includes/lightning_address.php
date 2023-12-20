@@ -10,16 +10,17 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// Enqueue the stylesheet
-function hdq_enqueue_lightning_style() {
+// TODO: Get this working. Right now styling is inline
+// Enqueue the front-end stylesheet
+function hdq_enqueue_lightning_la_style() {
     wp_enqueue_style(
-        'hdq_admin_style',
-        plugin_dir_url(__FILE__) . 'css/hdq_a_light_style.css',
+        'hdq_front_end_style', // Unique handle for your front-end style
+        plugin_dir_url(dirname(__FILE__)) . 'css/hdq_a_light_la_style.css', // Correct path to your CSS file
         array(),
         HDQ_A_LIGHT_PLUGIN_VERSION
     );
 }
-add_action('wp_enqueue_scripts', 'hdq_enqueue_lightning_style');
+add_action('wp_enqueue_scripts', 'hdq_enqueue_lightning_la_style');
 
 // Enqueue the JavaScript file
 function hdq_enqueue_lightning_script() {
@@ -98,27 +99,51 @@ function should_enable_rewards($quiz_id, $lightning_address) {
     return $rewards_enabled && !$over_budget;
 }
 
+// Function to display the quiz rules modal at the start of the quiz
+// TODO: remove the inline styles and add them to the stylesheet
+function la_modal_html($quiz_id) {
+    ?>
+    <div id="la-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+        <div class="la-modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 5px;">
+            <span class="la-close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <p>Here are the rules for the quiz:</p>
+            <ul>
+                <li>Enter a valid Bitcoin Lightning address to receive rewards.</li>
+                <li>Each correct answer will earn you <?php echo get_option('sats_per_answer_for_' . $quiz_id, 0); ?> satoshis.</li>
+                <li>You have a <?php echo get_option('max_retries_for_' . $quiz_id, 0); ?> number of tries.</li>
+                <li>Rewards are calculated based on correct answers.</li>
+            </ul>
+            <button id="la-start-quiz" style="background-color: #FF9900; color: white; padding: 10px 20px; margin: 10px auto; border: none; cursor: pointer; border-radius: 4px; display: block;">Start Quiz</button>
+        </div>
+    </div>
+    <?php
+}
+
 
 
 /**
- * Check if rewards are enabled. If so, display a user input form to collect the Lightning Address at the start of the quiz.
+ * Check if rewards are and should beenabled. 
+ * If so, display a user input form to collect the Lightning Address at the start of the quiz.
+ * Display quiz instructions in a modal.
  */
 function la_input_lightning_address_on_quiz_start($quiz_id) {
-    // Here we check if we should enable rewards for this quiz
-    // For the second parameter, we can pass an empty string or a default value as the user has not entered an address yet
+    // Call the modal HTML function
+    la_modal_html($quiz_id);
+    
     if (should_enable_rewards($quiz_id, '')) {
         echo '<div class="hdq_row">';
-        echo '<label for="lightning_address" class="hdq_input">Enter your Lightning Address: </label>';
-        echo '<input type="text" id="lightning_address" name="lightning_address" class="hdq_lightning_input" placeholder="bolt@lightning.com">';
+        echo '<label for="lightning_address" class="hdq_input" style="font-size: 150%;">Enter your Lightning Address: </label>';
+        echo '<input type="text" id="lightning_address" name="lightning_address" class="hdq_lightning_input" placeholder="bolt@lightning.com" style="padding: 0.8rem; font-size: 1.2em; width: 100%; color: #2d2d2d; border-bottom: 1px dashed #aaa; line-height: inherit; height: auto; cursor: initial; margin-bottom: 15px;">';
         echo '<input type="submit" class="hdq_button" id="hdq_save_settings" value="SAVE" style="margin-left:10px;" onclick="validateLightningAddress(event);">';
         echo '</div>';
     } else {
-        // If rewards should not be enabled, display a message or hide the form
-        echo '<div class="hdq_row">Rewards are not currently available for this quiz.  You can still take the quiz if you want though ; )</div>';
+        echo '<div class="hdq_row">Rewards are not currently available for this quiz. You can still take the quiz if you want though ; )</div>';
     }
 }
 
 add_action('hdq_before', 'la_input_lightning_address_on_quiz_start', 10, 1);
+
+
 
 // Function to count the attempts a user's lightning address has made for a specific quiz
 function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
