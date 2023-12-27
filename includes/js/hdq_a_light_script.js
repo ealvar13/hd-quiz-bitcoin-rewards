@@ -203,6 +203,12 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
         });
         const data = await response.json();
         console.log('Quiz results saved:', data);
+
+        // Check if the response contains the satoshis sent and update the modal
+        if (data && data.satoshis_sent !== undefined) {
+            jQuery('#step-reward').text(`You earned ${data.satoshis_sent} Satoshis.`);
+        }
+
         return data;
     } catch (error) {
         console.error('Error saving quiz results:', error);
@@ -210,64 +216,100 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
     }
 }
 
+// Function to manage the steps indicator modal
+function setupStepsIndicatorModal() {
+    // Function to open the steps indicator modal
+    function openStepsModal() {
+        jQuery('#steps-modal').show();
+    }
+
+    // Function to close the steps indicator modal
+    function closeStepsModal() {
+        jQuery('#steps-modal').hide();
+    }
+
+    // Event listener for the close button of the steps indicator modal
+    jQuery('.close-modal').click(function() {
+        closeStepsModal();
+    });
+
+    // Event listener for the "Close" button of the modal
+    jQuery('#close-steps-modal').click(function() {
+        closeStepsModal();
+    });
+
+    return {
+        openStepsModal,
+        closeStepsModal
+    };
+}
+
+// Call setupStepsIndicatorModal and store the returned functions
+const { openStepsModal, closeStepsModal } = setupStepsIndicatorModal();
+
+
 document.addEventListener("DOMContentLoaded", function() {
-    setupModal(); // Call the setupModal function to activate the modal functionality
-    
-    let finishButton = document.querySelector(".hdq_finsh_button"); // Ensure the class name is correct
+    // Set up modals
+    setupModal();
+    const { openStepsModal } = setupStepsIndicatorModal(); // Removed closeStepsModal from destructuring
+
+    let finishButton = document.querySelector(".hdq_finsh_button");
     if (finishButton) {
         finishButton.addEventListener("click", function() {
-            // Retrieve the users lightning address again here
-            let email = document.getElementById("lightning_address").value;
-            let quizName = document.querySelector(".wp-block-post-title").textContent; // Fetching quiz name from the DOM
-            let quizID = finishButton.getAttribute('data-id'); // Fetching quiz ID from the finish button's data-id attribute
+            openStepsModal(); // Open the modal when Finish button is clicked
+            jQuery('#step-calculating').addClass('active-step'); // Set the first step as active
 
-            // Timeout to allow result to be populated and to fetch quiz ID
+            let email = document.getElementById("lightning_address").value;
+            let quizName = document.querySelector(".wp-block-post-title").textContent;
+            let quizID = finishButton.getAttribute('data-id');
+
             setTimeout(function() {
                 let resultElement = document.querySelector('.hdq_result');
                 if (resultElement) {
                     let scoreText = resultElement.textContent;
                     let correctAnswers = parseInt(scoreText.split(' / ')[0], 10);
-                    
-                    // Fetch the sats per correct answer using this quiz ID
+
                     fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            let satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
-                            let totalSats = correctAnswers * satsPerCorrect;
-                            console.log(`Quiz ID: ${quizID}`);
-                            console.log(`Quiz score: ${scoreText}`);
-                            console.log(`Sats per correct answer: ${satsPerCorrect}`);
-                            console.log(`Total Satoshis earned: ${totalSats}`);
+                    .then(response => response.json())
+                    .then(data => {
+                        let satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
+                        let totalSats = correctAnswers * satsPerCorrect;
 
-                            getBolt11(email, totalSats)
-                                .then(bolt11 => {
-                                    if (bolt11) {
-                                        console.log(`BOLT11 Invoice: ${bolt11}`);
-                                        sendPaymentRequest(bolt11, quizID, email)
-                                            .then(paymentResponse => {
-                                                let paymentSuccessful = paymentResponse.success;
-                                                console.log('Payment response:', paymentResponse);
+                        jQuery('#step-generating').addClass('active-step');
 
-                                                // Determine satoshis sent based on payment success
-                                                let satoshisToSend = paymentSuccessful ? totalSats : 0;
+                        getBolt11(email, totalSats)
+                        .then(bolt11 => {
+                            if (bolt11) {
+                                jQuery('#step-sending').addClass('active-step');
 
-                                                saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID)
-                                                    .then(saveResponse => {
-                                                        console.log('Quiz Results Save Response:', saveResponse);
-                                                    });
-                                            })
-                                            .catch(error => console.error('Error paying BOLT11 Invoice:', error));
-                                    } else {
-                                        console.log(`Failed to generate BOLT11 Invoice.`);
-                                    }
+                                sendPaymentRequest(bolt11, quizID, email)
+                                .then(paymentResponse => {
+                                    let paymentSuccessful = paymentResponse.success;
+                                    let satoshisToSend = paymentSuccessful ? totalSats : 0;
+                                    jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
+                                    jQuery('#step-reward').addClass('active-step');
+
+                                    saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID);
                                 })
-                                .catch(error => console.error('Error generating BOLT11:', error));
+                                .catch(error => {
+                                    console.error('Error paying BOLT11 Invoice:', error);
+                                    jQuery('#step-result').addClass('active-step').text('Payment Failed');
+                                });
+                            } else {
+                                console.log(`Failed to generate BOLT11 Invoice.`);
+                            }
                         })
-                        .catch(error => console.error('Error:', error));
+                        .catch(error => {
+                            console.error('Error generating BOLT11:', error);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
                 } else {
                     console.log('Quiz score not found.');
                 }
-            }, 500); // The delay in milliseconds; adjust if necessary
+            }, 500);
         });
     }
 });

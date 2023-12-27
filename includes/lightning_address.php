@@ -109,8 +109,9 @@ function la_modal_html($quiz_id) {
             <p>Here are the rules for the quiz:</p>
             <ul>
                 <li>Enter a valid Bitcoin Lightning address to receive rewards.</li>
+                <li>If you need a Lightning address, get one here for free: <a href="https://lightningaddress.com/#providers" target="_blank">https://lightningaddress.com/#providers</a></li>
                 <li>Each correct answer will earn you <?php echo get_option('sats_per_answer_for_' . $quiz_id, 0); ?> satoshis.</li>
-                <li>You have a <?php echo get_option('max_retries_for_' . $quiz_id, 0); ?> number of tries.</li>
+                <li>You have <?php echo get_option('max_retries_for_' . $quiz_id, 0); ?> tries.</li>
                 <li>Rewards are calculated based on correct answers.</li>
             </ul>
             <button id="la-start-quiz" style="background-color: #FF9900; color: white; padding: 10px 20px; margin: 10px auto; border: none; cursor: pointer; border-radius: 4px; display: block;">Start Quiz</button>
@@ -195,6 +196,38 @@ function store_lightning_address_in_session() {
 add_action('wp_ajax_store_lightning_address', 'store_lightning_address_in_session');        // If the user is logged in
 add_action('wp_ajax_nopriv_store_lightning_address', 'store_lightning_address_in_session'); // If the user is not logged in
 
+// Modal to display the steps of the payment process
+// TODO remove inline styles and add them to the stylesheet
+function la_steps_indicator_modal() {
+    ?>
+    <div id="steps-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+        <div class="modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 5px;">
+            <span class="close-modal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="margin-top: 0;">Processing Your Rewards</h2>
+            <div id="steps-indicator" style="margin-top: 20px;">
+                <div id="step-calculating" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">Calculating Rewards</div>
+                <div id="step-generating" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">Using your Lightning Address to generate Bolt 11 Invoice</div>
+                <div id="step-reward" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">You earned <span id="satoshis-sent-display">0</span> Satoshis.</div>
+                <div id="step-sending" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">Sending Reward Payment</div>
+                <div id="step-result" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">Awaiting Result...</div>
+            </div>
+            <button id="close-steps-modal" style="margin-top: 20px; padding: 10px 20px; background-color: #FF9900; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+        </div>
+    </div>
+    <?php
+}
+
+function la_add_steps_indicator_modal($quiz_id) {
+    // Log a message for debugging purposes
+    error_log("la_add_steps_indicator_modal called for quiz ID: " . $quiz_id);
+    
+    // Call the steps indicator modal function
+    la_steps_indicator_modal();
+}
+
+// Add the above function to the 'hdq_after' hook
+add_action('hdq_after', 'la_add_steps_indicator_modal', 10, 1);
+
 function hdq_pay_bolt11_invoice() {
     global $wpdb;
 
@@ -278,32 +311,33 @@ function hdq_save_quiz_results() {
     $quiz_result = isset($_POST['quiz_result']) ? sanitize_text_field($_POST['quiz_result']) : '';
     $satoshis_earned = isset($_POST['satoshis_earned']) ? intval($_POST['satoshis_earned']) : 0;
     $quiz_id = isset($_POST['quiz_id']) ? sanitize_text_field($_POST['quiz_id']) : '';
-
-    // Fetch quiz name using the term associated with the quiz ID
-    $quiz_term = get_term_by('id', $quiz_id, 'quiz');
-    $quiz_name = $quiz_term ? $quiz_term->name : 'Unknown Quiz';
-
     $send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
     $satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;
 
     // Insert data into the database
-    $wpdb->insert(
+    $insert_result = $wpdb->insert(
         $table_name,
         array(
             'user_id' => $user_id,
             'lightning_address' => $lightning_address,
             'quiz_result' => $quiz_result,
             'satoshis_earned' => $satoshis_earned,
-            'quiz_name' => $quiz_name,
+            'quiz_name' => $quiz_term ? $quiz_term->name : 'Unknown Quiz',
             'send_success' => $send_success,
             'satoshis_sent' => $satoshis_sent,
-            'quiz_id' => $quiz_id // Include quiz_id in the array
+            'quiz_id' => $quiz_id
         ),
-        array('%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d') // Update the format string accordingly
+        array('%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d')
     );
 
-    // Send a response back to the AJAX request
-    echo json_encode(array('success' => true));
+    if ($insert_result !== false) {
+        // Success, send back the inserted data
+        echo json_encode(array('success' => true, 'satoshis_sent' => $satoshis_sent));
+    } else {
+        // Error in insertion
+        echo json_encode(array('success' => false, 'error' => 'Unable to save quiz results.'));
+    }
+
     wp_die();
 }
 
