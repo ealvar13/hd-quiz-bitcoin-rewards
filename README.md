@@ -9,7 +9,7 @@
 - **Features**: Tracking budget, limiting retries based on lightning addresses, and managing rewards.
 
 ## 3. Known Issues and Challenges
-- **Main Challenge**: Implementing a feature to limit quiz retries based on a user's lightning address and correctly using the quiz ID.
+- **Main Challenge**: Improving styling (currently inline).  Next steps are improving ux, testing and adding alternatives to btcpay server.
 
 ## 4. Technology Stack Details
 - **Environment**: WordPress with custom PHP scripts.
