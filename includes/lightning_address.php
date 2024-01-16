@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function hdq_enqueue_lightning_la_style() {
     wp_enqueue_style(
         'hdq_front_end_style', // Unique handle for your front-end style
-        plugin_dir_url(dirname(__FILE__)) . 'css/hdq_a_light_la_style.css', // Correct path to your CSS file
+        plugin_dir_url(dirname(__FILE__)) . 'includes/css/hdq_a_light_la_style.css',
         array(),
         HDQ_A_LIGHT_PLUGIN_VERSION
     );
