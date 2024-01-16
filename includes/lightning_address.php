@@ -311,6 +311,11 @@ function hdq_save_quiz_results() {
     $quiz_result = isset($_POST['quiz_result']) ? sanitize_text_field($_POST['quiz_result']) : '';
     $satoshis_earned = isset($_POST['satoshis_earned']) ? intval($_POST['satoshis_earned']) : 0;
     $quiz_id = isset($_POST['quiz_id']) ? sanitize_text_field($_POST['quiz_id']) : '';
+
+    // Fetch quiz name using the term associated with the quiz ID
+    $quiz_term = get_term_by('id', $quiz_id, 'quiz');
+    $quiz_name = $quiz_term ? $quiz_term->name : 'Unknown Quiz';
+
     $send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
     $satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;
 
