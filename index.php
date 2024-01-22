@@ -27,8 +27,8 @@ function start_session() {
 add_action('init', 'start_session', 1);
 
 // Define plugin version
-if (!defined('HDQ_BR_PLUGIN_VERSION')) {
-    define('HDQ_BR_PLUGIN_VERSION', '0.1');
+if (!defined('HDQ_A_LIGHT_PLUGIN_VERSION')) {
+    define('HDQ_A_LIGHT_PLUGIN_VERSION', '0.1');
 }
 
 

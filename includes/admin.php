@@ -41,11 +41,11 @@ function check_quiz_budgets() {
 // show results and settings tabs
 wp_enqueue_style(
     'hdq_admin_style',
-    plugin_dir_url(__FILE__) . './css/hdq_a_light_admin_style.css?v=' . HDQ_A_LIGHT_PLUGIN_VERSION
+    plugin_dir_url(__FILE__) . './css/hdq_a_light_admin_style.css?v=' . HDQ_BR_PLUGIN_VERSION
 );
 wp_enqueue_script(
     'hdq_admin_script',
-    plugins_url('./js/hdq_a_light_admin.js?v=' . HDQ_A_LIGHT_PLUGIN_VERSION, __FILE__),
+    plugins_url('./js/hdq_a_light_admin.js?v=' . HDQ_BR_PLUGIN_VERSION, __FILE__),
     array('jquery'),
     '1.0',
     true
@@ -190,7 +190,7 @@ wp_enqueue_script(
                         
                         <div class="hdq_row">
                             <label for="<?php echo $data_field_name_btcpay_store_id; ?>">BTCPay Server Store ID:</label>
-                            <input type="text" id="<?php echo $data_field_name_btcpay_store_id; ?>" name="<?php echo $data_field_name_btcpay_store_id; ?>" value="<?php echo $opt_val_btcpay_store_id; ?>">
+                            <input type="text" id="<?php echo $data_field_name_btcpay_store_id; ?>" name="<?php echo $data_field_name_btcpay_store_id; ?>" value="<?php if(!empty($opt_val_btcpay_store_id)): echo $opt_val_btcpay_store_id; endif;?>">
                         </div>
 
                         <div class="hdq_row">
