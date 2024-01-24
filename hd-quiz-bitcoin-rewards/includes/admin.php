@@ -209,7 +209,7 @@ wp_enqueue_script(
                 <?php
                 $total_sent_values = check_quiz_budgets();
                 ?>
-                <form id="hdq_settings" method="post">
+                <form id="hdq_rewards" method="post">
                     <input type="hidden" name="hdq_submit_hidden" value="Y">
                     <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
 
