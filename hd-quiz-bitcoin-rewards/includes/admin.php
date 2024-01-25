@@ -149,24 +149,24 @@ wp_enqueue_script(
                     <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 2rem">
                         <div class="hdq_row" style="grid-column: span 2;">
-                            <label for="hdq_a_l_members_only">Only save results for logged in users
+                            <!--<label for="hdq_a_l_members_only">Only save results for logged in users
                                 <span class="hdq_tooltip hdq_tooltip_question">?<span class="hdq_tooltip_content"><span>By default, all results will be saved, and non-logged-in users will show up as
                                             <code>--</code></span></span></span></label>
-                            <div class="hdq_check_row">
+                            
                                 <div class="hdq-options-check">
                                     <input type="checkbox" id="hdq_a_l_members_only" name="hdq_a_l_members_only" value="yes" <?php if ($opt_val1 == "yes") {
                                                                                                                                     echo 'checked = ""';
                                                                                                                                 } ?> />
                                     <label for="hdq_a_l_members_only"></label>
+                                </div>-->
+                                <div class="hdq_check_row">
+                                    <div role="button" id="hdq_a_light_delete_results" class="hdq_button4" title="clear all of the current results and start from scratch"><span class="dashicons dashicons-trash"></span> DELETE ALL RESULTS</div>
+
+                                    <div id="hdq_a_light_export_csv_wrap">
+                                        <div role="button" id="hdq_a_light_export_results" class="hdq_button3" title="clear all of the current results and start from scratch">EXPORT AS CSV</div>
+                                    </div>
+
                                 </div>
-
-                                <div role="button" id="hdq_a_light_delete_results" class="hdq_button4" title="clear all of the current results and start from scratch"><span class="dashicons dashicons-trash"></span> DELETE ALL RESULTS</div>
-
-                                <div id="hdq_a_light_export_csv_wrap">
-                                    <div role="button" id="hdq_a_light_export_results" class="hdq_button3" title="clear all of the current results and start from scratch">EXPORT AS CSV</div>
-                                </div>
-
-                            </div>
                         </div>
 
                         <label style="grid-column: span 2;">Enter either Joltz or BTCPay Server Details and click SAVE

@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     let scoreText = resultElement.textContent;
                     let correctAnswers = parseInt(scoreText.split(' / ')[0], 10);
 
-                    fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
+                    fetch(`/wordpress/wp-json/hdq/v1/sats_per_answer/${quizID}`)
                     .then(response => response.json())
                     .then(data => {
                         let satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);

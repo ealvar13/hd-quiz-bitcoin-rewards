@@ -92,6 +92,11 @@ add_action('wp_ajax_nopriv_hdq_a_light_submit_action', 'hdq_a_light_submit_actio
 // delete all results
 function hdq_a_light_delete_results()
 {
+    //die('sudh');
+    global $wpdb;
+    $table_name = $wpdb->prefix.'bitcoin_quiz_results';
+    $wpdb->query("TRUNCATE TABLE $table_name");
+    echo 'All records deleted successfully';
     update_option("hdq_quiz_results_l", "");
     die();
 }
