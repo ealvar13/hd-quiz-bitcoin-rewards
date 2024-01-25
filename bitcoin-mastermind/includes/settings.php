@@ -1,5 +1,5 @@
 <?php
-class hdq_settings
+class bitc_settings
 {
     public $settings = array();
 
@@ -111,9 +111,9 @@ class hdq_settings
 
     public function get()
     {
-        $settings = get_option("hdq_settings");
+        $settings = get_option("bitc_settings");
         if ($settings != "") {
-            $settings = hdq_sanitize_fields($settings);
+            $settings = bitc_sanitize_fields($settings);
             foreach ($this->settings as $k => $setting) {
                 if (isset($settings[$k]) && $settings[$k]["value"] !== "") {
                     $this->settings[$k]["value"] = $settings[$k]["value"];

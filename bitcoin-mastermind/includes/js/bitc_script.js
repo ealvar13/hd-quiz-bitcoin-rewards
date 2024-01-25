@@ -1,13 +1,13 @@
 const HDQ = {
 	EL: {
-		quizzes: document.getElementsByClassName("hdq_quiz"),
-		results: document.getElementsByClassName("hdq_results_wrapper")[0],
-		questions: document.getElementsByClassName("hdq_question"),
-		next: document.getElementsByClassName("hdq_next"),
-		finish: document.getElementsByClassName("hdq_finsh_button"),
-		answers: document.getElementsByClassName("hdq_option"),
-		loading: document.getElementsByClassName("hdq_loading_bar")[0],
-		jPaginate: document.getElementsByClassName("hdq_jPaginate_button"),
+		quizzes: document.getElementsByClassName("bitc_quiz"),
+		results: document.getElementsByClassName("bitc_results_wrapper")[0],
+		questions: document.getElementsByClassName("bitc_question"),
+		next: document.getElementsByClassName("bitc_next"),
+		finish: document.getElementsByClassName("bitc_finsh_button"),
+		answers: document.getElementsByClassName("bitc_option"),
+		loading: document.getElementsByClassName("bitc_loading_bar")[0],
+		jPaginate: document.getElementsByClassName("bitc_jPaginate_button"),
 	},
 	VARS: {},
 	init: async function () {
@@ -41,7 +41,7 @@ const HDQ = {
 		}
 
 		// WP Pagination
-		const nextButton = document.getElementsByClassName("hdq_next_page_button");
+		const nextButton = document.getElementsByClassName("bitc_next_page_button");
 		for (let i = 0; i < nextButton.length; i++) {
 			nextButton[i].addEventListener("click", function (e) {
 				if (!HDQ.VARS.paginate) {
@@ -52,14 +52,14 @@ const HDQ = {
 		}
 
 		// kb nav
-		const buttons = document.getElementsByClassName("hdq_button");
+		const buttons = document.getElementsByClassName("bitc_button");
 		for (let i = 0; i < buttons.length; i++) {
 			buttons[i].addEventListener("keyup", HDQ.keyUp);
 		}
 
 		if (HDQ.VARS.timer.max > 3) {
 			if (HDQ.VARS.ads !== true) {
-				const start = document.getElementsByClassName("hdq_quiz_start");
+				const start = document.getElementsByClassName("bitc_quiz_start");
 				for (let i = 0; i < start.length; i++) {
 					start[i].addEventListener("click", HDQ.timer.paginate);
 					start[i].addEventListener("click", HDQ.timer.init);
@@ -71,8 +71,8 @@ const HDQ = {
 
 		if (!HDQ.VARS.legacy_scroll) {
 			// create hidden div above quiz that we can use to offset scrolling
-			const offsetDiv = `<div id = "hdq_offset_div" style = "width: 1px; height: 1px; position: relative; opactity: 0; pointer-events: none; user-select: none;z-index: 0; relative; top: -4rem; background-color:red">&nbsp;</div>`;
-			document.getElementById("hdq_" + HDQ.VARS.id).insertAdjacentHTML("afterbegin", offsetDiv);
+			const offsetDiv = `<div id = "bitc_offset_div" style = "width: 1px; height: 1px; position: relative; opactity: 0; pointer-events: none; user-select: none;z-index: 0; relative; top: -4rem; background-color:red">&nbsp;</div>`;
+			document.getElementById("bitc_" + HDQ.VARS.id).insertAdjacentHTML("afterbegin", offsetDiv);
 		}
 
 		let init_actions = HDQ.VARS.init_actions;
@@ -98,26 +98,26 @@ const HDQ = {
 		init: function () {
 			try {
 				this.remove();
-				let hdquiz_wrapper = document.getElementsByClassName("hdq_quiz")[0];
+				let hdquiz_wrapper = document.getElementsByClassName("bitc_quiz")[0];
 
-				if (hdquiz_wrapper.firstElementChild.classList.contains("hdq_results_wrapper")) {
+				if (hdquiz_wrapper.firstElementChild.classList.contains("bitc_results_wrapper")) {
 					// results above
 					let results_wrapper = hdquiz_wrapper.firstElementChild;
 					let next_el = results_wrapper.nextSibling.nextSibling;
-					if (next_el.classList.contains("hdq_jPaginate")) {
-						next_el.getElementsByClassName("hdq_next_button")[0].click();
+					if (next_el.classList.contains("bitc_jPaginate")) {
+						next_el.getElementsByClassName("bitc_next_button")[0].click();
 					}
 				} else {
 					// results below
-					hdquiz_wrapper.firstElementChild.getElementsByClassName("hdq_next_button")[0].click();
+					hdquiz_wrapper.firstElementChild.getElementsByClassName("bitc_next_button")[0].click();
 				}
 			} catch (e) {}
-			let quizzes = document.getElementsByClassName("hdq_quiz");
+			let quizzes = document.getElementsByClassName("bitc_quiz");
 			for (let i = 0; i < quizzes.length; i++) {
 				quizzes[i].style.display = "block";
 			}
 
-			const html = `<div class = "hdq_timer"></div>`;
+			const html = `<div class = "bitc_timer"></div>`;
 			document.body.insertAdjacentHTML("beforeend", html);
 
 			HDQ.VARS.timer.active = true;
@@ -134,28 +134,28 @@ const HDQ = {
 				let seconds = HDQ.VARS.timer.time % 60;
 				seconds = seconds < 10 ? "0" + seconds : seconds;
 				let t = minutes + ":" + seconds;
-				jQuery(".hdq_timer").html(t);
+				jQuery(".bitc_timer").html(t);
 				if (HDQ.VARS.timer.time > 10 && HDQ.VARS.timer.time < 30) {
-					jQuery(".hdq_timer").addClass("hdq_timer_warning");
+					jQuery(".bitc_timer").addClass("bitc_timer_warning");
 				} else if (HDQ.VARS.timer.time <= 10) {
-					jQuery(".hdq_timer").removeClass("hdq_timer_warning");
-					jQuery(".hdq_timer").addClass("hdq_timer_danger");
+					jQuery(".bitc_timer").removeClass("bitc_timer_warning");
+					jQuery(".bitc_timer").addClass("bitc_timer_danger");
 				}
 				HDQ.VARS.timer.time = HDQ.VARS.timer.time - 1;
 				setTimeout(HDQ.timer.quiz, 1000);
 			} else {
 				if (HDQ.VARS.timer.active == true) {
 					// uh oh! Out of time
-					jQuery(".hdq_timer").html("0");
-					jQuery(".hdq_timer").removeClass("hdq_timer_danger");
-					jQuery(".hdq_finsh_button").click(); // submit quiz for completion
+					jQuery(".bitc_timer").html("0");
+					jQuery(".bitc_timer").removeClass("bitc_timer_danger");
+					jQuery(".bitc_finsh_button").click(); // submit quiz for completion
 					HDQ.VARS.timer.active = false;
 				} else {
 					// user finished in time
-					jQuery(".hdq_timer").removeClass("hdq_timer_danger");
-					jQuery(".hdq_timer").removeClass("hdq_timer_warning");
-					jQuery(".hdq_timer").removeClass("hdq_timer_danger");
-					jQuery(".hdq_timer").removeClass("hdq_timer_warning");
+					jQuery(".bitc_timer").removeClass("bitc_timer_danger");
+					jQuery(".bitc_timer").removeClass("bitc_timer_warning");
+					jQuery(".bitc_timer").removeClass("bitc_timer_danger");
+					jQuery(".bitc_timer").removeClass("bitc_timer_warning");
 				}
 			}
 		},
@@ -165,14 +165,14 @@ const HDQ = {
 					HDQ.EL.answers[i].disabled = true;
 					HDQ.EL.answers[i].addEventListener("change", HDQ.timer.question.changed);
 					let p = await HDQ.getParent(HDQ.EL.answers[i]);
-					p.classList.add("hdq_disabled");
+					p.classList.add("bitc_disabled");
 				}
 				// reenable the first question answers
 				let parent = await HDQ.getParent(HDQ.EL.answers[0]);
-				parent.classList.add("hdq_active_question");
-				let answers = parent.getElementsByClassName("hdq_option");
+				parent.classList.add("bitc_active_question");
+				let answers = parent.getElementsByClassName("bitc_option");
 				p = await HDQ.getParent(answers[0]);
-				p.classList.remove("hdq_disabled");
+				p.classList.remove("bitc_disabled");
 
 				for (let i = 0; i < answers.length; i++) {
 					answers[i].disabled = false;
@@ -185,15 +185,15 @@ const HDQ = {
 				}
 			},
 			checkQuestion: async function (el) {
-				if (el.classList.contains("hdq_question")) {
-					let answers = el.getElementsByClassName("hdq_option");
+				if (el.classList.contains("bitc_question")) {
+					let answers = el.getElementsByClassName("bitc_option");
 					if (answers.length > 0) {
 						let p = await HDQ.getParent(answers[0]);
-						p.classList.remove("hdq_disabled");
+						p.classList.remove("bitc_disabled");
 						for (let i = 0; i < answers.length; i++) {
 							answers[i].disabled = false;
 						}
-						el.classList.add("hdq_active_question");
+						el.classList.add("bitc_active_question");
 						return "success";
 					} else {
 						// probably a question as title
@@ -201,7 +201,7 @@ const HDQ = {
 						return await HDQ.timer.question.checkQuestion(next_question);
 					}
 				} else {
-					if (el.classList.contains("hdq_jPaginate")) {
+					if (el.classList.contains("bitc_jPaginate")) {
 						el.style.display = "block";
 						el.firstChild.style.display = "block";
 						el.firstChild.click();
@@ -214,8 +214,8 @@ const HDQ = {
 			},
 			changed: async function (ev, sap = false) {
 				// reset timer
-				let p = document.getElementsByClassName("hdq_active_question")[0];
-				if (!p.classList.contains("hdq_question")) {
+				let p = document.getElementsByClassName("bitc_active_question")[0];
+				if (!p.classList.contains("bitc_question")) {
 					p = HDQ.getParent(p);
 				}
 
@@ -223,14 +223,14 @@ const HDQ = {
 				let qt = p.getAttribute("data-type");
 				if ((qt == "select_all_apply_text" && sap === false) || (qt == "select_all_apply_image" && sap === false)) {
 					// does "next" button already exist?
-					let n = p.getElementsByClassName("hdq_button");
+					let n = p.getElementsByClassName("bitc_button");
 					if (typeof n[0] == "undefined") {
-						const html = `<div class="hdq_button" role="button" tabindex = "0" onkeyup="HDQ.keyUp(event, this)" onclick = "HDQ.timer.question.changed(this, true)" style = "display: flex; width: fit-content;">${HDQ.VARS.translations.next}</div>`;
+						const html = `<div class="bitc_button" role="button" tabindex = "0" onkeyup="HDQ.keyUp(event, this)" onclick = "HDQ.timer.question.changed(this, true)" style = "display: flex; width: fit-content;">${HDQ.VARS.translations.next}</div>`;
 						p.insertAdjacentHTML("beforeend", html);
 					}
 					return;
 				} else if (qt == "select_all_apply_text" || qt == "select_all_apply_image") {
-					let n = p.getElementsByClassName("hdq_button")[0];
+					let n = p.getElementsByClassName("bitc_button")[0];
 					n.remove();
 				}
 
@@ -239,9 +239,9 @@ const HDQ = {
 
 				// figure out what the next question is
 				let next_question = p.nextSibling;
-				let active_question = document.getElementsByClassName("hdq_active_question");
+				let active_question = document.getElementsByClassName("bitc_active_question");
 				if (active_question.length > 0) {
-					active_question[0].classList.remove("hdq_active_question");
+					active_question[0].classList.remove("bitc_active_question");
 				}
 
 				// check if question has custom time
@@ -254,10 +254,10 @@ const HDQ = {
 				if (status === "complete") {
 					// end the quiz
 					HDQ.VARS.timer.active = false;
-					jQuery(".hdq_finsh_button").click(); // submit quiz for completion
+					jQuery(".bitc_finsh_button").click(); // submit quiz for completion
 				} else {
-					jQuery(".hdq_timer").removeClass("hdq_timer_danger");
-					jQuery(".hdq_timer").removeClass("hdq_timer_warning");
+					jQuery(".bitc_timer").removeClass("bitc_timer_danger");
+					jQuery(".bitc_timer").removeClass("bitc_timer_warning");
 				}
 			},
 			question: async function (isFirst = false) {
@@ -267,40 +267,40 @@ const HDQ = {
 					let seconds = HDQ.VARS.timer.time % 60;
 					seconds = seconds < 10 ? "0" + seconds : seconds;
 					let t = minutes + ":" + seconds;
-					jQuery(".hdq_timer").html(t);
+					jQuery(".bitc_timer").html(t);
 					if (HDQ.VARS.timer.time > 10 && HDQ.VARS.timer.time < 30) {
-						jQuery(".hdq_timer").addClass("hdq_timer_warning");
+						jQuery(".bitc_timer").addClass("bitc_timer_warning");
 					} else if (HDQ.VARS.timer.time <= 10) {
-						jQuery(".hdq_timer").removeClass("hdq_timer_warning");
-						jQuery(".hdq_timer").addClass("hdq_timer_danger");
+						jQuery(".bitc_timer").removeClass("bitc_timer_warning");
+						jQuery(".bitc_timer").addClass("bitc_timer_danger");
 					}
 					HDQ.VARS.timer.time = HDQ.VARS.timer.time - 1;
 					setTimeout(HDQ.timer.question.question, 1000);
 				} else {
 					if (HDQ.VARS.timer.active == true) {
-						let active_question = document.getElementsByClassName("hdq_active_question");
+						let active_question = document.getElementsByClassName("bitc_active_question");
 						if (active_question.length > 0) {
 							active_question = active_question[0];
-							let answers = active_question.getElementsByClassName("hdq_option");
+							let answers = active_question.getElementsByClassName("bitc_option");
 							for (let i = 0; i < answers.length; i++) {
 								answers[i].disabled = true;
 							}
 
 							// figure out what the next question is
 							let next_question = active_question.nextSibling;
-							active_question.classList.remove("hdq_active_question");
+							active_question.classList.remove("bitc_active_question");
 							let status = await HDQ.timer.question.checkQuestion(next_question);
 
 							if (status === "complete") {
 								// end the quiz
-								jQuery(".hdq_finsh_button").click(); // submit quiz for completion
+								jQuery(".bitc_finsh_button").click(); // submit quiz for completion
 							} else {
 								// reset timer
-								jQuery(".hdq_timer").html("0");
+								jQuery(".bitc_timer").html("0");
 								HDQ.VARS.timer.time = HDQ.VARS.timer.max;
 
-								jQuery(".hdq_timer").removeClass("hdq_timer_danger");
-								jQuery(".hdq_timer").removeClass("hdq_timer_warning");
+								jQuery(".bitc_timer").removeClass("bitc_timer_danger");
+								jQuery(".bitc_timer").removeClass("bitc_timer_warning");
 
 								setTimeout(HDQ.timer.question.question, 1000);
 							}
@@ -353,8 +353,8 @@ const HDQ = {
 		},
 		checkToRadio(el) {
 			let question = el.getAttribute("data-id");
-			question = document.getElementById("hdq_question_" + question);
-			let answers = question.querySelectorAll(".hdq_option");
+			question = document.getElementById("bitc_question_" + question);
+			let answers = question.querySelectorAll(".bitc_option");
 			for (let i = 0; i < answers.length; i++) {
 				if (answers[i] != el) {
 					answers[i].checked = false;
@@ -363,8 +363,8 @@ const HDQ = {
 		},
 		disable: async function (el) {
 			let question = el.getAttribute("data-id");
-			question = document.getElementById("hdq_question_" + question);
-			let answers = question.querySelectorAll(".hdq_option");
+			question = document.getElementById("bitc_question_" + question);
+			let answers = question.querySelectorAll(".bitc_option");
 			for (let i = 0; i < answers.length; i++) {
 				answers[i].disabled = true;
 			}
@@ -380,8 +380,8 @@ const HDQ = {
 
 			async function showExtraText(el) {
 				let question = el.getAttribute("data-id");
-				question = document.getElementById("hdq_question_" + question);
-				let extra_text = question.querySelector(".hdq_question_after_text");
+				question = document.getElementById("bitc_question_" + question);
+				let extra_text = question.querySelector(".bitc_question_after_text");
 				if (extra_text != null) {
 					extra_text.style.display = "block";
 				}
@@ -406,17 +406,17 @@ const HDQ = {
 			let correct = isCorrect(answers);
 			if (correct) {
 				if (HDQ.VARS.show_results == "yes") {
-					el.parentNode.classList.add("hdq_correct");
+					el.parentNode.classList.add("bitc_correct");
 				}
 			} else {
 				if (HDQ.VARS.show_results == "yes") {
-					el.parentNode.classList.add("hdq_wrong");
+					el.parentNode.classList.add("bitc_wrong");
 				}
 				if (HDQ.VARS.mark_correct === "yes") {
-					if (!el.parentNode.classList.contains("hdq_answered")) {
+					if (!el.parentNode.classList.contains("bitc_answered")) {
 						let data = " - [" + answers[0] + "]";
 						el.value = el.value + data;
-						el.parentNode.classList.add("hdq_answered");
+						el.parentNode.classList.add("bitc_answered");
 					}
 				}
 			}
@@ -448,25 +448,25 @@ const HDQ = {
 				if (el.checked == true) {
 					correct = true;
 					if (HDQ.VARS.show_results == "yes") {
-						row.classList.add("hdq_correct");
+						row.classList.add("bitc_correct");
 					}
 				}
 			} else {
 				if (el.checked == true) {
 					if (HDQ.VARS.show_results == "yes") {
-						row.classList.add("hdq_wrong");
+						row.classList.add("bitc_wrong");
 					}
 				}
 			}
 
 			let question = el.getAttribute("data-id");
-			question = document.getElementById("hdq_question_" + question);
-			let answers = question.querySelectorAll(".hdq_option");
+			question = document.getElementById("bitc_question_" + question);
+			let answers = question.querySelectorAll(".bitc_option");
 			for (let i = 0; i < answers.length; i++) {
 				if (HDQ.VARS.mark_correct === "yes") {
 					if (answers[i].value == 1) {
 						row = answers[i].parentNode.parentNode.parentNode;
-						row.classList.add("hdq_correct_not_selected");
+						row.classList.add("bitc_correct_not_selected");
 					}
 				}
 				answers[i].disabled = true;
@@ -480,25 +480,25 @@ const HDQ = {
 				if (el.checked == true) {
 					correct = true;
 					if (HDQ.VARS.show_results == "yes") {
-						row.classList.add("hdq_correct");
+						row.classList.add("bitc_correct");
 					}
 				}
 			} else {
 				if (el.checked == true) {
 					if (HDQ.VARS.show_results == "yes") {
-						row.classList.add("hdq_wrong");
+						row.classList.add("bitc_wrong");
 					}
 				}
 			}
 
 			let question = el.getAttribute("data-id");
-			question = document.getElementById("hdq_question_" + question);
-			let answers = question.querySelectorAll(".hdq_option");
+			question = document.getElementById("bitc_question_" + question);
+			let answers = question.querySelectorAll(".bitc_option");
 			for (let i = 0; i < answers.length; i++) {
 				if (HDQ.VARS.mark_correct === "yes") {
 					if (answers[i].value == 1) {
 						row = answers[i].parentNode.parentNode.parentNode.parentNode;
-						row.classList.add("hdq_correct_not_selected");
+						row.classList.add("bitc_correct_not_selected");
 					}
 				}
 				answers[i].disabled = true;
@@ -512,26 +512,26 @@ const HDQ = {
 				if (el.checked == true) {
 					correct = true;
 					if (HDQ.VARS.show_results == "yes") {
-						row.classList.add("hdq_correct");
+						row.classList.add("bitc_correct");
 					}
 				}
 			} else {
 				if (el.checked == true) {
 					correct = false;
 					if (HDQ.VARS.show_results == "yes") {
-						row.classList.add("hdq_wrong");
+						row.classList.add("bitc_wrong");
 					}
 				}
 			}
 
 			let question = el.getAttribute("data-id");
-			question = document.getElementById("hdq_question_" + question);
-			let answers = question.querySelectorAll(".hdq_option");
+			question = document.getElementById("bitc_question_" + question);
+			let answers = question.querySelectorAll(".bitc_option");
 			for (let i = 0; i < answers.length; i++) {
 				if (HDQ.VARS.mark_correct === "yes" && show_results) {
 					if (answers[i].value == 1) {
 						row = answers[i].parentNode.parentNode.parentNode;
-						row.classList.add("hdq_correct_not_selected");
+						row.classList.add("bitc_correct_not_selected");
 					}
 				}
 				if (show_results) {
@@ -593,14 +593,14 @@ const HDQ = {
 			for (let i = 0; i < results.length; i++) {
 				if (results[i].v == 1 && results[i].checked == false) {
 					if (HDQ.VARS.mark_correct != "yes" && HDQ.VARS.show_results == "yes") {
-						hdq_show_part_wrong(answers);
+						bitc_show_part_wrong(answers);
 					}
 					return 0;
 					break;
 				}
 				if (results[i].v == 0 && results[i].checked == true) {
 					if (HDQ.VARS.mark_correct != "yes" && HDQ.VARS.show_results == "yes") {
-						hdq_show_part_wrong(answers);
+						bitc_show_part_wrong(answers);
 					}
 					return 0;
 					break;
@@ -608,14 +608,14 @@ const HDQ = {
 			}
 			return 1;
 
-			function hdq_show_part_wrong(answers) {
+			function bitc_show_part_wrong(answers) {
 				// if the user got part of the question right,
 				// Visually show that even though the selected answer was correct,
 				// the entire answer set is incorrect
 				for (let i = 0; i < answers.length; i++) {
 					if (answers[i].value == 1 && answers[i].checked == true) {
-						answers[i].parentElement.parentElement.parentElement.classList.remove("hdq_correct");
-						answers[i].parentElement.parentElement.parentElement.classList.add("hdq_correct_not_selected");
+						answers[i].parentElement.parentElement.parentElement.classList.remove("bitc_correct");
+						answers[i].parentElement.parentElement.parentElement.classList.add("bitc_correct_not_selected");
 					}
 				}
 			}
@@ -629,14 +629,14 @@ const HDQ = {
 			for (let i = 0; i < results.length; i++) {
 				if (results[i].v == 1 && results[i].checked == false) {
 					if (HDQ.VARS.mark_correct != "yes" && HDQ.VARS.show_results == "yes") {
-						hdq_show_part_wrong(answers);
+						bitc_show_part_wrong(answers);
 					}
 					return 0;
 					break;
 				}
 				if (results[i].v == 0 && results[i].checked == true) {
 					if (HDQ.VARS.mark_correct != "yes" && HDQ.VARS.show_results == "yes") {
-						hdq_show_part_wrong(answers);
+						bitc_show_part_wrong(answers);
 					}
 					return 0;
 					break;
@@ -644,14 +644,14 @@ const HDQ = {
 			}
 			return 1;
 
-			function hdq_show_part_wrong(answers) {
+			function bitc_show_part_wrong(answers) {
 				// if the user got part of the question right,
 				// Visually show that even though the selected answer was correct,
 				// the entire answer set is incorrect
 				for (let i = 0; i < answers.length; i++) {
 					if (answers[i].value == 1 && answers[i].checked == true) {
-						answers[i].parentElement.parentElement.parentElement.classList.remove("hdq_correct");
-						answers[i].parentElement.parentElement.parentElement.classList.add("hdq_correct_not_selected");
+						answers[i].parentElement.parentElement.parentElement.classList.remove("bitc_correct");
+						answers[i].parentElement.parentElement.parentElement.classList.add("bitc_correct_not_selected");
 					}
 				}
 			}
@@ -660,8 +660,8 @@ const HDQ = {
 	calculateScore: async function () {
 		let total_score = 0;
 		let total_questions = 0;
-		let cs = document.getElementById("hdq_current_score");
-		let tq = document.getElementById("hdq_total_questions");
+		let cs = document.getElementById("bitc_current_score");
+		let tq = document.getElementById("bitc_total_questions");
 		if (cs != null && tq != null) {
 			total_score = parseInt(cs.value);
 			total_questions = parseInt(tq.value);
@@ -670,7 +670,7 @@ const HDQ = {
 
 		for (let i = 0; i < HDQ.EL.questions.length; i++) {
 			let t = HDQ.EL.questions[i].getAttribute("data-type");
-			let answers = HDQ.EL.questions[i].querySelectorAll(".hdq_option");
+			let answers = HDQ.EL.questions[i].querySelectorAll(".bitc_option");
 			if (answers.length > 0) {
 				total_score += await HDQ.getResult[t](answers);
 			} else {
@@ -678,15 +678,15 @@ const HDQ = {
 			}
 		}
 
-		HDQ.VARS.hdq_score = [parseInt(total_score), parseInt(total_questions)];
-		return HDQ.VARS.hdq_score;
+		HDQ.VARS.bitc_score = [parseInt(total_score), parseInt(total_questions)];
+		return HDQ.VARS.bitc_score;
 	},
 	submit: async function (el) {
 		if (el === null || typeof el.getAttribute("id") === "undfined") {
-			el = document.getElementsByClassName("hdq_finsh_button")[0];
+			el = document.getElementsByClassName("bitc_finsh_button")[0];
 		}
 
-		if (el.classList.contains("hdq_complete")) {
+		if (el.classList.contains("bitc_complete")) {
 			return;
 		}
 
@@ -695,16 +695,16 @@ const HDQ = {
 		// start visual feedback
 		let quiz_ID = el.getAttribute("data-id");
 		el.innerHTML = "...";
-		el.classList.add("hdq_complete");
+		el.classList.add("bitc_complete");
 		jQuery(el).fadeOut("slow");
-		HDQ.EL.loading.classList.add("hdq_animate");
+		HDQ.EL.loading.classList.add("bitc_animate");
 
 		// hide all buttons
-		jQuery(".hdq_jPaginate_button").fadeOut();
+		jQuery(".bitc_jPaginate_button").fadeOut();
 
 		// show all questions in case of jPagination
 		if (HDQ.VARS.hide_questions !== "yes") {
-			jQuery(".hdq_question").fadeIn();
+			jQuery(".bitc_question").fadeIn();
 		}
 
 		// validate all answers
@@ -714,26 +714,26 @@ const HDQ = {
 		let data = score[0] + " / " + score[1];
 
 		// update results section
-		if (jQuery(".hdq_results_inner .hdq_result .hdq_result_percent")[0]) {
-			let hdq_results_percent = (parseFloat(HDQ.VARS.hdq_score[0]) / parseFloat(HDQ.VARS.hdq_score[1])) * 100;
-			hdq_results_percent = Math.ceil(hdq_results_percent);
-			data = '<span class = "hdq_result_fraction">' + data + '</span> - <span class = "hdq_result_percent">' + hdq_results_percent + "%</span>";
+		if (jQuery(".bitc_results_inner .bitc_result .bitc_result_percent")[0]) {
+			let bitc_results_percent = (parseFloat(HDQ.VARS.bitc_score[0]) / parseFloat(HDQ.VARS.bitc_score[1])) * 100;
+			bitc_results_percent = Math.ceil(bitc_results_percent);
+			data = '<span class = "bitc_result_fraction">' + data + '</span> - <span class = "bitc_result_percent">' + bitc_results_percent + "%</span>";
 		}
-		jQuery(".hdq_results_inner .hdq_result").html(data);
+		jQuery(".bitc_results_inner .bitc_result").html(data);
 
 		let pass_percent = 0;
 		pass_percent = score[0] / score[1];
 		pass_percent = pass_percent * 100;
 		if (pass_percent >= HDQ.VARS.pass_percent) {
-			jQuery(".hdq_result_pass").show();
+			jQuery(".bitc_result_pass").show();
 		} else {
-			jQuery(".hdq_result_fail").show();
+			jQuery(".bitc_result_fail").show();
 		}
 
 		if (HDQ.VARS.share_results === "yes") {
 			HDQ.share();
 		}
-		jQuery(".hdq_results_wrapper").fadeIn();
+		jQuery(".bitc_results_wrapper").fadeIn();
 
 		if (typeof HDQ.VARS.submit_actions != undefined && HDQ.VARS.submit_actions != null) {
 			for (let i = 0; i < HDQ.VARS.submit_actions.length; i++) {
@@ -742,7 +742,7 @@ const HDQ = {
 		}
 
 		if (HDQ.VARS.hide_questions === "yes") {
-			jQuery(".hdq_question").fadeOut();
+			jQuery(".bitc_question").fadeOut();
 		}
 
 		setTimeout(function () {
@@ -761,7 +761,7 @@ const HDQ = {
 		// small delay since this isn't syncronous
 		setTimeout(function () {
 			data.quizID = HDQ.VARS.id;
-			data.score = HDQ.VARS.hdq_score;
+			data.score = HDQ.VARS.bitc_score;
 			// send data to admin-ajax
 			console.log(action);
 			console.log(data);
@@ -784,7 +784,7 @@ const HDQ = {
 			create_webshare();
 
 			function create_webshare() {
-				const el = document.getElementsByClassName("hdq_share_other")[0];
+				const el = document.getElementsByClassName("bitc_share_other")[0];
 				if (el && typeof el !== "undefined") {
 					try {
 						if (!navigator.canShare) {
@@ -796,7 +796,7 @@ const HDQ = {
 
 					el.addEventListener("click", async function () {
 						let text = HDQ.VARS.share_text;
-						let score = HDQ.VARS.hdq_score[0] + "/" + HDQ.VARS.hdq_score[1];
+						let score = HDQ.VARS.bitc_score[0] + "/" + HDQ.VARS.bitc_score[1];
 						text = text.replaceAll("%score%", score);
 						text = text.replaceAll("%quiz%", HDQ.VARS.name);
 
@@ -818,7 +818,7 @@ const HDQ = {
 			function create_twitter() {
 				let baseURL = "https://twitter.com/intent/tweet";
 				let text = HDQ.VARS.share_text;
-				let score = HDQ.VARS.hdq_score[0] + "/" + HDQ.VARS.hdq_score[1];
+				let score = HDQ.VARS.bitc_score[0] + "/" + HDQ.VARS.bitc_score[1];
 				text = text.replaceAll("%score%", score);
 				text = text.replaceAll("%quiz%", HDQ.VARS.name);
 
@@ -832,56 +832,56 @@ const HDQ = {
 				let hashtags = "&hashtags=hdquiz";
 
 				let shareLink = baseURL + text + url + hashtags;
-				jQuery(".hdq_twitter").attr("href", shareLink);
+				jQuery(".bitc_twitter").attr("href", shareLink);
 			}
 		}
 		create_social_share();
 	},
 	jPaginate: function () {
-		let hdq_form_id = jQuery(this).attr("data-id");
-		jQuery(".hdq_jPaginate .hdq_next_button").removeClass("hdq_next_selected");
-		jQuery(this).addClass("hdq_next_selected");
+		let bitc_form_id = jQuery(this).attr("data-id");
+		jQuery(".bitc_jPaginate .bitc_next_button").removeClass("bitc_next_selected");
+		jQuery(this).addClass("bitc_next_selected");
 
-		jQuery("#hdq_" + hdq_form_id + " .hdq_jPaginate:visible")
-			.prevAll("#hdq_" + hdq_form_id + " .hdq_question")
+		jQuery("#bitc_" + bitc_form_id + " .bitc_jPaginate:visible")
+			.prevAll("#bitc_" + bitc_form_id + " .bitc_question")
 			.hide();
 
-		let hdq_class_styles = ["layout_left", "layout_left_full", "layout_right", "layout_right_full"];
+		let bitc_class_styles = ["layout_left", "layout_left_full", "layout_right", "layout_right_full"];
 		let style = "block";
-		let q_style = document.getElementById("hdq_" + hdq_form_id).getElementsByClassName("hdq_quiz")[0].classList;
+		let q_style = document.getElementById("bitc_" + bitc_form_id).getElementsByClassName("bitc_quiz")[0].classList;
 		let set_style = [];
 		for (let i = 0; i < q_style.length; i++) {
 			set_style.push(q_style[i]);
 		}
-		for (let i = 0; i < hdq_class_styles.length; i++) {
-			if (set_style.includes(hdq_class_styles[i])) {
+		for (let i = 0; i < bitc_class_styles.length; i++) {
+			if (set_style.includes(bitc_class_styles[i])) {
 				style = "grid";
 			}
 		}
 
-		jQuery("#hdq_" + hdq_form_id + " .hdq_jPaginate:eq(" + parseInt(HDQ.VARS.jPage) + ")")
-			.nextUntil("#hdq_" + hdq_form_id + " .hdq_jPaginate ")
+		jQuery("#bitc_" + bitc_form_id + " .bitc_jPaginate:eq(" + parseInt(HDQ.VARS.jPage) + ")")
+			.nextUntil("#bitc_" + bitc_form_id + " .bitc_jPaginate ")
 			.show()
 			.css("display", style);
-		jQuery(".hdq_results_wrapper").hide(); // in case the results are below the quiz
+		jQuery(".bitc_results_wrapper").hide(); // in case the results are below the quiz
 		HDQ.VARS.jPage = parseInt(HDQ.VARS.jPage + 1);
 
 		if (HDQ.VARS.jPage === HDQ.EL.jPaginate.length) {
-			jQuery(".hdq_finsh_button").removeClass("hdq_hidden");
+			jQuery(".bitc_finsh_button").removeClass("bitc_hidden");
 		}
 
 		jQuery(this).parent().hide();
 
-		jQuery("#hdq_" + hdq_form_id + " .hdq_jPaginate:eq(" + parseInt(HDQ.VARS.jPage) + ")").show();
+		jQuery("#bitc_" + bitc_form_id + " .bitc_jPaginate:eq(" + parseInt(HDQ.VARS.jPage) + ")").show();
 
-		const results_wrapper = jQuery(".hdq_question:visible");
+		const results_wrapper = jQuery(".bitc_question:visible");
 		if (results_wrapper.length == 0) {
 			return;
 		}
 		setTimeout(function () {
 			if (!HDQ.VARS.legacy_scroll) {
 				// results_wrapper[0].scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
-				document.getElementById("hdq_offset_div").scrollIntoView({
+				document.getElementById("bitc_offset_div").scrollIntoView({
 					behavior: "smooth",
 					block: "start",
 					inline: "nearest",
@@ -920,23 +920,23 @@ const HDQ = {
 		results: function () {
 			// this is super not accurate, but covers most themes.
 			setTimeout(async function () {
-				let hdq_quiz_container = document.querySelector("#hdq_" + HDQ.VARS.id);
-				hdq_quiz_container = jQuery(await HDQ.get_quiz_parent_container(hdq_quiz_container));
+				let bitc_quiz_container = document.querySelector("#bitc_" + HDQ.VARS.id);
+				bitc_quiz_container = jQuery(await HDQ.get_quiz_parent_container(bitc_quiz_container));
 				console.log("container:");
-				console.log(hdq_quiz_container);
+				console.log(bitc_quiz_container);
 
-				if (hdq_quiz_container[0].tagName === "DIV") {
-					hdq_top = jQuery(hdq_quiz_container).scrollTop() + jQuery(".hdq_results_wrapper").offset().top - jQuery(".hdq_results_wrapper").height() / 2 - 100;
-					console.log("hdq_top: " + hdq_top);
-					jQuery(hdq_quiz_container).animate(
+				if (bitc_quiz_container[0].tagName === "DIV") {
+					bitc_top = jQuery(bitc_quiz_container).scrollTop() + jQuery(".bitc_results_wrapper").offset().top - jQuery(".bitc_results_wrapper").height() / 2 - 100;
+					console.log("bitc_top: " + bitc_top);
+					jQuery(bitc_quiz_container).animate(
 						{
-							scrollTop: hdq_top,
+							scrollTop: bitc_top,
 						},
 						550
 					);
 					jQuery("html,body").animate(
 						{
-							scrollTop: hdq_top,
+							scrollTop: bitc_top,
 						},
 						550
 					);
@@ -952,7 +952,7 @@ const HDQ = {
 
 					jQuery("html,body").animate(
 						{
-							scrollTop: jQuery(".hdq_results_wrapper").offset().top - 100,
+							scrollTop: jQuery(".bitc_results_wrapper").offset().top - 100,
 						},
 						550
 					);
@@ -968,14 +968,14 @@ const HDQ = {
 		},
 		question: function () {
 			setTimeout(async function () {
-				let hdq_quiz_container = document.querySelector("#hdq_" + HDQ.VARS.id);
-				hdq_quiz_container = jQuery(await HDQ.get_quiz_parent_container(hdq_quiz_container));
+				let bitc_quiz_container = document.querySelector("#bitc_" + HDQ.VARS.id);
+				bitc_quiz_container = jQuery(await HDQ.get_quiz_parent_container(bitc_quiz_container));
 
-				if (hdq_quiz_container[0].tagName === "DIV") {
-					hdq_top = jQuery(hdq_quiz_container).scrollTop() + jQuery(".hdq_question:visible").offset().top - jQuery(".hdq_question:visible").height() / 2 - 100;
-					jQuery(hdq_quiz_container).animate(
+				if (bitc_quiz_container[0].tagName === "DIV") {
+					bitc_top = jQuery(bitc_quiz_container).scrollTop() + jQuery(".bitc_question:visible").offset().top - jQuery(".bitc_question:visible").height() / 2 - 100;
+					jQuery(bitc_quiz_container).animate(
 						{
-							scrollTop: hdq_top,
+							scrollTop: bitc_top,
 						},
 						550
 					);
@@ -991,7 +991,7 @@ const HDQ = {
 
 					jQuery("html,body").animate(
 						{
-							scrollTop: jQuery(".hdq_question:visible").offset().top - 100,
+							scrollTop: jQuery(".bitc_question:visible").offset().top - 100,
 						},
 						550
 					);
@@ -1009,13 +1009,13 @@ const HDQ = {
 	scroll: function () {
 		setTimeout(function () {
 			if (HDQ.VARS.results_position === "above" && !HDQ.VARS.legacy_scroll) {
-				document.getElementById("hdq_offset_div").scrollIntoView({
+				document.getElementById("bitc_offset_div").scrollIntoView({
 					behavior: "smooth",
 					block: "start",
 					inline: "nearest",
 				});
 			} else {
-				const results_wrapper = document.getElementsByClassName("hdq_results_wrapper")[0];
+				const results_wrapper = document.getElementsByClassName("bitc_results_wrapper")[0];
 				results_wrapper.scrollIntoView({
 					behavior: "smooth",
 					block: "center",
@@ -1027,7 +1027,7 @@ const HDQ = {
 	// gets the parent question of an element
 	getParent: async function (el) {
 		let p = el.parentNode;
-		if (p.classList.contains("hdq_question")) {
+		if (p.classList.contains("bitc_question")) {
 			return p;
 		} else {
 			p = HDQ.getParent(p);
@@ -1036,57 +1036,57 @@ const HDQ = {
 	},
 };
 
-let hdq_locals = {};
-if (typeof hdq_local_vars != "undefined") {
-	hdq_locals = JSON.parse(hdq_local_vars);
-	async function HDQ_INIT() {
+let bitc_locals = {};
+if (typeof bitc_local_vars != "undefined") {
+	bitc_locals = JSON.parse(bitc_local_vars);
+	async function bitc_INIT() {
 		// set init vars
 		async function hdqSetInitVars() {
 			HDQ.VARS = {
-				ajax: hdq_locals.hdq_ajax,
-				featured_image: hdq_locals.hdq_featured_image,
-				pass_percent: hdq_locals.hdq_pass_percent,
-				id: hdq_locals.hdq_quiz_id,
-				name: hdq_locals.hdq_quiz_name,
-				permalink: hdq_locals.hdq_quiz_permalink,
-				mark_correct: hdq_locals.hdq_results_correct,
-				hide_questions: hdq_locals.hdq_hide_questions,
-				share_results: hdq_locals.hdq_share_results,
-				show_extra_text: hdq_locals.hdq_show_extra_text,
-				show_results: hdq_locals.hdq_show_results,
-				show_results_now: hdq_locals.hdq_show_results_now,
-				results_position: hdq_locals.hdq_results_position,
-				stop_reselect: hdq_locals.hdq_stop_answer_reselect,
-				submit_actions: hdq_locals.hdq_submit,
-				init_actions: hdq_locals.hdq_init,
+				ajax: bitc_locals.bitc_ajax,
+				featured_image: bitc_locals.bitc_featured_image,
+				pass_percent: bitc_locals.bitc_pass_percent,
+				id: bitc_locals.bitc_quiz_id,
+				name: bitc_locals.bitc_quiz_name,
+				permalink: bitc_locals.bitc_quiz_permalink,
+				mark_correct: bitc_locals.bitc_results_correct,
+				hide_questions: bitc_locals.bitc_hide_questions,
+				share_results: bitc_locals.bitc_share_results,
+				show_extra_text: bitc_locals.bitc_show_extra_text,
+				show_results: bitc_locals.bitc_show_results,
+				show_results_now: bitc_locals.bitc_show_results_now,
+				results_position: bitc_locals.bitc_results_position,
+				stop_reselect: bitc_locals.bitc_stop_answer_reselect,
+				submit_actions: bitc_locals.bitc_submit,
+				init_actions: bitc_locals.bitc_init,
 				timer: {
-					time: hdq_locals.hdq_timer,
-					max: hdq_locals.hdq_timer,
-					question: hdq_locals.hdq_timer_question,
+					time: bitc_locals.bitc_timer,
+					max: bitc_locals.bitc_timer,
+					question: bitc_locals.bitc_timer_question,
 					active: false,
 				},
-				twitter: hdq_locals.hdq_twitter_handle,
-				ads: hdq_locals.hdq_use_ads,
-				hdq_score: [],
+				twitter: bitc_locals.bitc_twitter_handle,
+				ads: bitc_locals.bitc_use_ads,
+				bitc_score: [],
 				jPage: 0,
 				paginate: false,
-				legacy_scroll: hdq_locals.hdq_legacy_scroll,
-				translations: hdq_locals.hdq_translations,
-				share_text: hdq_locals.hdq_share_text,
+				legacy_scroll: bitc_locals.bitc_legacy_scroll,
+				translations: bitc_locals.bitc_translations,
+				share_text: bitc_locals.bitc_share_text,
 			};
 		}
 		await hdqSetInitVars();
 		HDQ.init();
 	}
-	HDQ_INIT();
+	bitc_INIT();
 }
 
 // TODO: check to see if this integration still works well
 /* FB APP - Only used if APP ID was provided */
-jQuery("#hdq_fb_sharer").on("click", function () {
-	let hdq_score = jQuery(".hdq_result").text();
+jQuery("#bitc_fb_sharer").on("click", function () {
+	let bitc_score = jQuery(".bitc_result").text();
 	let text = HDQ.VARS.share_text;
-	text = text.replaceAll("%score%", hdq_score);
+	text = text.replaceAll("%score%", bitc_score);
 	text = text.replaceAll("%quiz%", HDQ.VARS.name);
 	FB.ui(
 		{

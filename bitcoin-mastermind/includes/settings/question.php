@@ -1,57 +1,57 @@
 <?php
-if (hdq_user_permission()) {
-    hdq_load_question_tabs();
+if (bitc_user_permission()) {
+    bitc_load_question_tabs();
 }
 
-function hdq_load_question_tabs()
+function bitc_load_question_tabs()
 {
-    function hdq_display_question($questionID, $quizID, $fields)
+    function bitc_display_question($questionID, $quizID, $fields)
     {
 ?>
         <input type="hidden" style="display:none" class="hderp_input" data-type="integer" id="question_id" value="<?php echo $questionID; ?>" />
-        <div id="hdq_question_buttons">
-            <div id="hdq_question_edit_left">
-                <div role="button" title="back to quiz screen" class="hdq_button2" data-id="<?php echo $quizID; ?>" data-question-id="<?php echo $questionID; ?>" id="hdq_back_to_quiz">
+        <div id="bitc_question_buttons">
+            <div id="bitc_question_edit_left">
+                <div role="button" title="back to quiz screen" class="bitc_button2" data-id="<?php echo $quizID; ?>" data-question-id="<?php echo $questionID; ?>" id="bitc_back_to_quiz">
                     <span class="dashicons dashicons-arrow-left-alt"></span>
                     BACK TO QUIZ
                 </div>
-                <div role="button" title="add another question to this quiz" class="hdq_button2" data-id="<?php echo $quizID; ?>" id="hdq_add_question">
+                <div role="button" title="add another question to this quiz" class="bitc_button2" data-id="<?php echo $quizID; ?>" id="bitc_add_question">
                     <span class="dashicons dashicons-plus"></span>
                     ADD NEW QUESTION
                 </div>
             </div>
-            <div id="hdq_question_edit_right">
-                <div role="button" title="delete this question" class="hdq_button_warning" id="hdq_delete_question" data-question="<?php echo $questionID; ?>" data-quiz="<?php echo $quizID; ?>">
+            <div id="bitc_question_edit_right">
+                <div role="button" title="delete this question" class="bitc_button_warning" id="bitc_delete_question" data-question="<?php echo $questionID; ?>" data-quiz="<?php echo $quizID; ?>">
                     <span class="dashicons dashicons-trash"></span>
                 </div>
-                <div role="button" title="save this question" class="hdq_button" data-id="<?php echo $questionID; ?>" id="hdq_save_question">
+                <div role="button" title="save this question" class="bitc_button" data-id="<?php echo $questionID; ?>" id="bitc_save_question">
                     <span class="dashicons dashicons-sticky"></span>
                     SAVE QUESTION
                 </div>
             </div>
         </div>
 
-        <div id="hdq_question_admin_top">
-            <div class="hdq_row">
-                <input type="text" id="title" class="hdq_question_title hderp_input" data-type="title" data-tab="" placeholder="enter question..." data-required="required" value="<?php echo hdq_getValue(array("name" => "title"), $fields); ?>">
+        <div id="bitc_question_admin_top">
+            <div class="bitc_row">
+                <input type="text" id="title" class="bitc_question_title hderp_input" data-type="title" data-tab="" placeholder="enter question..." data-required="required" value="<?php echo bitc_getValue(array("name" => "title"), $fields); ?>">
             </div>
         </div>
         <div id="content_tabs">
             <div id="tab_nav_wrapper">
-                <div id="hdq_logo">
-                    <span class="hdq_logo_tooltip"><img src="<?php echo plugins_url('../images/hd-logo.png', __FILE__); ?>" alt="Harmonic Design logo">
-                        <span class="hdq_logo_tooltip_content">
+                <div id="bitc_logo">
+                    <span class="bitc_logo_tooltip"><img src="<?php echo plugins_url('../images/hd-logo.png', __FILE__); ?>" alt="Harmonic Design logo">
+                        <span class="bitc_logo_tooltip_content">
                             <span><strong>Bitcoin Mastermind</strong> is developed by Harmonic Design. Check out the addons page to see how you can extend Bitcoin Mastermind even further.</span>
                         </span>
                     </span>
                 </div>
                 <div id="tab_nav">
-                    <?php hdq_print_question_tabs(); ?>
+                    <?php bitc_print_question_tabs(); ?>
                 </div>
             </div>
             <div id="tab_content">
                 <input type="hidden" class="hderp_input" id="quiz_id" style="display:none" data-required="true" data-type="integer" value="<?php echo $quizID; ?>" />
-                <?php hdq_print_question_tab_content($fields); ?>
+                <?php bitc_print_question_tab_content($fields); ?>
             </div>
         </div>
 
@@ -70,8 +70,8 @@ function hdq_load_question_tabs()
     }
 
     if ($quizID > 0) {
-        $fields = get_hdq_question($questionID);
-        hdq_display_question($questionID, $quizID, $fields);
+        $fields = get_bitc_question($questionID);
+        bitc_display_question($questionID, $quizID, $fields);
     } else {
         echo 'ERROR: No quiz ID was provided';
     }

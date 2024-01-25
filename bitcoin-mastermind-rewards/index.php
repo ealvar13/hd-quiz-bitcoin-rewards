@@ -27,26 +27,26 @@ function start_session() {
 add_action('init', 'start_session', 1);
 
 // Define plugin version
-if (!defined('HDQ_A_LIGHT_PLUGIN_VERSION')) {
-    define('HDQ_A_LIGHT_PLUGIN_VERSION', '0.1');
+if (!defined('bitc_A_LIGHT_PLUGIN_VERSION')) {
+    define('bitc_A_LIGHT_PLUGIN_VERSION', '0.1');
 }
 // Define plugin version
-if (!defined('HDQ_BR_PLUGIN_VERSION')) {
-    define('HDQ_BR_PLUGIN_VERSION', '0.1');
+if (!defined('bitc_BR_PLUGIN_VERSION')) {
+    define('bitc_BR_PLUGIN_VERSION', '0.1');
 }
 
 
 
 /* Automatically deactivate if Bitcoin Mastermind is not active
 ------------------------------------------------------- */
-function hdq_br_check_hd_quiz_active() {
+function bitc_br_check_hd_quiz_active() {
     if (function_exists('is_plugin_active')) {
         if (!is_plugin_active("hd-quiz/index.php")) {
             deactivate_plugins(plugin_basename(__FILE__));
         }
     }
 }
-add_action('init', 'hdq_br_check_hd_quiz_active');
+add_action('init', 'bitc_br_check_hd_quiz_active');
 
 
 /* Include the basic required files
@@ -58,19 +58,19 @@ require dirname(__FILE__) . '/includes/api_endpoints.php';
 
 /* Create Bitcoin Mastermind Bitcoin Rewards Settings page
 ------------------------------------------------------- */
-function hdq_br_create_settings_page() {
-    function hdq_br_register_settings_page() {
-        add_submenu_page('hdq_quizzes', 'Bitcoin Rewards', 'Bitcoin Rewards', 'publish_posts', 'hdq_bitcoin_rewards', 'hdq_br_settings_page_callback');
+function bitc_br_create_settings_page() {
+    function bitc_br_register_settings_page() {
+        add_submenu_page('bitc_quizzes', 'Bitcoin Rewards', 'Bitcoin Rewards', 'publish_posts', 'bitc_bitcoin_rewards', 'bitc_br_settings_page_callback');
     }
-    add_action('admin_menu', 'hdq_br_register_settings_page', 11);
+    add_action('admin_menu', 'bitc_br_register_settings_page', 11);
 }
-add_action('init', 'hdq_br_create_settings_page');
+add_action('init', 'bitc_br_create_settings_page');
 
 // Hook the table creation function to plugin activation
 register_activation_hook(__FILE__, 'create_custom_bitcoin_table');
 
 // Settings Page Callback: Load the Bitcoin Rewards settings page
-function hdq_br_settings_page_callback() {
+function bitc_br_settings_page_callback() {
     require dirname(__FILE__) . '/includes/admin.php';
 }
 

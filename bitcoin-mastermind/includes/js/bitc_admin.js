@@ -14,10 +14,10 @@ const HDQ = {
 					save: document.getElementById("save"),
 				},
 			},
-			addQuiz: document.getElementById("hdq_new_quiz_name"),
+			addQuiz: document.getElementById("bitc_new_quiz_name"),
 			editors: document.getElementsByClassName("editor"),
-			quizzes: document.getElementById("hdq_list_quizzes"),
-			questions: document.getElementById("hdq_questions_list"),
+			quizzes: document.getElementById("bitc_list_quizzes"),
+			questions: document.getElementById("bitc_questions_list"),
 			main: document.getElementById("main"),
 			inputEnter: document.getElementsByClassName("input_enter"),
 		},
@@ -30,9 +30,9 @@ const HDQ = {
 			},
 		},
 		fields: document.getElementsByClassName("hderp_input"),
-		quizzes: document.getElementsByClassName("hdq_quiz_term"),
-		questions: document.getElementsByClassName("hdq_quiz_question "),
-		nonce: document.getElementById("hdq_quiz_nonce"),
+		quizzes: document.getElementsByClassName("bitc_quiz_term"),
+		questions: document.getElementsByClassName("bitc_quiz_question "),
+		nonce: document.getElementById("bitc_quiz_nonce"),
 	},
 	vars: {
 		loadTimer: 0,
@@ -47,7 +47,7 @@ const HDQ = {
 	},
 	init: {
 		settings: function () {
-			HDQ.EL.page.header.actions.save = document.getElementById("hdq_save_settings"); // since it's probably null right now
+			HDQ.EL.page.header.actions.save = document.getElementById("bitc_save_settings"); // since it's probably null right now
 			if (HDQ.EL.page.header.actions.save !== null) {
 				// save
 				HDQ.EL.page.header.actions.save.addEventListener("click", async function () {
@@ -83,16 +83,16 @@ const HDQ = {
 				}
 
 				function save(payload) {
-					console.log(document.getElementById("hdq_about_options_nonce").value);
+					console.log(document.getElementById("bitc_about_options_nonce").value);
 					HDQ.EL.page.header.actions.save.classList.add("saving");
 					HDQ.EL.page.header.actions.save.innerHTML = "saving...";
 					console.log(payload);
 					jQuery.ajax({
 						type: "POST",
 						data: {
-							action: "hdq_save_settings",
+							action: "bitc_save_settings",
 							payload: payload,
-							nonce: document.getElementById("hdq_about_options_nonce").value,
+							nonce: document.getElementById("bitc_about_options_nonce").value,
 						},
 						url: ajaxurl,
 						success: function (data) {
@@ -123,7 +123,7 @@ const HDQ = {
 				});
 			}
 
-			const data_upgrade_notice = document.getElementById("hdq_update_data_notice");
+			const data_upgrade_notice = document.getElementById("bitc_update_data_notice");
 			if (data_upgrade_notice != null) {
 				data_upgrade_notice.addEventListener("click", HDQ.removeDataUpgradeNotice);
 			}
@@ -168,7 +168,7 @@ const HDQ = {
 				});
 
 				// add new question
-				document.getElementById("hdq_add_question").addEventListener("click", async function () {
+				document.getElementById("bitc_add_question").addEventListener("click", async function () {
 					let quizID = parseInt(this.getAttribute("data-id"));
 					HDQ.questions.load(quizID);
 				});
@@ -218,8 +218,8 @@ const HDQ = {
 
 			// question pagination
 			function setQuestionPagination() {
-				const next = document.getElementById("hdq_next_questions");
-				const prev = document.getElementById("hdq_prev_questions");
+				const next = document.getElementById("bitc_next_questions");
+				const prev = document.getElementById("bitc_prev_questions");
 				if (next != null) {
 					next.addEventListener("click", HDQpaginate);
 				}
@@ -238,18 +238,18 @@ const HDQ = {
 			// allow tab switching
 			function setTabEventListeners() {
 				function main() {
-					const tabs = document.getElementsByClassName("hdq_quiz_tab");
+					const tabs = document.getElementsByClassName("bitc_quiz_tab");
 					for (let i = 0; i < tabs.length; i++) {
 						tabs[i].addEventListener("click", loadTabContent);
 					}
 
 					function loadTabContent() {
-						let active = document.getElementsByClassName("hdq_quiz_tab_active")[0];
-						active.classList.remove("hdq_quiz_tab_active");
-						this.classList.add("hdq_quiz_tab_active");
+						let active = document.getElementsByClassName("bitc_quiz_tab_active")[0];
+						active.classList.remove("bitc_quiz_tab_active");
+						this.classList.add("bitc_quiz_tab_active");
 
-						document.getElementById("hdq_questions_list").style.display = "none";
-						document.getElementById("hdq_settings_page").style.display = "none";
+						document.getElementById("bitc_questions_list").style.display = "none";
+						document.getElementById("bitc_settings_page").style.display = "none";
 
 						let el = this.getAttribute("data-id");
 						document.getElementById(el).style.display = "block";
@@ -272,7 +272,7 @@ const HDQ = {
 				}
 
 				// if there was a prev active question, autoscroll to it
-				let last_active_q = document.getElementsByClassName("hdq_question_last_active");
+				let last_active_q = document.getElementsByClassName("bitc_question_last_active");
 				if (last_active_q.length > 0) {
 					last_active_q[0].scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
 				}
@@ -282,7 +282,7 @@ const HDQ = {
 			}
 
 			// copy shortcode to clipboard
-			let shortcode = document.getElementsByClassName("hdq_shortcode_copy");
+			let shortcode = document.getElementsByClassName("bitc_shortcode_copy");
 			for (let i = 0; i < shortcode.length; i++) {
 				shortcode[i].addEventListener("click", function () {
 					let text = this.innerHTML;
@@ -292,7 +292,7 @@ const HDQ = {
 			}
 		},
 		question: function () {
-			const ELSAVE = document.getElementById("hdq_save_question");
+			const ELSAVE = document.getElementById("bitc_save_question");
 			if (ELSAVE !== null) {
 				let questionID = document.getElementById("question_id").value;
 				if (questionID == 0) {
@@ -321,13 +321,13 @@ const HDQ = {
 				});
 
 				// add new question
-				document.getElementById("hdq_add_question").addEventListener("click", async function () {
+				document.getElementById("bitc_add_question").addEventListener("click", async function () {
 					let quizID = parseInt(this.getAttribute("data-id"));
 					HDQ.questions.load(quizID);
 				});
 
 				// delete this
-				document.getElementById("hdq_delete_question").addEventListener("click", async function () {
+				document.getElementById("bitc_delete_question").addEventListener("click", async function () {
 					let quizID = parseInt(this.getAttribute("data-quiz"));
 					let questionID = parseInt(this.getAttribute("data-question"));
 					HDQ.questions.delete(quizID, questionID);
@@ -335,9 +335,9 @@ const HDQ = {
 			}
 
 			function setNavEventListeners() {
-				const ELBACK = document.getElementById("hdq_back_to_quiz");
-				const ELNEW = document.getElementById("hdq_add_question");
-				const ELDELETE = document.getElementById("hdq_delete_question");
+				const ELBACK = document.getElementById("bitc_back_to_quiz");
+				const ELNEW = document.getElementById("bitc_add_question");
+				const ELDELETE = document.getElementById("bitc_delete_question");
 
 				ELBACK.addEventListener("click", function () {
 					let quizID = this.getAttribute("data-id");
@@ -380,9 +380,9 @@ const HDQ = {
 
 			let nonce = HDQ.EL.nonce.value;
 			HDQ.EL.page.header.title.innerHTML = "loading...";
-			HDQ.EL.page.quizzes.classList.add("hdq_quiz_loading");
-			jQuery("#hdq_message").fadeOut();
-			jQuery("#hdq_loading ").fadeIn();
+			HDQ.EL.page.quizzes.classList.add("bitc_quiz_loading");
+			jQuery("#bitc_message").fadeOut();
+			jQuery("#bitc_loading ").fadeIn();
 
 			HDQ.vars.loadTimer = 0;
 			let loadTime = setInterval(function () {
@@ -391,10 +391,10 @@ const HDQ = {
 			jQuery.ajax({
 				type: "POST",
 				data: {
-					action: "hdq_load_quiz",
+					action: "bitc_load_quiz",
 					quiz: quizID,
 					questionID: questionID,
-					hdq_paged: pageID,
+					bitc_paged: pageID,
 					nonce: nonce,
 				},
 				url: ajaxurl,
@@ -403,12 +403,12 @@ const HDQ = {
 					if (HDQ.vars.loadTimer > 1000) {
 						HDQ.EL.page.main.innerHTML = data;
 						HDQ.init.quiz();
-						jQuery("#hdq_loading ").fadeOut();
+						jQuery("#bitc_loading ").fadeOut();
 					} else {
 						setTimeout(function () {
 							HDQ.EL.page.main.innerHTML = data;
 							HDQ.init.quiz();
-							jQuery("#hdq_loading ").fadeOut();
+							jQuery("#bitc_loading ").fadeOut();
 						}, 500);
 					}
 				},
@@ -417,9 +417,9 @@ const HDQ = {
 					HDQ.EL.page.header.actions.save = document.getElementById("save");
 				},
 				error: function () {
-					jQuery("#hdq_loading ").fadeOut();
+					jQuery("#bitc_loading ").fadeOut();
 					alert("there was an error retrieving your quiz");
-					HDQ.EL.page.quizzes.classList.remove("hdq_quiz_loading");
+					HDQ.EL.page.quizzes.classList.remove("bitc_quiz_loading");
 				},
 			});
 		},
@@ -430,9 +430,9 @@ const HDQ = {
 			jQuery.ajax({
 				type: "POST",
 				data: {
-					action: "hdq_save_quiz",
+					action: "bitc_save_quiz",
 					payload: payload,
-					nonce: document.getElementById("hdq_quiz_nonce").value,
+					nonce: document.getElementById("bitc_quiz_nonce").value,
 				},
 				url: ajaxurl,
 				success: function (data) {
@@ -454,9 +454,9 @@ const HDQ = {
 
 					let nonce = HDQ.EL.nonce.value;
 					HDQ.EL.page.header.title.innerHTML = "loading...";
-					HDQ.EL.page.quizzes.classList.add("hdq_quiz_loading");
-					jQuery("#hdq_message").fadeOut();
-					jQuery("#hdq_loading ").fadeIn();
+					HDQ.EL.page.quizzes.classList.add("bitc_quiz_loading");
+					jQuery("#bitc_message").fadeOut();
+					jQuery("#bitc_loading ").fadeIn();
 
 					HDQ.vars.loadTimer = 0;
 					let loadTime = setInterval(function () {
@@ -465,7 +465,7 @@ const HDQ = {
 					jQuery.ajax({
 						type: "POST",
 						data: {
-							action: "hdq_add_quiz",
+							action: "bitc_add_quiz",
 							quiz: v,
 							nonce: nonce,
 						},
@@ -481,17 +481,17 @@ const HDQ = {
 							}
 
 							data.quiz = decodeURIComponent(data.quiz);
-							let html = `<div role="button" class="hdq_quiz_item hdq_quiz_term" data-name="${data.quiz}" data-id="${data.id}">${data.quiz}<code>[HDquiz quiz = "${data.id}"]</code></div>`;
+							let html = `<div role="button" class="bitc_quiz_item bitc_quiz_term" data-name="${data.quiz}" data-id="${data.id}">${data.quiz}<code>[HDquiz quiz = "${data.id}"]</code></div>`;
 							// force a more smooth loading integration
 							if (HDQ.vars.loadTimer > 1000) {
 								HDQ.EL.page.quizzes.insertAdjacentHTML("beforeend", html);
-								jQuery("#hdq_loading ").fadeOut();
+								jQuery("#bitc_loading ").fadeOut();
 								HDQ.init.quizzes();
 								HDQ.scroll();
 							} else {
 								setTimeout(function () {
 									HDQ.EL.page.quizzes.insertAdjacentHTML("beforeend", html);
-									jQuery("#hdq_loading ").fadeOut();
+									jQuery("#bitc_loading ").fadeOut();
 									HDQ.init.quizzes();
 									HDQ.scroll();
 								}, 500);
@@ -500,11 +500,11 @@ const HDQ = {
 						complete: function () {
 							clearInterval(loadTime);
 							HDQ.EL.page.addQuiz.disabled = false;
-							HDQ.EL.page.quizzes.classList.remove("hdq_quiz_loading");
+							HDQ.EL.page.quizzes.classList.remove("bitc_quiz_loading");
 							HDQ.EL.page.header.title.innerHTML = "Bitcoin Mastermind - Quizzes";
 						},
 						error: function () {
-							jQuery("#hdq_loading ").fadeOut();
+							jQuery("#bitc_loading ").fadeOut();
 							alert("there was an error retrieving your quiz");
 						},
 					});
@@ -512,10 +512,10 @@ const HDQ = {
 			}
 		},
 		setSortable: function () {
-			jQuery("#hdq_questions_list").sortable({
+			jQuery("#bitc_questions_list").sortable({
 				placeholder: "sorting_placeholder",
-				items: ".hdq_quiz_question",
-				handle: ".hdq_quiz_item_drag",
+				items: ".bitc_quiz_question",
+				handle: ".bitc_quiz_item_drag",
 				distance: 15, // sets the drag tolerance to something more acceptable
 				update: function (event, ui) {
 					HDQ.vars.orderChanged = true;
@@ -526,7 +526,7 @@ const HDQ = {
 	questions: {
 		load: async function (el) {
 			if (HDQ.EL.page.questions === null) {
-				HDQ.EL.page.questions = document.getElementById("hdq_questions_list");
+				HDQ.EL.page.questions = document.getElementById("bitc_questions_list");
 			}
 
 			let questionID = 0;
@@ -538,8 +538,8 @@ const HDQ = {
 				quizID = parseInt(this.getAttribute("data-quiz-id"));
 			}
 			let nonce = HDQ.EL.nonce.value;
-			jQuery("#hdq_message").fadeOut();
-			jQuery("#hdq_loading").fadeIn();
+			jQuery("#bitc_message").fadeOut();
+			jQuery("#bitc_loading").fadeIn();
 
 			HDQ.vars.loadTimer = 0;
 			let loadTime = setInterval(function () {
@@ -548,7 +548,7 @@ const HDQ = {
 			jQuery.ajax({
 				type: "POST",
 				data: {
-					action: "hdq_load_question",
+					action: "bitc_load_question",
 					question: questionID,
 					quiz: quizID,
 					nonce: nonce,
@@ -559,13 +559,13 @@ const HDQ = {
 					if (HDQ.vars.loadTimer > 1000) {
 						HDQ.EL.page.main.innerHTML = data;
 						HDQ.init.question();
-						jQuery("#hdq_loading ").fadeOut();
+						jQuery("#bitc_loading ").fadeOut();
 						HDQ.scroll();
 					} else {
 						setTimeout(function () {
 							HDQ.EL.page.main.innerHTML = data;
 							HDQ.init.question();
-							jQuery("#hdq_loading ").fadeOut();
+							jQuery("#bitc_loading ").fadeOut();
 							HDQ.scroll();
 						}, 500);
 					}
@@ -574,9 +574,9 @@ const HDQ = {
 					clearInterval(loadTime);
 				},
 				error: function () {
-					jQuery("#hdq_loading ").fadeOut();
+					jQuery("#bitc_loading ").fadeOut();
 					alert("there was an error retrieving your quiz");
-					HDQ.EL.page.questions.classList.remove("hdq_quiz_loading");
+					HDQ.EL.page.questions.classList.remove("bitc_quiz_loading");
 				},
 			});
 		},
@@ -586,8 +586,8 @@ const HDQ = {
 				return;
 			}
 			let nonce = HDQ.EL.nonce.value;
-			document.getElementById("content_tabs").classList.add("hdq_quiz_loading");
-			jQuery("#hdq_loading ").fadeIn();
+			document.getElementById("content_tabs").classList.add("bitc_quiz_loading");
+			jQuery("#bitc_loading ").fadeIn();
 			HDQ.vars.loadTimer = 0;
 			let loadTime = setInterval(function () {
 				HDQ.vars.loadTimer += 10;
@@ -595,7 +595,7 @@ const HDQ = {
 			jQuery.ajax({
 				type: "POST",
 				data: {
-					action: "hdq_delete_question",
+					action: "bitc_delete_question",
 					question: questionID,
 					quiz: quizID,
 					nonce: nonce,
@@ -616,9 +616,9 @@ const HDQ = {
 					clearInterval(loadTime);
 				},
 				error: function () {
-					jQuery("#hdq_loading ").fadeOut();
+					jQuery("#bitc_loading ").fadeOut();
 					alert("there was an error deleting this question");
-					document.getElementById("content_tabs").remove("hdq_quiz_loading");
+					document.getElementById("content_tabs").remove("bitc_quiz_loading");
 				},
 			});
 		},
@@ -629,15 +629,15 @@ const HDQ = {
 			jQuery.ajax({
 				type: "POST",
 				data: {
-					action: "hdq_save_question",
+					action: "bitc_save_question",
 					payload: payload,
-					nonce: document.getElementById("hdq_quiz_nonce").value,
+					nonce: document.getElementById("bitc_quiz_nonce").value,
 				},
 				url: ajaxurl,
 				success: function (data) {
 					let json = JSON.parse(data);
 					console.log(json);
-					document.getElementById("hdq_save_question").setAttribute("data-id", parseInt(json.id));
+					document.getElementById("bitc_save_question").setAttribute("data-id", parseInt(json.id));
 					document.getElementById("question_id").value = parseInt(json.id);
 				},
 				complete: function () {
@@ -662,14 +662,14 @@ const HDQ = {
 				let answers = document.getElementById("answers");
 				answers.style.display = "table";
 
-				let featured_images_wrap = document.getElementsByClassName("hdq_answer_as_image");
+				let featured_images_wrap = document.getElementsByClassName("bitc_answer_as_image");
 				for (let i = 0; i < featured_images_wrap.length; i++) {
-					featured_images_wrap[i].classList.add("hdq_hide");
+					featured_images_wrap[i].classList.add("bitc_hide");
 				}
 
-				let answer_selected = document.getElementsByClassName("hdq_answer_selected");
+				let answer_selected = document.getElementsByClassName("bitc_answer_selected");
 				for (let i = 0; i < answer_selected.length; i++) {
-					answer_selected[i].classList.remove("hdq_hide");
+					answer_selected[i].classList.remove("bitc_hide");
 				}
 				return;
 			},
@@ -681,9 +681,9 @@ const HDQ = {
 				let data = `<p>With this question type, the user will need to correctly select ALL of the correct answers in order to be awarded a point for this question</p>`;
 				question_type_tip.innerHTML = data;
 				
-				let featured_images_wrap = document.getElementsByClassName("hdq_answer_as_image");
+				let featured_images_wrap = document.getElementsByClassName("bitc_answer_as_image");
 				for (let i = 0; i < featured_images_wrap.length; i++) {
-					featured_images_wrap[i].classList.remove("hdq_hide");
+					featured_images_wrap[i].classList.remove("bitc_hide");
 				}
 				
 			},			
@@ -697,9 +697,9 @@ const HDQ = {
 				let data = `<p>Image Based Answers: quiz takers will be able to select the corresponding image and text. Please note that you still need to include a text based answer so that the quiz is accessible to those with screen readers (plus it's better for SEO).</p>`;
 				question_type_tip.innerHTML = data;
 
-				let featured_images_wrap = document.getElementsByClassName("hdq_answer_as_image");
+				let featured_images_wrap = document.getElementsByClassName("bitc_answer_as_image");
 				for (let i = 0; i < featured_images_wrap.length; i++) {
-					featured_images_wrap[i].classList.remove("hdq_hide");
+					featured_images_wrap[i].classList.remove("bitc_hide");
 				}
 			},
 			title: function () {
@@ -714,9 +714,9 @@ const HDQ = {
 				let data = `<p>Instead of multiple choice answers, the quiz taker will have to type their answers. The below answers are NOT cAsE sEnSiTive. Each answer will correspond with an accepted correct answer, so it's best to include common spelling mistakes.</p><p>NEW: You can add an asterisks <code>*</code> to the end of a word to allow all extentions of that word. Example: <code>hop*</code> would allow "hop, hope, hopping" etc to be accepted.</p>`;
 				question_type_tip.innerHTML = data;
 
-				let answer_selected = document.getElementsByClassName("hdq_answer_selected");
+				let answer_selected = document.getElementsByClassName("bitc_answer_selected");
 				for (let i = 0; i < answer_selected.length; i++) {
-					answer_selected[i].classList.add("hdq_hide");
+					answer_selected[i].classList.add("bitc_hide");
 				}
 			},
 		},
@@ -972,7 +972,7 @@ const HDQ = {
 		// only one radio can be active at a time
 		let v = el.value;
 		let checked = false;
-		let radios = el.parentNode.parentNode.parentNode.querySelectorAll(".hdq_radio_input");
+		let radios = el.parentNode.parentNode.parentNode.querySelectorAll(".bitc_radio_input");
 		for (let i = 0; i < radios.length; i++) {
 			if (radios[i] != el) {
 				radios[i].checked = false;
@@ -1024,9 +1024,9 @@ const HDQ = {
 			if (!required) {
 				return false;
 			} else {
-				let required = document.getElementsByClassName("hdq_input_required");
+				let required = document.getElementsByClassName("bitc_input_required");
 				while (required.length > 0) {
-					required[0].classList.remove("hdq_input_required");
+					required[0].classList.remove("bitc_input_required");
 				}
 
 				// turn into associative
@@ -1062,20 +1062,20 @@ const HDQ = {
 
 				if (r[i].required === "required" && (value.length <= 0 || value == "\n")) {
 					if (r[i].type == "editor") {
-						document.getElementById("wp-" + r[i].name + "-editor-container").classList.add("hdq_input_required");
+						document.getElementById("wp-" + r[i].name + "-editor-container").classList.add("bitc_input_required");
 					} else {
-						document.getElementById(r[i].name).classList.add("hdq_input_required");
+						document.getElementById(r[i].name).classList.add("bitc_input_required");
 					}
 					try {
-						document.querySelector(`#tab_nav .tab_nav_item[data-id="${r[i].tab}"]`).classList.add("hdq_input_required");
+						document.querySelector(`#tab_nav .tab_nav_item[data-id="${r[i].tab}"]`).classList.add("bitc_input_required");
 					} catch (e) {}
 
 					valid = false;
 				} else {
 					if (r[i].type == "editor") {
-						document.getElementById("wp-" + r[i].name + "-editor-container").classList.remove("hdq_input_required");
+						document.getElementById("wp-" + r[i].name + "-editor-container").classList.remove("bitc_input_required");
 					} else {
-						document.getElementById(r[i].name).classList.remove("hdq_input_required");
+						document.getElementById(r[i].name).classList.remove("bitc_input_required");
 					}
 				}
 			}
@@ -1085,7 +1085,7 @@ const HDQ = {
 				let tab = tabs[i].getAttribute("data-id");
 				let required = document.getElementById("tab_" + tab).querySelectorAll(".input_required");
 				if (required.length === 0) {
-					tabs[i].classList.remove("hdq_input_required");
+					tabs[i].classList.remove("bitc_input_required");
 				}
 			}
 
@@ -1124,7 +1124,7 @@ const HDQ = {
 			return input.getAttribute("data-value");
 		},
 		checkbox: async function (input, options) {
-			let items = input.getElementsByClassName("hdq_checkbox_input");
+			let items = input.getElementsByClassName("bitc_checkbox_input");
 			let value = [];
 			for (let i = 0; i < items.length; i++) {
 				if (items[i].checked === true) {
@@ -1178,7 +1178,7 @@ const HDQ = {
 		},
 		categories: async function (input, options) {
 			let categories = [];
-			let quizzes = input.querySelectorAll(".hdq_category_input");
+			let quizzes = input.querySelectorAll(".bitc_category_input");
 
 			for (let i = 0; i < quizzes.length; i++) {
 				let cat = quizzes[i];
@@ -1189,7 +1189,7 @@ const HDQ = {
 			return categories;
 		},
 		answers: async function (input, options) {
-			let answers = document.querySelectorAll("#answers .hdq_input_answer");
+			let answers = document.querySelectorAll("#answers .bitc_input_answer");
 			let v = [];
 			for (let i = 0; i < answers.length; i++) {
 				v[i] = {
@@ -1212,7 +1212,7 @@ const HDQ = {
 			return v;
 		},
 		correct: async function (input, options) {
-			let selected = document.querySelectorAll("#answers .hdq_radio_input");
+			let selected = document.querySelectorAll("#answers .bitc_radio_input");
 			let v = [];
 			for (let i = 0; i < selected.length; i++) {
 				if (selected[i].checked == true) {
@@ -1239,23 +1239,23 @@ const HDQ = {
 		jQuery.ajax({
 			type: "POST",
 			data: {
-				action: "hdq_remove_data_upgrade_notice",
+				action: "bitc_remove_data_upgrade_notice",
 			},
 			url: ajaxurl,
 		});
 	},
 };
 
-if (jQuery("body").hasClass("toplevel_page_hdq_quizzes")) {
+if (jQuery("body").hasClass("toplevel_page_bitc_quizzes")) {
 	HDQ.init.quizzes();
 }
 
-if (jQuery("body").hasClass("hd-quiz_page_hdq_options")) {
+if (jQuery("body").hasClass("hd-quiz_page_bitc_options")) {
 	HDQ.init.settings();
 }
 
 // Accordion
 // ______________________________________________
-jQuery(".hdq_accordion h3").on("click", function () {
+jQuery(".bitc_accordion h3").on("click", function () {
 	jQuery(this).next("div").toggle(600);
 });

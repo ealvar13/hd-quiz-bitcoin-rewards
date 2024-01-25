@@ -66,7 +66,7 @@ async function validateLightningAddress(event) {
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
     // Retrieve the quiz ID from the finish button's data-id attribute
-    const finishButton = document.querySelector(".hdq_finsh_button");
+    const finishButton = document.querySelector(".bitc_finsh_button");
     const quizID = finishButton ? finishButton.getAttribute('data-id') : null;
     console.log(`Quiz ID from validateLightningAddress: ${quizID}`);
 
@@ -86,7 +86,7 @@ async function validateLightningAddress(event) {
 
     // If it's a valid lightning address, make the AJAX call
     jQuery.ajax({
-        url: hdq_data.ajaxurl,
+        url: bitc_data.ajaxurl,
         type: 'POST',
         data: {
             action: 'store_lightning_address',
@@ -153,7 +153,7 @@ async function getBolt11(email, amount) {
 }
 
 function sendPaymentRequest(bolt11, quizID, lightningAddress) {
-    return fetch(hdq_data.ajaxurl, {
+    return fetch(bitc_data.ajaxurl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -185,13 +185,13 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress) {
 async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID) {
     try {
         console.log(`Sending AJAX request with Quiz ID: ${quizID}`);
-        const response = await fetch(hdq_data.ajaxurl, {
+        const response = await fetch(bitc_data.ajaxurl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: new URLSearchParams({
-                'action': 'hdq_save_quiz_results',
+                'action': 'bitc_save_quiz_results',
                 'lightning_address': lightningAddress,
                 'quiz_result': quizResult,
                 'satoshis_earned': satoshisEarned,
@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setupModal();
     const { openStepsModal } = setupStepsIndicatorModal(); // Removed closeStepsModal from destructuring
 
-    let finishButton = document.querySelector(".hdq_finsh_button");
+    let finishButton = document.querySelector(".bitc_finsh_button");
     if (finishButton) {
         finishButton.addEventListener("click", function() {
             openStepsModal(); // Open the modal when Finish button is clicked
@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let quizID = finishButton.getAttribute('data-id');
 
             setTimeout(function() {
-                let resultElement = document.querySelector('.hdq_result');
+                let resultElement = document.querySelector('.bitc_result');
                 if (resultElement) {
                     let scoreText = resultElement.textContent;
                     let correctAnswers = parseInt(scoreText.split(' / ')[0], 10);

@@ -1,27 +1,27 @@
 <?php
-function hdq_register_tools_csv_importer_page_callback()
+function bitc_register_tools_csv_importer_page_callback()
 {
 	if (!current_user_can('edit_others_pages')) {
 		die();
 	}
 
 	wp_enqueue_style(
-		'hdq_admin_style',
-		plugin_dir_url(__FILE__) . '../css/hdq_admin.css?v=' . HDQ_PLUGIN_VERSION
+		'bitc_admin_style',
+		plugin_dir_url(__FILE__) . '../css/bitc_admin.css?v=' . bitc_PLUGIN_VERSION
 	);
 
 	wp_enqueue_script(
-		'hdq_admin_script_data_update',
-		plugins_url('../js/hdq_csv_import.js', __FILE__),
+		'bitc_admin_script_data_update',
+		plugins_url('../js/bitc_csv_import.js', __FILE__),
 		array('jquery'),
-		HDQ_PLUGIN_VERSION,
+		bitc_PLUGIN_VERSION,
 		true
 	);
 
 
 	$line = 0;
-	if (isset($_FILES["hdq_csv_file_upload"])) {
-		$line = hdq_accept_csv();
+	if (isset($_FILES["bitc_csv_file_upload"])) {
+		$line = bitc_accept_csv();
 	} ?>
 
 	<div id="main" style="max-width: 800px; background: #f3f3f3; border: 1px solid #ddd; margin-top: 2rem">
@@ -37,7 +37,7 @@ function hdq_register_tools_csv_importer_page_callback()
 				Using this tool, you can upload a CSV to bulk import questions. Please note that due to the complexity of
 				creating and formatting a CSV file, I can only offer limited support for this feature. This tool will only set the basic values needed for a question. You will need to manually set Quiz settings, or extra Question options such as question type and images after the import has completed.
 			</p>
-			<div class="hdq_highlight">
+			<div class="bitc_highlight">
 				<h4 style="margin: 0">
 					Instructions
 				</h4>
@@ -59,27 +59,27 @@ function hdq_register_tools_csv_importer_page_callback()
 			<center>
 
 
-				<form action="<?php echo get_admin_url(null, "?page=hdq_tools_csv_importer"); ?>" method="post" enctype="multipart/form-data">
-					<?php wp_nonce_field('hdq_tools_nonce', 'hdq_tools_nonce'); ?>
-					<input type="hidden" style="display:none" name="hdq_line_number" id="hdq_line_number" value="<?php echo $line; ?>" />
+				<form action="<?php echo get_admin_url(null, "?page=bitc_tools_csv_importer"); ?>" method="post" enctype="multipart/form-data">
+					<?php wp_nonce_field('bitc_tools_nonce', 'bitc_tools_nonce'); ?>
+					<input type="hidden" style="display:none" name="bitc_line_number" id="bitc_line_number" value="<?php echo $line; ?>" />
 					<div style="display: grid; grid-template-columns: 1fr max-content; grid-gap: 2em; align-items: center; width: 100%; max-width: 600px">
 
 						<div>
-							<input style="width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1;" type="file" accept=".csv" name="hdq_csv_file_upload" id="hdq_csv_file_upload" required="">
-							<label class="hdq_button2" style="width: 100%; border-radius: 3px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; display: inline-block; overflow: hidden; padding: 0.625rem 1.25rem" for="hdq_csv_file_upload">
-								<span class="dashicons dashicons-upload"></span> <span class="hdq_file_label">Choose a
+							<input style="width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1;" type="file" accept=".csv" name="bitc_csv_file_upload" id="bitc_csv_file_upload" required="">
+							<label class="bitc_button2" style="width: 100%; border-radius: 3px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; display: inline-block; overflow: hidden; padding: 0.625rem 1.25rem" for="bitc_csv_file_upload">
+								<span class="dashicons dashicons-upload"></span> <span class="bitc_file_label">Choose a
 									file…</span>
 							</label>
 						</div>
-						<input type="submit" class="hdq_button" id="hdq_start_csv_upload" title="Begin Import" value="BEGIN IMPORT" />
+						<input type="submit" class="bitc_button" id="bitc_start_csv_upload" title="Begin Import" value="BEGIN IMPORT" />
 					</div>
 				</form>
 			</center>
 		</div>
-		<div id="hdq_message_logs">
+		<div id="bitc_message_logs">
 			<?php
 			if ($line === "uploading") {
-				echo '<div class = "hdq_log_item">Adding questions has begun. Please do not leave this page until complete.</div>';
+				echo '<div class = "bitc_log_item">Adding questions has begun. Please do not leave this page until complete.</div>';
 			} ?>
 		</div>
 	</div>
@@ -90,7 +90,7 @@ function hdq_register_tools_csv_importer_page_callback()
 
 
 
-function hdq_accept_csv()
+function bitc_accept_csv()
 {
 
 	/* Get a file's MIME type (used for importer)
@@ -114,56 +114,56 @@ function hdq_accept_csv()
 		die();
 	}
 
-	$hdq_nonce = sanitize_text_field($_POST['hdq_tools_nonce']);
-	if (!wp_verify_nonce($hdq_nonce, 'hdq_tools_nonce')) {
+	$bitc_nonce = sanitize_text_field($_POST['bitc_tools_nonce']);
+	if (!wp_verify_nonce($bitc_nonce, 'bitc_tools_nonce')) {
 		echo 'permission not granted';
 		die();
 	}
 
 	$csvFile = "";
 	$upload_dir = wp_upload_dir();
-	$hdq_upload_dir = $upload_dir['basedir'] . '/hd-quiz/';
-	wp_mkdir_p($hdq_upload_dir);
+	$bitc_upload_dir = $upload_dir['basedir'] . '/hd-quiz/';
+	wp_mkdir_p($bitc_upload_dir);
 
 	// check file type extention
-	$extention = strtolower(pathinfo($_FILES['hdq_csv_file_upload']['name'], PATHINFO_EXTENSION));
+	$extention = strtolower(pathinfo($_FILES['bitc_csv_file_upload']['name'], PATHINFO_EXTENSION));
 	if ($extention != "csv") {
 		echo "Uploaded file was not a CSV";
 		die();
 	}
 
 	// also check mimetype since extention can be spoofed
-	$mime = get_mime($_FILES['hdq_csv_file_upload']['tmp_name']);
+	$mime = get_mime($_FILES['bitc_csv_file_upload']['tmp_name']);
 
 	if ($mime === "text/plain" || $mime === "text/csv") {
-		if (!move_uploaded_file($_FILES['hdq_csv_file_upload']['tmp_name'], $hdq_upload_dir . sanitize_text_field($_FILES['hdq_csv_file_upload']['name']))) {
+		if (!move_uploaded_file($_FILES['bitc_csv_file_upload']['tmp_name'], $bitc_upload_dir . sanitize_text_field($_FILES['bitc_csv_file_upload']['name']))) {
 			echo 'Error uploading file - check destination is writeable.';
 			die();
 		}
-		$csvFile = $hdq_upload_dir . sanitize_file_name($_FILES['hdq_csv_file_upload']['name']);
+		$csvFile = $bitc_upload_dir . sanitize_file_name($_FILES['bitc_csv_file_upload']['name']);
 	} else {
 		echo "Uploaded file was not a CSV";
 		die();
 	}
 
 	if ($csvFile != "" && $csvFile != null) {
-		hdq_parse_csv_data($csvFile, $hdq_nonce);
+		bitc_parse_csv_data($csvFile, $bitc_nonce);
 	}
 	return "uploading";
 }
 
-function hdq_parse_csv_data($csvFile = "", $hdq_nonce = "")
+function bitc_parse_csv_data($csvFile = "", $bitc_nonce = "")
 {
 	if (!current_user_can('edit_others_pages')) {
 		echo 'permission not granted';
 		die();
 	}
 
-	if ($hdq_nonce == "") {
-		$hdq_nonce = sanitize_text_field($_POST['nonce']);
+	if ($bitc_nonce == "") {
+		$bitc_nonce = sanitize_text_field($_POST['nonce']);
 	}
 
-	if (!wp_verify_nonce($hdq_nonce, 'hdq_tools_nonce')) {
+	if (!wp_verify_nonce($bitc_nonce, 'bitc_tools_nonce')) {
 		echo 'permission not granted';
 		die();
 	}
@@ -281,4 +281,4 @@ function hdq_parse_csv_data($csvFile = "", $hdq_nonce = "")
 <?php
 	}
 }
-add_action('wp_ajax_hdq_parse_csv_data', 'hdq_parse_csv_data');
+add_action('wp_ajax_bitc_parse_csv_data', 'bitc_parse_csv_data');

@@ -5,15 +5,15 @@ if (!current_user_can('edit_others_pages')) {
 }
 
 wp_enqueue_style(
-    'hdq_admin_style',
-    plugin_dir_url(__FILE__) . 'css/hdq_admin.css?v=' . HDQ_PLUGIN_VERSION
+    'bitc_admin_style',
+    plugin_dir_url(__FILE__) . 'css/bitc_admin.css?v=' . bitc_PLUGIN_VERSION
 );
 
 wp_enqueue_script(
-    'hdq_admin_script',
-    plugins_url('/js/hdq_admin.js?v=' . HDQ_PLUGIN_VERSION, __FILE__),
+    'bitc_admin_script',
+    plugins_url('/js/bitc_admin.js?v=' . bitc_PLUGIN_VERSION, __FILE__),
     array('jquery', 'jquery-ui-draggable'),
-    HDQ_PLUGIN_VERSION,
+    bitc_PLUGIN_VERSION,
     true
 );
 ?>
@@ -33,50 +33,50 @@ wp_enqueue_script(
     <hr style="margin-top:2rem" />
 
 
-    <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
+    <?php wp_nonce_field('bitc_about_options_nonce', 'bitc_about_options_nonce'); ?>
 
     <div style="display: grid; grid-template-columns: 1fr max-content; align-items: center;">
         <h2>
             Settings
         </h2>
         <div>
-            <a href="https://hdplugins.com/learn/hd-quiz/hd-quiz-documentation/?utm_source=hd-quiz" title="Documentation" class="hdq_button2">Documentation</a>
-            <div role="button" title="save HDQ settings" class="hdq_button" id="hdq_save_settings">SAVE</div>
+            <a href="https://hdplugins.com/learn/hd-quiz/hd-quiz-documentation/?utm_source=hd-quiz" title="Documentation" class="bitc_button2">Documentation</a>
+            <div role="button" title="save HDQ settings" class="bitc_button" id="bitc_save_settings">SAVE</div>
         </div>
     </div>
 
 
     <?php
-    $fields = hdq_get_settings();
+    $fields = bitc_get_settings();
     if (!isset($quizID)) {
         $quizID = "";
     }
     ?>
 
-    <div id="hdq_settings_page" class="content" style="display: block">
+    <div id="bitc_settings_page" class="content" style="display: block">
         <div id="content_tabs">
             <div id="tab_nav_wrapper">
-                <div id="hdq_logo">
-                    <span class="hdq_logo_tooltip"><img src="<?php echo plugins_url('/images/hd-logo.png', __FILE__); ?>" alt="Harmonic Design logo">
-                        <span class="hdq_logo_tooltip_content">
+                <div id="bitc_logo">
+                    <span class="bitc_logo_tooltip"><img src="<?php echo plugins_url('/images/hd-logo.png', __FILE__); ?>" alt="Harmonic Design logo">
+                        <span class="bitc_logo_tooltip_content">
                             <span><strong>Bitcoin Mastermind</strong> is developed by Harmonic Design. Check out the addons page to see how you can extend Bitcoin Mastermind even further.</span>
                         </span>
                     </span>
                 </div>
                 <div id="tab_nav">
-                    <?php hdq_print_settings_tabs(); ?>
+                    <?php bitc_print_settings_tabs(); ?>
                 </div>
             </div>
             <div id="tab_content">
                 <input type="hidden" class="hderp_input" id="quiz_id" style="display:none" data-required="true" data-type="integer" value="<?php echo $quizID; ?>" />
-                <?php hdq_print_settings_tab_content($fields); ?>
+                <?php bitc_print_settings_tab_content($fields); ?>
             </div>
         </div>
     </div>
 
 
 
-    <div class="hdq_highlight" id="hd_patreon">
+    <div class="bitc_highlight" id="hd_patreon">
         <div id="hd_patreon_icon">
             <img src="<?php echo plugins_url('/images/hd_patreon.png', __FILE__); ?>" alt="Donate">
         </div>

@@ -12,18 +12,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // TODO: Get this working. Right now styling is inline
 // Enqueue the front-end stylesheet
-function hdq_enqueue_lightning_la_style() {
+function bitc_enqueue_lightning_la_style() {
     wp_enqueue_style(
-        'hdq_front_end_style', // Unique handle for your front-end style
-        plugin_dir_url(dirname(__FILE__)) . 'includes/css/hdq_a_light_la_style.css',
+        'bitc_front_end_style', // Unique handle for your front-end style
+        plugin_dir_url(dirname(__FILE__)) . 'includes/css/bitc_a_light_la_style.css',
         array(),
-        HDQ_A_LIGHT_PLUGIN_VERSION
+        bitc_A_LIGHT_PLUGIN_VERSION
     );
 }
-add_action('wp_enqueue_scripts', 'hdq_enqueue_lightning_la_style');
+add_action('wp_enqueue_scripts', 'bitc_enqueue_lightning_la_style');
 
 // Enqueue the JavaScript file
-function hdq_enqueue_lightning_script() {
+function bitc_enqueue_lightning_script() {
     global $post; // Ensure you have access to the global post object
     $quiz_id = $post->ID; // This assumes that you are on a single quiz post. Adjust if necessary.
     
@@ -32,21 +32,21 @@ function hdq_enqueue_lightning_script() {
     $sats_value = get_option($sats_field, 0); // Default to 0 if not set
 
     // Get the BTCPay Server URL and API Key
-    $btcpay_url = get_option('hdq_btcpay_url', '');
-    $btcpay_api_key = get_option('hdq_btcpay_api_key', '');
+    $btcpay_url = get_option('bitc_btcpay_url', '');
+    $btcpay_api_key = get_option('bitc_btcpay_api_key', '');
 
-    $script_path = plugin_dir_url(__FILE__) . 'js/hdq_a_light_script.js';
+    $script_path = plugin_dir_url(__FILE__) . 'js/bitc_a_light_script.js';
     wp_enqueue_script('hdq-lightning-script', $script_path, array('jquery'), '1.0.0', true);
 
     // Localize the script with your data including the sats value and the BTCPay Server URL and API Key
-    wp_localize_script('hdq-lightning-script', 'hdq_data', array(
+    wp_localize_script('hdq-lightning-script', 'bitc_data', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
         'satsPerAnswer' => $sats_value,
         'btcpayUrl' => $btcpay_url,
         'btcpayApiKey' => $btcpay_api_key,
     ));
 }
-add_action('wp_enqueue_scripts', 'hdq_enqueue_lightning_script');
+add_action('wp_enqueue_scripts', 'bitc_enqueue_lightning_script');
 
 // Fetch the total satoshis sent for the current quiz
 function get_total_sent_for_quiz($quiz_id) {
@@ -132,17 +132,17 @@ function la_input_lightning_address_on_quiz_start($quiz_id) {
     la_modal_html($quiz_id);
     
     if (should_enable_rewards($quiz_id, '')) {
-        echo '<div class="hdq_row">';
-        echo '<label for="lightning_address" class="hdq_input" style="font-size: 150%;">Enter your Lightning Address: </label>';
-        echo '<input type="text" id="lightning_address" name="lightning_address" class="hdq_lightning_input" placeholder="bolt@lightning.com" style="padding: 0.8rem; font-size: 1.2em; width: 100%; color: #2d2d2d; border-bottom: 1px dashed #aaa; line-height: inherit; height: auto; cursor: initial; margin-bottom: 15px;">';
-        echo '<input type="submit" class="hdq_button" id="hdq_save_settings" value="SAVE" style="margin-left:10px;" onclick="validateLightningAddress(event);">';
+        echo '<div class="bitc_row">';
+        echo '<label for="lightning_address" class="bitc_input" style="font-size: 150%;">Enter your Lightning Address: </label>';
+        echo '<input type="text" id="lightning_address" name="lightning_address" class="bitc_lightning_input" placeholder="bolt@lightning.com" style="padding: 0.8rem; font-size: 1.2em; width: 100%; color: #2d2d2d; border-bottom: 1px dashed #aaa; line-height: inherit; height: auto; cursor: initial; margin-bottom: 15px;">';
+        echo '<input type="submit" class="bitc_button" id="bitc_save_settings" value="SAVE" style="margin-left:10px;" onclick="validateLightningAddress(event);">';
         echo '</div>';
     } else {
-        echo '<div class="hdq_row">Rewards are not currently available for this quiz. You can still take the quiz if you want though ; )</div>';
+        echo '<div class="bitc_row">Rewards are not currently available for this quiz. You can still take the quiz if you want though ; )</div>';
     }
 }
 
-add_action('hdq_before', 'la_input_lightning_address_on_quiz_start', 10, 1);
+add_action('bitc_before', 'la_input_lightning_address_on_quiz_start', 10, 1);
 
 
 
@@ -225,10 +225,10 @@ function la_add_steps_indicator_modal($quiz_id) {
     la_steps_indicator_modal();
 }
 
-// Add the above function to the 'hdq_after' hook
-add_action('hdq_after', 'la_add_steps_indicator_modal', 10, 1);
+// Add the above function to the 'bitc_after' hook
+add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
 
-function hdq_pay_bolt11_invoice() {
+function bitc_pay_bolt11_invoice() {
     global $wpdb;
 
     error_log("POST Data: " . print_r($_POST, true)); // Debug log to check all POST data
@@ -250,9 +250,9 @@ function hdq_pay_bolt11_invoice() {
 
     $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
     $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
-    $btcpayServerUrl = get_option('hdq_btcpay_url', '');
-    $apiKey = get_option('hdq_btcpay_api_key', '');
-    $storeId = get_option('hdq_btcpay_store_id', '');
+    $btcpayServerUrl = get_option('bitc_btcpay_url', '');
+    $apiKey = get_option('bitc_btcpay_api_key', '');
+    $storeId = get_option('bitc_btcpay_store_id', '');
     $cryptoCode = "BTC"; // Hardcoded as BTC
     $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
 
@@ -295,10 +295,10 @@ function hdq_pay_bolt11_invoice() {
 }
 
 // Register the new AJAX action
-add_action('wp_ajax_pay_bolt11_invoice', 'hdq_pay_bolt11_invoice');        // If the user is logged in
-add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'hdq_pay_bolt11_invoice'); // If the user is not logged in
+add_action('wp_ajax_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice');        // If the user is logged in
+add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice'); // If the user is not logged in
 
-function hdq_save_quiz_results() {
+function bitc_save_quiz_results() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
 
@@ -346,5 +346,5 @@ function hdq_save_quiz_results() {
     wp_die();
 }
 
-add_action('wp_ajax_hdq_save_quiz_results', 'hdq_save_quiz_results');
-add_action('wp_ajax_nopriv_hdq_save_quiz_results', 'hdq_save_quiz_results');
+add_action('wp_ajax_bitc_save_quiz_results', 'bitc_save_quiz_results');
+add_action('wp_ajax_nopriv_bitc_save_quiz_results', 'bitc_save_quiz_results');

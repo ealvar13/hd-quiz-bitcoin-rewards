@@ -1,5 +1,5 @@
 <?php
-function hdq_register_tools__data_upgrade_page_callback()
+function bitc_register_tools__data_upgrade_page_callback()
 {
     if (!current_user_can('edit_others_pages')) {
         die();
@@ -7,27 +7,27 @@ function hdq_register_tools__data_upgrade_page_callback()
 
 
     wp_enqueue_style(
-        'hdq_admin_style',
-        plugin_dir_url(__FILE__) . '../css/hdq_admin.css?v=' . HDQ_PLUGIN_VERSION
+        'bitc_admin_style',
+        plugin_dir_url(__FILE__) . '../css/bitc_admin.css?v=' . bitc_PLUGIN_VERSION
     );
 
     wp_enqueue_script(
-        'hdq_admin_script',
-        plugins_url('../js/hdq_admin.js?v=' . HDQ_PLUGIN_VERSION, __FILE__),
+        'bitc_admin_script',
+        plugins_url('../js/bitc_admin.js?v=' . bitc_PLUGIN_VERSION, __FILE__),
         array('jquery', 'jquery-ui-draggable'),
-        HDQ_PLUGIN_VERSION,
+        bitc_PLUGIN_VERSION,
         true
     );
 
     wp_enqueue_script(
-        'hdq_admin_script_data_update',
-        plugins_url('../js/hdq_data_update.js?v=' . HDQ_PLUGIN_VERSION, __FILE__),
+        'bitc_admin_script_data_update',
+        plugins_url('../js/bitc_data_update.js?v=' . bitc_PLUGIN_VERSION, __FILE__),
         array('jquery'),
-        HDQ_PLUGIN_VERSION,
+        bitc_PLUGIN_VERSION,
         true
     );
 
-    wp_nonce_field('hdq_tools_nonce', 'hdq_tools_nonce');
+    wp_nonce_field('bitc_tools_nonce', 'bitc_tools_nonce');
 
     $questions = wp_count_posts('post_type_questionna');
     $questions = $questions->publish;
@@ -45,15 +45,15 @@ function hdq_register_tools__data_upgrade_page_callback()
 			
 		</p>
 
-        <div class="hdq_highlight">
+        <div class="bitc_highlight">
             <p>
 
                 <strong>NOTE:</strong> If for any reason, the data migration is not working, <strong>do no
                     worry</strong>. None of your old data has been deleted or modified in any way. In fact, you can
                 easily replace this version of Bitcoin Mastermind by downloading the <a href="https://wordpress.org/plugins/hd-quiz/advanced/" target="_blank">previous version of Bitcoin Mastermind
-                    here</a> <span class="hdq_tooltip">
+                    here</a> <span class="bitc_tooltip">
                     ?
-                    <span class="hdq_tooltip_content">
+                    <span class="bitc_tooltip_content">
                         <span>The download link is at the very bottom of the page</span>
                     </span>
                 </span>.
@@ -70,12 +70,12 @@ function hdq_register_tools__data_upgrade_page_callback()
             Thank you for your patience and understanding. Needing to change data like this is hopefully a once in a lifetime event for Bitcoin Mastermind. This new method opens up a lot of doors to increase speed, security, and feature set of Bitcoin Mastermind.
         </p>
         <center>
-            <div data-quizzes="<?php echo $quizzes; ?>" data-questions="<?php echo $questions; ?>" id="hdq_tool_update_data_start" class="hdq_button" role="button" title="Start update">
+            <div data-quizzes="<?php echo $quizzes; ?>" data-questions="<?php echo $questions; ?>" id="bitc_tool_update_data_start" class="bitc_button" role="button" title="Start update">
                 BEGIN UPDATE
             </div>
         </center>
 
-        <div id="hdq_message_logs"></div>
+        <div id="bitc_message_logs"></div>
 
 
     </div>
@@ -83,7 +83,7 @@ function hdq_register_tools__data_upgrade_page_callback()
 <?php
 }
 
-function hdq_update_legacy_data()
+function bitc_update_legacy_data()
 {
     // get total number of questions
     $total = wp_count_posts('post_type_questionna');
@@ -92,7 +92,7 @@ function hdq_update_legacy_data()
     // else, offer manual update function with ajax
 
     // update quiz meta data
-    function hdq_update_legacy_quizzes()
+    function bitc_update_legacy_quizzes()
     {
         $taxonomy = 'quiz';
         $term_args = array(
@@ -171,7 +171,7 @@ function hdq_update_legacy_data()
     }
 
     // update quiz meta data
-    function hdq_update_legacy_questions()
+    function bitc_update_legacy_questions()
     {
         // WP_Query arguments
         $args = array(
@@ -196,121 +196,121 @@ function hdq_update_legacy_data()
                     'sub' => array(),
                 );
 
-                $hdq_id = get_the_ID();
+                $bitc_id = get_the_ID();
 
                 // extra check to make sure we are not overwriting good data
                 $existing = get_post_meta($questionID, "question_data", true);
                 if (!is_array($existing)) {
 
 
-                    $hdq_selected = array(intval(get_post_meta($hdq_id, 'hdQue_post_class2', true)));
-                    $hdq_image_as_answer = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class23', true));
-                    $hdq_question_as_title = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class24', true));
-                    $hdq_paginate = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class25', true));
-                    $hdq_tooltip = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class12', true));
-                    $hdq_after_answer = wp_kses_post(get_post_meta($hdq_id, 'hdQue_post_class26', true));
-                    $hdq_featured_image_id = get_post_thumbnail_id($hdq_id);
+                    $bitc_selected = array(intval(get_post_meta($bitc_id, 'hdQue_post_class2', true)));
+                    $bitc_image_as_answer = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class23', true));
+                    $bitc_question_as_title = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class24', true));
+                    $bitc_paginate = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class25', true));
+                    $bitc_tooltip = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class12', true));
+                    $bitc_after_answer = wp_kses_post(get_post_meta($bitc_id, 'hdQue_post_class26', true));
+                    $bitc_featured_image_id = get_post_thumbnail_id($bitc_id);
 
-                    $hdq_1_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class1', true), $allowed_html);
+                    $bitc_1_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class1', true), $allowed_html);
 
-                    $hdq_1_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class13', true));
-                    $hdq_2_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class3', true), $allowed_html);
-                    $hdq_2_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class14', true));
-                    $hdq_3_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class4', true), $allowed_html);
-                    $hdq_3_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class15', true));
-                    $hdq_4_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class5', true), $allowed_html);
-                    $hdq_4_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class16', true));
-                    $hdq_5_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class6', true), $allowed_html);
-                    $hdq_5_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class17', true));
-                    $hdq_6_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class7', true), $allowed_html);
-                    $hdq_6_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class18', true));
-                    $hdq_7_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class8', true), $allowed_html);
-                    $hdq_7_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class19', true));
-                    $hdq_8_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class9', true), $allowed_html);
-                    $hdq_8_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class20', true));
-                    $hdq_9_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class10', true), $allowed_html);
-                    $hdq_9_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class21', true));
-                    $hdq_10_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class11', true), $allowed_html);
-                    $hdq_10_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class22', true));
+                    $bitc_1_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class13', true));
+                    $bitc_2_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class3', true), $allowed_html);
+                    $bitc_2_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class14', true));
+                    $bitc_3_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class4', true), $allowed_html);
+                    $bitc_3_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class15', true));
+                    $bitc_4_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class5', true), $allowed_html);
+                    $bitc_4_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class16', true));
+                    $bitc_5_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class6', true), $allowed_html);
+                    $bitc_5_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class17', true));
+                    $bitc_6_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class7', true), $allowed_html);
+                    $bitc_6_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class18', true));
+                    $bitc_7_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class8', true), $allowed_html);
+                    $bitc_7_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class19', true));
+                    $bitc_8_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class9', true), $allowed_html);
+                    $bitc_8_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class20', true));
+                    $bitc_9_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class10', true), $allowed_html);
+                    $bitc_9_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class21', true));
+                    $bitc_10_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class11', true), $allowed_html);
+                    $bitc_10_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class22', true));
 
-                    if ($hdq_1_image != "" && !is_numeric($hdq_1_image)) {
-                        $hdq_1_image =  hdq_get_attachment_id($hdq_1_image);
+                    if ($bitc_1_image != "" && !is_numeric($bitc_1_image)) {
+                        $bitc_1_image =  bitc_get_attachment_id($bitc_1_image);
                     }
-                    if ($hdq_2_image != "" && !is_numeric($hdq_2_image)) {
-                        $hdq_2_image =  hdq_get_attachment_id($hdq_2_image);
+                    if ($bitc_2_image != "" && !is_numeric($bitc_2_image)) {
+                        $bitc_2_image =  bitc_get_attachment_id($bitc_2_image);
                     }
-                    if ($hdq_3_image != "" && !is_numeric($hdq_3_image)) {
-                        $hdq_3_image =  hdq_get_attachment_id($hdq_3_image);
+                    if ($bitc_3_image != "" && !is_numeric($bitc_3_image)) {
+                        $bitc_3_image =  bitc_get_attachment_id($bitc_3_image);
                     }
-                    if ($hdq_4_image != "" && !is_numeric($hdq_4_image)) {
-                        $hdq_4_image =  hdq_get_attachment_id($hdq_4_image);
+                    if ($bitc_4_image != "" && !is_numeric($bitc_4_image)) {
+                        $bitc_4_image =  bitc_get_attachment_id($bitc_4_image);
                     }
-                    if ($hdq_5_image != "" && !is_numeric($hdq_5_image)) {
-                        $hdq_5_image =  hdq_get_attachment_id($hdq_5_image);
+                    if ($bitc_5_image != "" && !is_numeric($bitc_5_image)) {
+                        $bitc_5_image =  bitc_get_attachment_id($bitc_5_image);
                     }
-                    if ($hdq_6_image != "" && !is_numeric($hdq_6_image)) {
-                        $hdq_6_image =  hdq_get_attachment_id($hdq_6_image);
+                    if ($bitc_6_image != "" && !is_numeric($bitc_6_image)) {
+                        $bitc_6_image =  bitc_get_attachment_id($bitc_6_image);
                     }
-                    if ($hdq_7_image != "" && !is_numeric($hdq_7_image)) {
-                        $hdq_7_image =  hdq_get_attachment_id($hdq_7_image);
+                    if ($bitc_7_image != "" && !is_numeric($bitc_7_image)) {
+                        $bitc_7_image =  bitc_get_attachment_id($bitc_7_image);
                     }
-                    if ($hdq_8_image != "" && !is_numeric($hdq_8_image)) {
-                        $hdq_8_image =  hdq_get_attachment_id($hdq_8_image);
+                    if ($bitc_8_image != "" && !is_numeric($bitc_8_image)) {
+                        $bitc_8_image =  bitc_get_attachment_id($bitc_8_image);
                     }
-                    if ($hdq_9_image != "" && !is_numeric($hdq_9_image)) {
-                        $hdq_9_image =  hdq_get_attachment_id($hdq_9_image);
+                    if ($bitc_9_image != "" && !is_numeric($bitc_9_image)) {
+                        $bitc_9_image =  bitc_get_attachment_id($bitc_9_image);
                     }
-                    if ($hdq_10_image != "" && !is_numeric($hdq_10_image)) {
-                        $hdq_10_image =  hdq_get_attachment_id($hdq_10_image);
+                    if ($bitc_10_image != "" && !is_numeric($bitc_10_image)) {
+                        $bitc_10_image =  bitc_get_attachment_id($bitc_10_image);
                     }
 
 
                     $q = array();
-                    $q["title"]["value"] = get_the_title($hdq_id);
+                    $q["title"]["value"] = get_the_title($bitc_id);
                     $q["title"]["type"] = "title";
 
-                    $q["question_id"]["value"] = $hdq_id;
+                    $q["question_id"]["value"] = $bitc_id;
                     $q["question_id"]["type"] = "integer";
 
-                    $q["selected"]["value"] = $hdq_selected;
+                    $q["selected"]["value"] = $bitc_selected;
                     $q["selected"]["type"] = "checkbox";
 
                     $question_type = "multiple_choice_text";
-                    if ($hdq_image_as_answer === "yes") {
+                    if ($bitc_image_as_answer === "yes") {
                         $question_type = "multiple_choice_image";
                     }
-                    if ($hdq_question_as_title === "yes") {
+                    if ($bitc_question_as_title === "yes") {
                         $question_type = "title";
                     }
 
                     $q["question_type"]["value"] = $question_type;
                     $q["question_type"]["type"] = "select";
 
-                    $q["paginate"]["value"] = array($hdq_paginate);
+                    $q["paginate"]["value"] = array($bitc_paginate);
                     $q["paginate"]["type"] = "checkbox";
-                    $q["tooltip"]["value"] = $hdq_tooltip;
+                    $q["tooltip"]["value"] = $bitc_tooltip;
                     $q["tooltip"]["type"] = "text";
-                    $q["extra_text"]["value"] = $hdq_after_answer;
+                    $q["extra_text"]["value"] = $bitc_after_answer;
                     $q["extra_text"]["type"] = "editor";
-                    $q["featured_image"]["value"] = $hdq_featured_image_id;
+                    $q["featured_image"]["value"] = $bitc_featured_image_id;
                     $q["featured_image"]["type"] = "image";
 
                     $answers = array();
-                    array_push($answers, array("answer" => $hdq_1_answer, "image" => $hdq_1_image));
-                    array_push($answers, array("answer" => $hdq_2_answer, "image" => $hdq_2_image));
-                    array_push($answers, array("answer" => $hdq_3_answer, "image" => $hdq_3_image));
-                    array_push($answers, array("answer" => $hdq_4_answer, "image" => $hdq_4_image));
-                    array_push($answers, array("answer" => $hdq_5_answer, "image" => $hdq_5_image));
-                    array_push($answers, array("answer" => $hdq_6_answer, "image" => $hdq_6_image));
-                    array_push($answers, array("answer" => $hdq_7_answer, "image" => $hdq_7_image));
-                    array_push($answers, array("answer" => $hdq_8_answer, "image" => $hdq_8_image));
-                    array_push($answers, array("answer" => $hdq_9_answer, "image" => $hdq_9_image));
-                    array_push($answers, array("answer" => $hdq_10_answer, "image" => $hdq_10_image));
+                    array_push($answers, array("answer" => $bitc_1_answer, "image" => $bitc_1_image));
+                    array_push($answers, array("answer" => $bitc_2_answer, "image" => $bitc_2_image));
+                    array_push($answers, array("answer" => $bitc_3_answer, "image" => $bitc_3_image));
+                    array_push($answers, array("answer" => $bitc_4_answer, "image" => $bitc_4_image));
+                    array_push($answers, array("answer" => $bitc_5_answer, "image" => $bitc_5_image));
+                    array_push($answers, array("answer" => $bitc_6_answer, "image" => $bitc_6_image));
+                    array_push($answers, array("answer" => $bitc_7_answer, "image" => $bitc_7_image));
+                    array_push($answers, array("answer" => $bitc_8_answer, "image" => $bitc_8_image));
+                    array_push($answers, array("answer" => $bitc_9_answer, "image" => $bitc_9_image));
+                    array_push($answers, array("answer" => $bitc_10_answer, "image" => $bitc_10_image));
 
                     $q["answers"]["type"] = "answers";
                     $q["answers"]["value"] = $answers;
 
-                    update_post_meta($hdq_id, "question_data", $q);
+                    update_post_meta($bitc_id, "question_data", $q);
                 }
             }
         }
@@ -319,37 +319,37 @@ function hdq_update_legacy_data()
     }
 
     if ($total <= 60) {
-        hdq_update_legacy_quizzes();
-        hdq_update_legacy_questions();
+        bitc_update_legacy_quizzes();
+        bitc_update_legacy_questions();
     } else {
         // show alert to get a user to use the ajax tool
-        update_option("hdq_data_upgrade", "required");
+        update_option("bitc_data_upgrade", "required");
     }
 }
 
 
-function hdq_show_need_to_update_data_message()
+function bitc_show_need_to_update_data_message()
 {
-    $o = sanitize_text_field(get_option("hdq_data_upgrade"));
+    $o = sanitize_text_field(get_option("bitc_data_upgrade"));
     if ($o != "required") {
         return;
     } ?>
     <div class="notice notice-error" style="background: darkred; color:#fff;">
-        <p style="text-align:center;"><strong>Bitcoin Mastermind</strong>. You need to update your quizzes and questions to be compatible with this version. <a href="<?php echo get_admin_url(null, "?page=hdq_tools_data_upgrade"); ?>" class="button" style="font-weight: bold">BEGIN UPDATE</a></p>
+        <p style="text-align:center;"><strong>Bitcoin Mastermind</strong>. You need to update your quizzes and questions to be compatible with this version. <a href="<?php echo get_admin_url(null, "?page=bitc_tools_data_upgrade"); ?>" class="button" style="font-weight: bold">BEGIN UPDATE</a></p>
     </div>
 <?php
 }
-add_action('admin_notices', 'hdq_show_need_to_update_data_message');
+add_action('admin_notices', 'bitc_show_need_to_update_data_message');
 
-function hdq_tool_upgrade_quiz_data()
+function bitc_tool_upgrade_quiz_data()
 {
     if (!current_user_can('edit_others_pages')) {
         echo 'access denied';
         die();
     }
 
-    $hdq_nonce = sanitize_text_field($_POST['nonce']);
-    if (!wp_verify_nonce($hdq_nonce, 'hdq_tools_nonce')) {
+    $bitc_nonce = sanitize_text_field($_POST['nonce']);
+    if (!wp_verify_nonce($bitc_nonce, 'bitc_tools_nonce')) {
         echo 'access denied';
         die();
     }
@@ -387,10 +387,10 @@ function hdq_tool_upgrade_quiz_data()
                 $q["quiz_pass_percentage"]["value"] = intval($term_meta["passPercent"]);
                 $q["quiz_pass_text"]["name"] = "quiz_pass_text";
                 $q["quiz_pass_text"]["type"] = "editor";
-                $q["quiz_pass_text"]["value"] = hdq_encodeURIComponent(wp_kses_post($term_meta["passText"]));
+                $q["quiz_pass_text"]["value"] = bitc_encodeURIComponent(wp_kses_post($term_meta["passText"]));
                 $q["quiz_fail_text"]["name"] = "quiz_fail_text";
                 $q["quiz_fail_text"]["type"] = "editor";
-                $q["quiz_fail_text"]["value"] = hdq_encodeURIComponent(wp_kses_post($term_meta["failText"]));
+                $q["quiz_fail_text"]["value"] = bitc_encodeURIComponent(wp_kses_post($term_meta["failText"]));
                 $q["share_results"]["name"] = "share_results";
                 $q["share_results"]["type"] = "checkbox";
                 $q["share_results"]["value"] = array(sanitize_text_field($term_meta["shareResults"]));
@@ -441,18 +441,18 @@ function hdq_tool_upgrade_quiz_data()
 
     die();
 }
-add_action('wp_ajax_hdq_tool_upgrade_quiz_data', 'hdq_tool_upgrade_quiz_data');
+add_action('wp_ajax_bitc_tool_upgrade_quiz_data', 'bitc_tool_upgrade_quiz_data');
 
 
-function hdq_tool_upgrade_question_data()
+function bitc_tool_upgrade_question_data()
 {
     if (!current_user_can('edit_others_pages')) {
         echo 'permission not granted';
         die();
     }
 
-    $hdq_nonce = sanitize_text_field($_POST['nonce']);
-    if (!wp_verify_nonce($hdq_nonce, 'hdq_tools_nonce')) {
+    $bitc_nonce = sanitize_text_field($_POST['nonce']);
+    if (!wp_verify_nonce($bitc_nonce, 'bitc_tools_nonce')) {
         echo 'permission not granted';
         die();
     }
@@ -489,119 +489,119 @@ function hdq_tool_upgrade_question_data()
                 'sub' => array(),
             );
 
-            $hdq_id = get_the_ID();
+            $bitc_id = get_the_ID();
 
-            $new_type = get_hdq_question($hdq_id);
+            $new_type = get_bitc_question($bitc_id);
 
             if (isset($new_type["title"]["value"]) && $new_type["title"]["value"] != "") {
                 // already updated this question
             } else {
-                $hdq_selected = array(intval(get_post_meta($hdq_id, 'hdQue_post_class2', true)));
-                $hdq_image_as_answer = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class23', true));
-                $hdq_question_as_title = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class24', true));
-                $hdq_paginate = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class25', true));
-                $hdq_tooltip = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class12', true));
-                $hdq_after_answer = wp_kses_post(get_post_meta($hdq_id, 'hdQue_post_class26', true));
-                $hdq_featured_image_id = get_post_thumbnail_id($hdq_id);
+                $bitc_selected = array(intval(get_post_meta($bitc_id, 'hdQue_post_class2', true)));
+                $bitc_image_as_answer = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class23', true));
+                $bitc_question_as_title = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class24', true));
+                $bitc_paginate = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class25', true));
+                $bitc_tooltip = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class12', true));
+                $bitc_after_answer = wp_kses_post(get_post_meta($bitc_id, 'hdQue_post_class26', true));
+                $bitc_featured_image_id = get_post_thumbnail_id($bitc_id);
 
-                $hdq_1_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class1', true), $allowed_html);
-                $hdq_1_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class13', true));
-                $hdq_2_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class3', true), $allowed_html);
-                $hdq_2_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class14', true));
-                $hdq_3_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class4', true), $allowed_html);
-                $hdq_3_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class15', true));
-                $hdq_4_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class5', true), $allowed_html);
-                $hdq_4_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class16', true));
-                $hdq_5_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class6', true), $allowed_html);
-                $hdq_5_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class17', true));
-                $hdq_6_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class7', true), $allowed_html);
-                $hdq_6_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class18', true));
-                $hdq_7_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class8', true), $allowed_html);
-                $hdq_7_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class19', true));
-                $hdq_8_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class9', true), $allowed_html);
-                $hdq_8_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class20', true));
-                $hdq_9_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class10', true), $allowed_html);
-                $hdq_9_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class21', true));
-                $hdq_10_answer = wp_kses(get_post_meta($hdq_id, 'hdQue_post_class11', true), $allowed_html);
-                $hdq_10_image = sanitize_text_field(get_post_meta($hdq_id, 'hdQue_post_class22', true));
+                $bitc_1_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class1', true), $allowed_html);
+                $bitc_1_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class13', true));
+                $bitc_2_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class3', true), $allowed_html);
+                $bitc_2_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class14', true));
+                $bitc_3_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class4', true), $allowed_html);
+                $bitc_3_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class15', true));
+                $bitc_4_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class5', true), $allowed_html);
+                $bitc_4_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class16', true));
+                $bitc_5_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class6', true), $allowed_html);
+                $bitc_5_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class17', true));
+                $bitc_6_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class7', true), $allowed_html);
+                $bitc_6_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class18', true));
+                $bitc_7_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class8', true), $allowed_html);
+                $bitc_7_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class19', true));
+                $bitc_8_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class9', true), $allowed_html);
+                $bitc_8_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class20', true));
+                $bitc_9_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class10', true), $allowed_html);
+                $bitc_9_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class21', true));
+                $bitc_10_answer = wp_kses(get_post_meta($bitc_id, 'hdQue_post_class11', true), $allowed_html);
+                $bitc_10_image = sanitize_text_field(get_post_meta($bitc_id, 'hdQue_post_class22', true));
 
-                if ($hdq_1_image != "" && !is_numeric($hdq_1_image)) {
-                    $hdq_1_image =  hdq_get_attachment_id($hdq_1_image);
+                if ($bitc_1_image != "" && !is_numeric($bitc_1_image)) {
+                    $bitc_1_image =  bitc_get_attachment_id($bitc_1_image);
                 }
-                if ($hdq_2_image != "" && !is_numeric($hdq_2_image)) {
-                    $hdq_2_image =  hdq_get_attachment_id($hdq_2_image);
+                if ($bitc_2_image != "" && !is_numeric($bitc_2_image)) {
+                    $bitc_2_image =  bitc_get_attachment_id($bitc_2_image);
                 }
-                if ($hdq_3_image != "" && !is_numeric($hdq_3_image)) {
-                    $hdq_3_image =  hdq_get_attachment_id($hdq_3_image);
+                if ($bitc_3_image != "" && !is_numeric($bitc_3_image)) {
+                    $bitc_3_image =  bitc_get_attachment_id($bitc_3_image);
                 }
-                if ($hdq_4_image != "" && !is_numeric($hdq_4_image)) {
-                    $hdq_4_image =  hdq_get_attachment_id($hdq_4_image);
+                if ($bitc_4_image != "" && !is_numeric($bitc_4_image)) {
+                    $bitc_4_image =  bitc_get_attachment_id($bitc_4_image);
                 }
-                if ($hdq_5_image != "" && !is_numeric($hdq_5_image)) {
-                    $hdq_5_image =  hdq_get_attachment_id($hdq_5_image);
+                if ($bitc_5_image != "" && !is_numeric($bitc_5_image)) {
+                    $bitc_5_image =  bitc_get_attachment_id($bitc_5_image);
                 }
-                if ($hdq_6_image != "" && !is_numeric($hdq_6_image)) {
-                    $hdq_6_image =  hdq_get_attachment_id($hdq_6_image);
+                if ($bitc_6_image != "" && !is_numeric($bitc_6_image)) {
+                    $bitc_6_image =  bitc_get_attachment_id($bitc_6_image);
                 }
-                if ($hdq_7_image != "" && !is_numeric($hdq_7_image)) {
-                    $hdq_7_image =  hdq_get_attachment_id($hdq_7_image);
+                if ($bitc_7_image != "" && !is_numeric($bitc_7_image)) {
+                    $bitc_7_image =  bitc_get_attachment_id($bitc_7_image);
                 }
-                if ($hdq_8_image != "" && !is_numeric($hdq_8_image)) {
-                    $hdq_8_image =  hdq_get_attachment_id($hdq_8_image);
+                if ($bitc_8_image != "" && !is_numeric($bitc_8_image)) {
+                    $bitc_8_image =  bitc_get_attachment_id($bitc_8_image);
                 }
-                if ($hdq_9_image != "" && !is_numeric($hdq_9_image)) {
-                    $hdq_9_image =  hdq_get_attachment_id($hdq_9_image);
+                if ($bitc_9_image != "" && !is_numeric($bitc_9_image)) {
+                    $bitc_9_image =  bitc_get_attachment_id($bitc_9_image);
                 }
-                if ($hdq_10_image != "" && !is_numeric($hdq_10_image)) {
-                    $hdq_10_image =  hdq_get_attachment_id($hdq_10_image);
+                if ($bitc_10_image != "" && !is_numeric($bitc_10_image)) {
+                    $bitc_10_image =  bitc_get_attachment_id($bitc_10_image);
                 }
 
                 $q = array();
-                $q["title"]["value"] = get_the_title($hdq_id);
+                $q["title"]["value"] = get_the_title($bitc_id);
                 $q["title"]["type"] = "title";
 
-                $q["question_id"]["value"] = $hdq_id;
+                $q["question_id"]["value"] = $bitc_id;
                 $q["question_id"]["type"] = "integer";
 
-                $q["selected"]["value"] = $hdq_selected;
+                $q["selected"]["value"] = $bitc_selected;
                 $q["selected"]["type"] = "checkbox";
 
                 $question_type = "multiple_choice_text";
-                if ($hdq_image_as_answer === "yes") {
+                if ($bitc_image_as_answer === "yes") {
                     $question_type = "multiple_choice_image";
                 }
-                if ($hdq_question_as_title === "yes") {
+                if ($bitc_question_as_title === "yes") {
                     $question_type = "title";
                 }
 
                 $q["question_type"]["value"] = $question_type;
                 $q["question_type"]["type"] = "select";
 
-                $q["paginate"]["value"] = array($hdq_paginate);
+                $q["paginate"]["value"] = array($bitc_paginate);
                 $q["paginate"]["type"] = "checkbox";
-                $q["tooltip"]["value"] = $hdq_tooltip;
+                $q["tooltip"]["value"] = $bitc_tooltip;
                 $q["tooltip"]["type"] = "text";
-                $q["extra_text"]["value"] = $hdq_after_answer;
+                $q["extra_text"]["value"] = $bitc_after_answer;
                 $q["extra_text"]["type"] = "editor";
-                $q["featured_image"]["value"] = $hdq_featured_image_id;
+                $q["featured_image"]["value"] = $bitc_featured_image_id;
                 $q["featured_image"]["type"] = "image";
 
                 $answers = array();
-                array_push($answers, array("answer" => $hdq_1_answer, "image" => $hdq_1_image));
-                array_push($answers, array("answer" => $hdq_2_answer, "image" => $hdq_2_image));
-                array_push($answers, array("answer" => $hdq_3_answer, "image" => $hdq_3_image));
-                array_push($answers, array("answer" => $hdq_4_answer, "image" => $hdq_4_image));
-                array_push($answers, array("answer" => $hdq_5_answer, "image" => $hdq_5_image));
-                array_push($answers, array("answer" => $hdq_6_answer, "image" => $hdq_6_image));
-                array_push($answers, array("answer" => $hdq_7_answer, "image" => $hdq_7_image));
-                array_push($answers, array("answer" => $hdq_8_answer, "image" => $hdq_8_image));
-                array_push($answers, array("answer" => $hdq_9_answer, "image" => $hdq_9_image));
-                array_push($answers, array("answer" => $hdq_10_answer, "image" => $hdq_10_image));
+                array_push($answers, array("answer" => $bitc_1_answer, "image" => $bitc_1_image));
+                array_push($answers, array("answer" => $bitc_2_answer, "image" => $bitc_2_image));
+                array_push($answers, array("answer" => $bitc_3_answer, "image" => $bitc_3_image));
+                array_push($answers, array("answer" => $bitc_4_answer, "image" => $bitc_4_image));
+                array_push($answers, array("answer" => $bitc_5_answer, "image" => $bitc_5_image));
+                array_push($answers, array("answer" => $bitc_6_answer, "image" => $bitc_6_image));
+                array_push($answers, array("answer" => $bitc_7_answer, "image" => $bitc_7_image));
+                array_push($answers, array("answer" => $bitc_8_answer, "image" => $bitc_8_image));
+                array_push($answers, array("answer" => $bitc_9_answer, "image" => $bitc_9_image));
+                array_push($answers, array("answer" => $bitc_10_answer, "image" => $bitc_10_image));
 
                 $q["answers"]["type"] = "answers";
                 $q["answers"]["value"] = $answers;
 
-                update_post_meta($hdq_id, "question_data", $q);
+                update_post_meta($bitc_id, "question_data", $q);
             }
         }
     }
@@ -609,29 +609,29 @@ function hdq_tool_upgrade_question_data()
     wp_reset_postdata();
     die();
 }
-add_action('wp_ajax_hdq_tool_upgrade_question_data', 'hdq_tool_upgrade_question_data');
+add_action('wp_ajax_bitc_tool_upgrade_question_data', 'bitc_tool_upgrade_question_data');
 
-function hdq_tool_upgrade_question_data_complete()
+function bitc_tool_upgrade_question_data_complete()
 {
     if (!current_user_can('edit_others_pages')) {
         echo 'permission not granted';
         die();
     }
 
-    $hdq_nonce = sanitize_text_field($_POST['nonce']);
-    if (!wp_verify_nonce($hdq_nonce, 'hdq_tools_nonce')) {
+    $bitc_nonce = sanitize_text_field($_POST['nonce']);
+    if (!wp_verify_nonce($bitc_nonce, 'bitc_tools_nonce')) {
         echo 'permission not granted';
         die();
     }
 
-    update_option("hdq_data_upgrade", "");
+    update_option("bitc_data_upgrade", "");
 
     die();
 }
-add_action('wp_ajax_hdq_tool_upgrade_question_data_complete', 'hdq_tool_upgrade_question_data_complete');
+add_action('wp_ajax_bitc_tool_upgrade_question_data_complete', 'bitc_tool_upgrade_question_data_complete');
 
-function hdq_remove_data_upgrade_notice()
+function bitc_remove_data_upgrade_notice()
 {
-    delete_option("hdq_remove_data_upgrade_notice");
+    delete_option("bitc_remove_data_upgrade_notice");
 }
-add_action('wp_ajax_hdq_remove_data_upgrade_notice', 'hdq_remove_data_upgrade_notice');
+add_action('wp_ajax_bitc_remove_data_upgrade_notice', 'bitc_remove_data_upgrade_notice');

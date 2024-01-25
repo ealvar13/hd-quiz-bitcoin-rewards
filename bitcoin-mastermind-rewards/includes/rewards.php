@@ -5,11 +5,11 @@
  */
 
 // Process form submission
-if (isset($_POST['hdq_rewards_save'])) {
-    $hdq_nonce = $_POST['hdq_about_options_nonce'];
+if (isset($_POST['bitc_rewards_save'])) {
+    $bitc_nonce = $_POST['bitc_about_options_nonce'];
 
     // Check if nonce is valid
-    if (wp_verify_nonce($hdq_nonce, 'hdq_about_options_nonce') !== false) {
+    if (wp_verify_nonce($bitc_nonce, 'bitc_about_options_nonce') !== false) {
         // Loop through each quiz to save its settings
         $quizzes = fetch_all_quizzes();
         foreach ($quizzes as $quiz) {
@@ -40,18 +40,18 @@ if (isset($_POST['hdq_rewards_save'])) {
     }
 }
 
-$hdq_functions_path = WP_PLUGIN_DIR . '/hd-quiz/includes/functions.php';
-if (file_exists($hdq_functions_path)) {
-    include_once $hdq_functions_path;
+$bitc_functions_path = WP_PLUGIN_DIR . '/hd-quiz/includes/functions.php';
+if (file_exists($bitc_functions_path)) {
+    include_once $bitc_functions_path;
 } else {
     // Log the error
     error_log("Bitcoin Mastermind Plugin: Unable to find functions.php");
     
     // Attach the admin notice to the action hook
-    add_action( 'admin_notices', 'hdq_admin_notice_error' );
+    add_action( 'admin_notices', 'bitc_admin_notice_error' );
 }
 
-function hdq_admin_notice_error() {
+function bitc_admin_notice_error() {
     $class = 'notice notice-error';
     $message = __( 'Bitcoin Mastermind Plugin not found! Please ensure it is installed and active for the rewards functionality to work correctly.', 'hdq-rewards-plugin' );
     printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) ); 

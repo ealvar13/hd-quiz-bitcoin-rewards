@@ -15,59 +15,59 @@ require dirname(__FILE__) . '/fields/select.php';
 require dirname(__FILE__) . '/fields/encrypt.php';
 /* Print each field type
 ------------------------------------------------------- */
-function hdq_print_tab_fields($tab, $tab_slug, $fields)
+function bitc_print_tab_fields($tab, $tab_slug, $fields)
 {
 	for ($i = 0; $i < count($tab); $i++) {
 		if (!isset($tab[$i]["type"])) {
 			return;
 		}
 		if ($tab[$i]["type"] == "row") {
-			hdq_printField_row($tab[$i], $tab_slug, $fields);
+			bitc_printField_row($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "col-1-1") {
-			hdq_printField_col11($tab[$i], $tab_slug, $fields);
+			bitc_printField_col11($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "col-1-1-1") {
-			hdq_printField_col111($tab[$i], $tab_slug, $fields);
+			bitc_printField_col111($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "heading") {
-			hdq_printField_heading($tab[$i], $tab_slug);
+			bitc_printField_heading($tab[$i], $tab_slug);
 		} elseif ($tab[$i]["type"] == "heading2") {
-			hdq_printField_heading2($tab[$i], $tab_slug);
+			bitc_printField_heading2($tab[$i], $tab_slug);
 		} elseif ($tab[$i]["type"] == "heading3") {
-			hdq_printField_heading3($tab[$i], $tab_slug);
+			bitc_printField_heading3($tab[$i], $tab_slug);
 		} elseif ($tab[$i]["type"] == "content") {
-			hdq_printField_content($tab[$i], $tab_slug);
+			bitc_printField_content($tab[$i], $tab_slug);
 		} elseif ($tab[$i]["type"] == "hr") {
-			hdq_printField_hr($tab[$i], $tab_slug);
+			bitc_printField_hr($tab[$i], $tab_slug);
 		} elseif ($tab[$i]["type"] == "text") {
-			hdq_printField_text($tab[$i], $tab_slug, $fields);
+			bitc_printField_text($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "textarea") {
-			hdq_printField_textarea($tab[$i], $tab_slug, $fields);
+			bitc_printField_textarea($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "email") {
-			hdq_printField_email($tab[$i], $tab_slug, $fields);
+			bitc_printField_email($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "editor") {
-			hdq_printField_editor($tab[$i], $tab_slug, $fields);
+			bitc_printField_editor($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "float") {
-			hdq_printField_float($tab[$i], $tab_slug, $fields);
+			bitc_printField_float($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "integer") {
-			hdq_printField_integer($tab[$i], $tab_slug, $fields);
+			bitc_printField_integer($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "select") {
-			hdq_printField_select($tab[$i], $tab_slug, $fields);
+			bitc_printField_select($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "image") {
-			hdq_printField_image($tab[$i], $tab_slug, $fields);
+			bitc_printField_image($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "radio") {
-			hdq_printField_radio($tab[$i], $tab_slug, $fields);
+			bitc_printField_radio($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "checkbox") {
-			hdq_printField_checkbox($tab[$i], $tab_slug, $fields);
+			bitc_printField_checkbox($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "action") {
-			hdq_printField_action($tab[$i], $tab_slug, $fields);
+			bitc_printField_action($tab[$i], $tab_slug, $fields);
 		} elseif ($tab[$i]["type"] == "encode") {
-			hdq_printField_encode($tab[$i], $tab_slug, $fields);
+			bitc_printField_encode($tab[$i], $tab_slug, $fields);
 		}
 	}
 }
 
 /* Create settings tab array
 ------------------------------------------------------- */
-function hdq_get_settings_tabs()
+function bitc_get_settings_tabs()
 {
 	global $tabs;
 	$tabs = array();
@@ -80,7 +80,7 @@ function hdq_get_settings_tabs()
 	$tab["title"] = "Translation";
 	array_push($tabs, $tab);
 
-	$tabs = apply_filters("hdq_add_settings_tab", $tabs);
+	$tabs = apply_filters("bitc_add_settings_tab", $tabs);
 
 	// sanitize
 	for ($i = 0; $i < count($tabs); $i++) {
@@ -92,9 +92,9 @@ function hdq_get_settings_tabs()
 
 /* Print settings tabs
 ------------------------------------------------------- */
-function hdq_print_settings_tabs()
+function bitc_print_settings_tabs()
 {
-	$tabs = hdq_get_settings_tabs();
+	$tabs = bitc_get_settings_tabs();
 	for ($i = 0; $i < count($tabs); $i++) {
 		$classes = "";
 		if ($i == 0) {
@@ -106,10 +106,10 @@ function hdq_print_settings_tabs()
 
 /* Get and print settings tab content
 ------------------------------------------------------- */
-function hdq_print_settings_tab_content($fields)
+function bitc_print_settings_tab_content($fields)
 {
-	$tabs = hdq_get_settings_tabs();
-	$content = hdq_get_settings_meta();
+	$tabs = bitc_get_settings_tabs();
+	$content = bitc_get_settings_meta();
 
 	for ($i = 0; $i < count($tabs); $i++) {
 		$tab = $tabs[$i]["slug"];
@@ -126,7 +126,7 @@ function hdq_print_settings_tab_content($fields)
 		}
 		echo '<div id="tab_' . $tabs[$i]["slug"] . '" class="tab_content ' . $classes . '"><h2 class="tab_heading">' . $tabs[$i]["title"] . '</h2>';
 		if ($hasContent) {
-			hdq_print_tab_fields($tab, $tabs[$i]["slug"], $fields);
+			bitc_print_tab_fields($tab, $tabs[$i]["slug"], $fields);
 		}
 		echo '</div>';
 	}
@@ -134,7 +134,7 @@ function hdq_print_settings_tab_content($fields)
 
 /* Create quiz tab array
 ------------------------------------------------------- */
-function hdq_get_quiz_tabs()
+function bitc_get_quiz_tabs()
 {
 	global $tabs;
 	$tabs = array();
@@ -155,7 +155,7 @@ function hdq_get_quiz_tabs()
 	$tab["title"] = "Advanced";
 	array_push($tabs, $tab);
 
-	$tabs = apply_filters("hdq_add_quiz_tab", $tabs);
+	$tabs = apply_filters("bitc_add_quiz_tab", $tabs);
 
 	// sanitize
 	for ($i = 0; $i < count($tabs); $i++) {
@@ -167,9 +167,9 @@ function hdq_get_quiz_tabs()
 
 /* Print quiz tabs
 ------------------------------------------------------- */
-function hdq_print_quiz_tabs()
+function bitc_print_quiz_tabs()
 {
-	$tabs = hdq_get_quiz_tabs();
+	$tabs = bitc_get_quiz_tabs();
 	for ($i = 0; $i < count($tabs); $i++) {
 		$classes = "";
 		if ($i == 0) {
@@ -181,10 +181,10 @@ function hdq_print_quiz_tabs()
 
 /* Get and print tab content
 ------------------------------------------------------- */
-function hdq_print_quiz_tab_content($fields)
+function bitc_print_quiz_tab_content($fields)
 {
-	$tabs = hdq_get_quiz_tabs();
-	$content = hdq_get_quiz_meta();
+	$tabs = bitc_get_quiz_tabs();
+	$content = bitc_get_quiz_meta();
 
 	for ($i = 0; $i < count($tabs); $i++) {
 		$tab = $tabs[$i]["slug"];
@@ -201,7 +201,7 @@ function hdq_print_quiz_tab_content($fields)
 		}
 		echo '<div id="tab_' . $tabs[$i]["slug"] . '" class="tab_content ' . $classes . '"><h2 class="tab_heading">' . $tabs[$i]["title"] . '</h2>';
 		if ($hasContent) {
-			hdq_print_tab_fields($tab, $tabs[$i]["slug"], $fields);
+			bitc_print_tab_fields($tab, $tabs[$i]["slug"], $fields);
 		}
 		echo '</div>';
 	}
@@ -210,7 +210,7 @@ function hdq_print_quiz_tab_content($fields)
 
 /* Create question tab array
 ------------------------------------------------------- */
-function hdq_get_question_tabs()
+function bitc_get_question_tabs()
 {
 	global $tabs;
 	$tabs = array();
@@ -227,7 +227,7 @@ function hdq_get_question_tabs()
 	$tab["title"] = "Quizzes";
 	array_push($tabs, $tab);
 
-	$tabs = apply_filters("hdq_add_question_tab", $tabs);
+	$tabs = apply_filters("bitc_add_question_tab", $tabs);
 
 	// sanitize
 	for ($i = 0; $i < count($tabs); $i++) {
@@ -239,9 +239,9 @@ function hdq_get_question_tabs()
 
 /* Print question tabs
 ------------------------------------------------------- */
-function hdq_print_question_tabs()
+function bitc_print_question_tabs()
 {
-	$tabs = hdq_get_question_tabs();
+	$tabs = bitc_get_question_tabs();
 	for ($i = 0; $i < count($tabs); $i++) {
 		$classes = "";
 		if ($i == 0) {
@@ -253,10 +253,10 @@ function hdq_print_question_tabs()
 
 /* Get and print tab content
 ------------------------------------------------------- */
-function hdq_print_question_tab_content($fields)
+function bitc_print_question_tab_content($fields)
 {
-	$tabs = hdq_get_question_tabs();
-	$content = hdq_get_question_meta();
+	$tabs = bitc_get_question_tabs();
+	$content = bitc_get_question_meta();
 
 	for ($i = 0; $i < count($tabs); $i++) {
 		$tab = $tabs[$i]["slug"];
@@ -273,7 +273,7 @@ function hdq_print_question_tab_content($fields)
 		}
 		echo '<div id="tab_' . $tabs[$i]["slug"] . '" class="tab_content ' . $classes . '"><h2 class="tab_heading">' . $tabs[$i]["title"] . '</h2>';
 		if ($hasContent) {
-			hdq_print_tab_fields($tab, $tabs[$i]["slug"], $fields);
+			bitc_print_tab_fields($tab, $tabs[$i]["slug"], $fields);
 		}
 		echo '</div>';
 	}
@@ -281,7 +281,7 @@ function hdq_print_question_tab_content($fields)
 
 /* Get settings meta
 ------------------------------------------------------- */
-function hdq_get_settings_meta()
+function bitc_get_settings_meta()
 {
 	// this is just an easier way to manage and edit in the future
 	$default = '{
@@ -436,15 +436,15 @@ function hdq_get_settings_meta()
 }';
 	$default = json_decode($default, true);
 
-	$fields = apply_filters("hdq_add_settings_meta", $default);
+	$fields = apply_filters("bitc_add_settings_meta", $default);
 
-	$fields = hdq_create_all_fields($fields); // clean and santize
+	$fields = bitc_create_all_fields($fields); // clean and santize
 	return $fields;
 }
 
 /* Get quiz meta
 ------------------------------------------------------- */
-function hdq_get_quiz_meta()
+function bitc_get_quiz_meta()
 {
 	// this is just an easier way to manage and edit in the future
 	$default = '{
@@ -654,21 +654,21 @@ function hdq_get_quiz_meta()
 				}
 			]
 		},
-		{ "type": "action", "name": "quiz_name", "function": "hdq_quiz_rename", "label": "Rename Quiz", "value": "" }
+		{ "type": "action", "name": "quiz_name", "function": "bitc_quiz_rename", "label": "Rename Quiz", "value": "" }
 	]
 }
 ';
 	$default = json_decode($default, true);
 
-	$fields = apply_filters("hdq_add_quiz_meta", $default);
+	$fields = apply_filters("bitc_add_quiz_meta", $default);
 
-	$fields = hdq_create_all_fields($fields); // clean and santize
+	$fields = bitc_create_all_fields($fields); // clean and santize
 	return $fields;
 }
 
 /* Get question meta
 ------------------------------------------------------- */
-function hdq_get_question_meta()
+function bitc_get_question_meta()
 {
 	$default = '{
 	"main": [
@@ -712,7 +712,7 @@ function hdq_get_question_meta()
 		},
 		{
 			"type": "action",
-			"function": "hdq_print_answers_admin",
+			"function": "bitc_print_answers_admin",
 			"name": "answers"
 		}
 	],
@@ -760,32 +760,32 @@ function hdq_get_question_meta()
 	"quizzes": [
 		{
 			"type": "action",
-			"function": "hdq_print_quizzes_admin",
+			"function": "bitc_print_quizzes_admin",
 			"name": "quizzes"
 		}
 	]
 }';
 	$default = json_decode($default, true);
 
-	$fields = apply_filters("hdq_add_question_meta", $default);
+	$fields = apply_filters("bitc_add_question_meta", $default);
 
-	$fields = hdq_create_all_fields($fields); // clean and santize
+	$fields = bitc_create_all_fields($fields); // clean and santize
 	return $fields;
 }
 
 /* Get and clean all fields before printing
 ------------------------------------------------------- */
-function hdq_create_all_fields($fields, $tabs = true)
+function bitc_create_all_fields($fields, $tabs = true)
 {
 	// sanitize all fields
 	if ($tabs) {
 		foreach ($fields as $key => $v) {
 			if (count($v) > 0) {
 				for ($i = 0; $i < count($v); $i++) {
-					$fields[$key][$i] = hdq_field_array_sanitize($fields[$key][$i], $v[$i]);
+					$fields[$key][$i] = bitc_field_array_sanitize($fields[$key][$i], $v[$i]);
 					if (isset($v[$i]["children"])) {
 						for ($x = 0; $x < count($v[$i]["children"]); $x++) {
-							$fields[$key][$i]["children"][$x] = hdq_field_array_sanitize($fields[$key][$i]["children"][$x], $v[$i]["children"][$x]);
+							$fields[$key][$i]["children"][$x] = bitc_field_array_sanitize($fields[$key][$i]["children"][$x], $v[$i]["children"][$x]);
 						}
 					}
 				}
@@ -793,10 +793,10 @@ function hdq_create_all_fields($fields, $tabs = true)
 		}
 	} else {
 		for ($i = 0; $i < count($fields); $i++) {
-			$fields[$i] = hdq_field_array_sanitize($fields[$i], $fields[$i]);
+			$fields[$i] = bitc_field_array_sanitize($fields[$i], $fields[$i]);
 			if (isset($fields[$i]["children"])) {
 				for ($x = 0; $x < count($fields[$i]["children"]); $x++) {
-					$fields[$i]["children"][$x] = hdq_field_array_sanitize($fields[$i]["children"][$x], $fields[$i]["children"][$x]);
+					$fields[$i]["children"][$x] = bitc_field_array_sanitize($fields[$i]["children"][$x], $fields[$i]["children"][$x]);
 				}
 			}
 		}
@@ -804,7 +804,7 @@ function hdq_create_all_fields($fields, $tabs = true)
 	return $fields;
 }
 
-function hdq_field_array_sanitize($field, $v)
+function bitc_field_array_sanitize($field, $v)
 {
 	if (isset($v["label"])) {
 		$field["label"] = sanitize_text_field($v["label"]);
@@ -868,7 +868,7 @@ function hdq_field_array_sanitize($field, $v)
 
 /* Get field value
 ------------------------------------------------------- */
-function hdq_getValue($tab, $fields)
+function bitc_getValue($tab, $fields)
 {
 	$value = "";
 	if (isset($fields[$tab["name"]])) {
@@ -884,7 +884,7 @@ function hdq_getValue($tab, $fields)
 
 /* Get field placeholder
 ------------------------------------------------------- */
-function hdq_getPlaceholder($tab, $fields)
+function bitc_getPlaceholder($tab, $fields)
 {
 	$placeholder = "";
 	if (isset($tab["placeholder"]) && $tab["placeholder"] != "") {
@@ -895,7 +895,7 @@ function hdq_getPlaceholder($tab, $fields)
 
 /* Get field required status
 ------------------------------------------------------- */
-function hdq_getRequired($tab, $fields)
+function bitc_getRequired($tab, $fields)
 {
 	$required = false;
 	if (isset($tab["required"]) && $tab["required"] == true) {
@@ -906,26 +906,26 @@ function hdq_getRequired($tab, $fields)
 
 /* Print field required icon
 ------------------------------------------------------- */
-function hdq_print_tab_requiredIcon()
+function bitc_print_tab_requiredIcon()
 {
-	echo '<span class="hdq_required_icon">*</span>';
+	echo '<span class="bitc_required_icon">*</span>';
 }
 
 /* Print field tooltip
 ------------------------------------------------------- */
-function hdq_print_fields_tooltip($tooltip)
+function bitc_print_fields_tooltip($tooltip)
 {
 ?>
-	<span class="hdq_tooltip">
+	<span class="bitc_tooltip">
 		?
-		<span class="hdq_tooltip_content">
+		<span class="bitc_tooltip_content">
 			<span><?php echo $tooltip; ?></span>
 		</span>
 	</span>
 <?php
 }
 
-function hdq_printField_action($tab, $tab_slug, $fields)
+function bitc_printField_action($tab, $tab_slug, $fields)
 {
 	if (!isset($tab["function"])) {
 		return;
@@ -937,64 +937,64 @@ function hdq_printField_action($tab, $tab_slug, $fields)
 
 /* Print field rows
 ------------------------------------------------------- */
-function hdq_printField_row($tab, $tab_slug, $fields)
+function bitc_printField_row($tab, $tab_slug, $fields)
 {
-	echo '<div class = "hdq_row">';
-	echo hdq_print_tab_fields($tab["children"], $tab_slug, $fields);
+	echo '<div class = "bitc_row">';
+	echo bitc_print_tab_fields($tab["children"], $tab_slug, $fields);
 	echo '</div>';
 }
 
-function hdq_printField_col11($tab, $tab_slug, $fields)
+function bitc_printField_col11($tab, $tab_slug, $fields)
 {
-	echo '<div class = "hdq_row hdq_col-1-1">';
-	echo hdq_print_tab_fields($tab["children"], $tab_slug, $fields);
+	echo '<div class = "bitc_row bitc_col-1-1">';
+	echo bitc_print_tab_fields($tab["children"], $tab_slug, $fields);
 	echo '</div>';
 }
 
-function hdq_printField_col111($tab, $tab_slug, $fields)
+function bitc_printField_col111($tab, $tab_slug, $fields)
 {
-	echo '<div class = "hdq_row hdq_col-1-1-1">';
-	echo hdq_print_tab_fields($tab["children"], $tab_slug, $fields);
+	echo '<div class = "bitc_row bitc_col-1-1-1">';
+	echo bitc_print_tab_fields($tab["children"], $tab_slug, $fields);
 	echo '</div>';
 }
 
-function hdq_printField_content($tab, $tab_slug)
+function bitc_printField_content($tab, $tab_slug)
 {
-	echo '<div id = "' . $tab["name"] . '" class = "hdq_row_content">';
+	echo '<div id = "' . $tab["name"] . '" class = "bitc_row_content">';
 	echo $tab["value"];
 	echo '</div>';
 }
 
-function hdq_printField_hr($tab, $tab_slug)
+function bitc_printField_hr($tab, $tab_slug)
 {
-	echo '<hr class = "hdq_hr" />';
+	echo '<hr class = "bitc_hr" />';
 }
 
-function hdq_printField_heading($tab, $tab_slug)
-{
-	echo '<h2>' . $tab["label"] . '</h2>';
-}
-
-function hdq_printField_heading2($tab, $tab_slug)
+function bitc_printField_heading($tab, $tab_slug)
 {
 	echo '<h2>' . $tab["label"] . '</h2>';
 }
 
-function hdq_printField_heading3($tab, $tab_slug)
+function bitc_printField_heading2($tab, $tab_slug)
+{
+	echo '<h2>' . $tab["label"] . '</h2>';
+}
+
+function bitc_printField_heading3($tab, $tab_slug)
 {
 	echo '<h3>' . $tab["label"] . '</h3>';
 }
 
-function hdq_print_answers_admin($tab, $tab_slug, $fields)
+function bitc_print_answers_admin($tab, $tab_slug, $fields)
 {
 	$answers = $fields["answers"]["value"];
 	$question_type = $fields["question_type"]["value"];
-	$image_as_answers = "hdq_hide";
+	$image_as_answers = "bitc_hide";
 	$text_based_answers = "";
 	if ($question_type === "multiple_choice_image") {
 		$image_as_answers = "";
 	} elseif ($question_type === "text_based") {
-		$text_based_answers = "hdq_hide";
+		$text_based_answers = "bitc_hide";
 	}
 
 	$answer_selected = array();
@@ -1004,26 +1004,26 @@ function hdq_print_answers_admin($tab, $tab_slug, $fields)
 ?>
 	<span class="hderp_input" id="selected" data-type="correct"></span>
 
-	<table class="hdq_table hderp_input" data-tab="main" id="answers" data-type="answers" style="<?php if ($fields["question_type"]["value"] === "title") {
+	<table class="bitc_table hderp_input" data-tab="main" id="answers" data-type="answers" style="<?php if ($fields["question_type"]["value"] === "title") {
 																										echo 'display:none;';
 																									} ?>">
 		<thead>
 			<tr>
 				<th>#</th>
 				<th>Answers</th>
-				<th width="225" class="hdq_answer_as_image <?php echo $image_as_answers; ?>">Featured Image</th>
-				<th width="30" class="hdq_answer_selected <?php echo $text_based_answers; ?>">Correct</th>
+				<th width="225" class="bitc_answer_as_image <?php echo $image_as_answers; ?>">Featured Image</th>
+				<th width="30" class="bitc_answer_selected <?php echo $text_based_answers; ?>">Correct</th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php
 	
-			$hdq_max_answers = 10;
-			if(defined('HDQ_MAX_ANSWERS')){
-				$hdq_max_answers = intval(HDQ_MAX_ANSWERS);
+			$bitc_max_answers = 10;
+			if(defined('bitc_MAX_ANSWERS')){
+				$bitc_max_answers = intval(bitc_MAX_ANSWERS);
 			}	
 	
-			for ($x = 1; $x < $hdq_max_answers + 1; $x++) {
+			for ($x = 1; $x < $bitc_max_answers + 1; $x++) {
 				$v = "";
 				if (isset($answers[$x - 1])) {
 					$v = $answers[$x - 1]["answer"];
@@ -1033,10 +1033,10 @@ function hdq_print_answers_admin($tab, $tab_slug, $fields)
 				<tr>
 					<td width="1"><?php echo $x; ?></td>
 					<td>
-						<input class="hdq_input hdq_input_answer" placeholder="enter answer..." data-type="text" type="text" value="<?php echo htmlspecialchars($v); ?>">
+						<input class="bitc_input bitc_input_answer" placeholder="enter answer..." data-type="text" type="text" value="<?php echo htmlspecialchars($v); ?>">
 					</td>
-					<td class="textCenter hdq_answer_as_image <?php echo $image_as_answers; ?>">
-						<div title="update image" id="hdq_answer_image_<?php echo $x; ?>" data-answer="<?php echo $x; ?>" data-options="%7B%22title%22%3A%22Set%20Answer%20Image%22%2C%22button%22%3A%22SET%20IMAGE%22%2C%22multiple%22%3Afalse%7D" data-value="<?php echo intval($i); ?>" data-tab="extra" data-type="image" class="hdq_input input_image">
+					<td class="textCenter bitc_answer_as_image <?php echo $image_as_answers; ?>">
+						<div title="update image" id="bitc_answer_image_<?php echo $x; ?>" data-answer="<?php echo $x; ?>" data-options="%7B%22title%22%3A%22Set%20Answer%20Image%22%2C%22button%22%3A%22SET%20IMAGE%22%2C%22multiple%22%3Afalse%7D" data-value="<?php echo intval($i); ?>" data-tab="extra" data-type="image" class="bitc_input input_image">
 							<?php
 							if ($i == "") {
 								echo 'set image';
@@ -1050,18 +1050,18 @@ function hdq_print_answers_admin($tab, $tab_slug, $fields)
 							} ?>
 						</div>
 						<?php if ($i != "") {
-							echo '<p class = "remove_image_wrapper" style = "text-align:center"><span class = "remove_image" data-id = "hdq_answer_image_' . $x . '">remove image</span></p>';
+							echo '<p class = "remove_image_wrapper" style = "text-align:center"><span class = "remove_image" data-id = "bitc_answer_image_' . $x . '">remove image</span></p>';
 						} ?>
 					</td>
-					<td class="hdq_answer_selected <?php echo $text_based_answers; ?>">
-						<div class="hdq_checkbox">
+					<td class="bitc_answer_selected <?php echo $text_based_answers; ?>">
+						<div class="bitc_checkbox">
 							<?php
 							$selected = "";
 							if (in_array($x, $answer_selected)) {
 								$selected = "checked";
 							} ?>
-							<input data-tab="main" type="checkbox" value="yes" data-type="checkbox" class="hdq_radio_input" data-id="selected" id="hdq_correct_<?php echo $x; ?>" <?php echo $selected; ?> />
-							<label class="hdq_toggle" for="hdq_correct_<?php echo $x; ?>"></label>
+							<input data-tab="main" type="checkbox" value="yes" data-type="checkbox" class="bitc_radio_input" data-id="selected" id="bitc_correct_<?php echo $x; ?>" <?php echo $selected; ?> />
+							<label class="bitc_toggle" for="bitc_correct_<?php echo $x; ?>"></label>
 						</div>
 					</td>
 				</tr>
@@ -1072,7 +1072,7 @@ function hdq_print_answers_admin($tab, $tab_slug, $fields)
 <?php
 }
 
-function hdq_print_quizzes_admin($tab, $tab_slug, $fields)
+function bitc_print_quizzes_admin($tab, $tab_slug, $fields)
 {
 	$attached_terms = get_the_terms($fields["question_id"]["value"], "quiz");
 
@@ -1086,7 +1086,7 @@ function hdq_print_quizzes_admin($tab, $tab_slug, $fields)
 	<p>
 		You can add this question to more than one quiz
 	</p>
-	<div class="hdq_table hderp_input" data-tab="quizzes" id="quizzes" data-type="categories">
+	<div class="bitc_table hderp_input" data-tab="quizzes" id="quizzes" data-type="categories">
 
 		<?php
 		$terms = get_terms(array(
@@ -1105,11 +1105,11 @@ function hdq_print_quizzes_admin($tab, $tab_slug, $fields)
 			if (in_array($terms[$i]->term_id, $attached)) {
 				$selected = "checked";
 			} ?>
-			<div class="hdq_category">
-				<label class="hdq_full_label" for="cat_<?php echo $terms[$i]->term_id; ?>">
-					<div class="hdq_checkbox">
-						<input type="checkbox" class="hdq_category_input" data-id="<?php echo $terms[$i]->term_id; ?>" id="cat_<?php echo $terms[$i]->term_id; ?>" value="<?php echo $terms[$i]->term_id; ?>" name="cat_<?php echo $terms[$i]->term_id; ?>" <?php echo $selected; ?> />
-						<span class="hdq_toggle" for="cat_<?php echo $terms[$i]->term_id; ?>"></span>
+			<div class="bitc_category">
+				<label class="bitc_full_label" for="cat_<?php echo $terms[$i]->term_id; ?>">
+					<div class="bitc_checkbox">
+						<input type="checkbox" class="bitc_category_input" data-id="<?php echo $terms[$i]->term_id; ?>" id="cat_<?php echo $terms[$i]->term_id; ?>" value="<?php echo $terms[$i]->term_id; ?>" name="cat_<?php echo $terms[$i]->term_id; ?>" <?php echo $selected; ?> />
+						<span class="bitc_toggle" for="cat_<?php echo $terms[$i]->term_id; ?>"></span>
 					</div>
 					<?php echo $terms[$i]->name; ?>
 				</label>
@@ -1119,7 +1119,7 @@ function hdq_print_quizzes_admin($tab, $tab_slug, $fields)
 		echo '</div>';
 	}
 
-	function hdq_quiz_rename($tab)
+	function bitc_quiz_rename($tab)
 	{
 
 		$quizID = 0;
@@ -1131,11 +1131,11 @@ function hdq_print_quizzes_admin($tab, $tab_slug, $fields)
 
 		?>
 
-		<div class="hdq_input_item">
-			<label class="hdq_input_label" for="<?php echo $tab["name"]; ?>">
-				<span class="hdq_required_icon">*</span>Rename Quiz
+		<div class="bitc_input_item">
+			<label class="bitc_input_label" for="<?php echo $tab["name"]; ?>">
+				<span class="bitc_required_icon">*</span>Rename Quiz
 			</label>
-			<input data-tab="advanced" data-type="quiz_name" data-required="required" type="text" class="hdq_input hderp_input" id="<?php echo $tab["name"]; ?>" value="<?php echo $value; ?>" placeholder="">
+			<input data-tab="advanced" data-type="quiz_name" data-required="required" type="text" class="bitc_input hderp_input" id="<?php echo $tab["name"]; ?>" value="<?php echo $value; ?>" placeholder="">
 		</div>
 
 
@@ -1145,7 +1145,7 @@ function hdq_print_quizzes_admin($tab, $tab_slug, $fields)
 
 	/* decrypt and HDC encoded string
 ------------------------------------------------------- */
-	function hdq_decode($ciphertext = "")
+	function bitc_decode($ciphertext = "")
 	{
 		if ($ciphertext === "") {
 			return "";
@@ -1164,7 +1164,7 @@ function hdq_print_quizzes_admin($tab, $tab_slug, $fields)
 		}
 	}
 
-	function hdq_encode($text = "")
+	function bitc_encode($text = "")
 	{
 		if ($text === "") {
 			return "";

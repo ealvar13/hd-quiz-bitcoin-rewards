@@ -40,21 +40,21 @@ function check_quiz_budgets() {
 
 // show results and settings tabs
 wp_enqueue_style(
-    'hdq_admin_style',
-    plugin_dir_url(__FILE__) . './css/hdq_a_light_admin_style.css?v=' . HDQ_BR_PLUGIN_VERSION
+    'bitc_admin_style',
+    plugin_dir_url(__FILE__) . './css/bitc_a_light_admin_style.css?v=' . bitc_BR_PLUGIN_VERSION
 );
 wp_enqueue_script(
-    'hdq_admin_script',
-    plugins_url('./js/hdq_a_light_admin.js?v=' . HDQ_BR_PLUGIN_VERSION, __FILE__),
+    'bitc_admin_script',
+    plugins_url('./js/bitc_a_light_admin.js?v=' . bitc_BR_PLUGIN_VERSION, __FILE__),
     array('jquery'),
     '1.0',
     true
 );
 
 ?>
-<div id="hdq_meta_forms">
-    <div id="hdq_wrapper">
-        <div id="hdq_form_wrapper">
+<div id="bitc_meta_forms">
+    <div id="bitc_wrapper">
+        <div id="bitc_form_wrapper">
             <h1>Bitcoin Mastermind Results - Bitcoin Rewards</h1>
             <p>
                 This add-on allows you to send bitcoin rewards over the Lightning Network for correct quiz answers.
@@ -67,18 +67,18 @@ wp_enqueue_script(
                 be GDPR compliant.
             </p>
 
-            <div id="hdq_tabs">
+            <div id="bitc_tabs">
                 <ul>
-                    <li class="hdq_active_tab" data-hdq-content="hdq_tab_content">Results</li>
-                    <li data-hdq-content="hdq_tab_rewards">Rewards</li>
-                    <li data-hdq-content="hdq_tab_settings">Settings</li>
+                    <li class="bitc_active_tab" data-hdq-content="bitc_tab_content">Results</li>
+                    <li data-hdq-content="bitc_tab_rewards">Rewards</li>
+                    <li data-hdq-content="bitc_tab_settings">Settings</li>
                 </ul>
                 <div class="clear"></div>
             </div>
-            <div id="hdq_tab_content" class="hdq_tab">
+            <div id="bitc_tab_content" class="bitc_tab">
 
                 <?php
-                $data = get_option("hdq_quiz_results_l");
+                $data = get_option("bitc_quiz_results_l");
                 $data = json_decode(html_entity_decode($data), true);
                 $total = 0;
                 if (!empty($data)) {
@@ -108,7 +108,7 @@ wp_enqueue_script(
                 $results = $wpdb->get_results($query, ARRAY_A);
                 ?>
 
-                <table class="hdq_a_light_table">
+                <table class="bitc_a_light_table">
                     <thead>
                         <tr>
                             <th>Quiz Name</th>
@@ -143,75 +143,75 @@ wp_enqueue_script(
                     </tbody>
                 </table>
             </div>
-            <div id="hdq_tab_settings" class="hdq_tab">
-                <form id="hdq_settings" method="post">
-                    <input type="hidden" name="hdq_submit_hidden" value="Y">
-                    <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
+            <div id="bitc_tab_settings" class="bitc_tab">
+                <form id="bitc_settings" method="post">
+                    <input type="hidden" name="bitc_submit_hidden" value="Y">
+                    <?php wp_nonce_field('bitc_about_options_nonce', 'bitc_about_options_nonce'); ?>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 2rem">
-                        <div class="hdq_row" style="grid-column: span 2;">
-                            <!--<label for="hdq_a_l_members_only">Only save results for logged in users
-                                <span class="hdq_tooltip hdq_tooltip_question">?<span class="hdq_tooltip_content"><span>By default, all results will be saved, and non-logged-in users will show up as
+                        <div class="bitc_row" style="grid-column: span 2;">
+                            <!--<label for="bitc_a_l_members_only">Only save results for logged in users
+                                <span class="bitc_tooltip bitc_tooltip_question">?<span class="bitc_tooltip_content"><span>By default, all results will be saved, and non-logged-in users will show up as
                                             <code>--</code></span></span></span></label>
                             
                                 <div class="hdq-options-check">
-                                    <input type="checkbox" id="hdq_a_l_members_only" name="hdq_a_l_members_only" value="yes" <?php if ($opt_val1 == "yes") {
+                                    <input type="checkbox" id="bitc_a_l_members_only" name="bitc_a_l_members_only" value="yes" <?php if ($opt_val1 == "yes") {
                                                                                                                                     echo 'checked = ""';
                                                                                                                                 } ?> />
-                                    <label for="hdq_a_l_members_only"></label>
+                                    <label for="bitc_a_l_members_only"></label>
                                 </div>-->
-                                <div class="hdq_check_row">
-                                    <div role="button" id="hdq_a_light_delete_results" class="hdq_button4" title="clear all of the current results and start from scratch"><span class="dashicons dashicons-trash"></span> DELETE ALL RESULTS</div>
+                                <div class="bitc_check_row">
+                                    <div role="button" id="bitc_a_light_delete_results" class="bitc_button4" title="clear all of the current results and start from scratch"><span class="dashicons dashicons-trash"></span> DELETE ALL RESULTS</div>
 
-                                    <div id="hdq_a_light_export_csv_wrap">
-                                        <div role="button" id="hdq_a_light_export_results" class="hdq_button3" title="clear all of the current results and start from scratch">EXPORT AS CSV</div>
+                                    <div id="bitc_a_light_export_csv_wrap">
+                                        <div role="button" id="bitc_a_light_export_results" class="bitc_button3" title="clear all of the current results and start from scratch">EXPORT AS CSV</div>
                                     </div>
 
                                 </div>
                         </div>
 
                         <label style="grid-column: span 2;">Enter either Joltz or BTCPay Server Details and click SAVE
-                                <span class="hdq_tooltip hdq_tooltip_question">?<span class="hdq_tooltip_content"><span>Only one is allowed. If one is filled, filling the other will erase the existing info.
+                                <span class="bitc_tooltip bitc_tooltip_question">?<span class="bitc_tooltip_content"><span>Only one is allowed. If one is filled, filling the other will erase the existing info.
                         </label>
                         
-                        <div class="hdq_row">
+                        <div class="bitc_row">
                             <label for="<?php echo $data_field_name_joltz; ?>">Joltz Brand Id:</label>
                             <input type="text" id="<?php echo $data_field_name_joltz; ?>" name="<?php echo $data_field_name_joltz; ?>" value="<?php echo $opt_val_joltz; ?>">
                         </div>
 
-                        <div class="hdq_row">
+                        <div class="bitc_row">
                             <label for="<?php echo $data_field_name_joltz_secret; ?>">Joltz Secret Key:</label>
                             <input type="text" id="<?php echo $data_field_name_joltz_secret; ?>" name="<?php echo $data_field_name_joltz_secret; ?>" value="<?php echo $opt_val_joltz_secret; ?>">
                         </div>
                         
-                        <div class="hdq_row">
+                        <div class="bitc_row">
                             <label for="<?php echo $data_field_name_btcpay_url; ?>">BTCPay Server URL:</label>
                             <input type="text" id="<?php echo $data_field_name_btcpay_url; ?>" name="<?php echo $data_field_name_btcpay_url; ?>" value="<?php echo $opt_val_btcpay_url; ?>">
                         </div>
                         
-                        <div class="hdq_row">
+                        <div class="bitc_row">
                             <label for="<?php echo $data_field_name_btcpay_store_id; ?>">BTCPay Server Store ID:</label>
                             <input type="text" id="<?php echo $data_field_name_btcpay_store_id; ?>" name="<?php echo $data_field_name_btcpay_store_id; ?>" value="<?php if(!empty($opt_val_btcpay_store_id)): echo $opt_val_btcpay_store_id; endif;?>">
                         </div>
 
-                        <div class="hdq_row">
+                        <div class="bitc_row">
                             <label for="<?php echo $data_field_name_btcpay_api_key; ?>">BTCPay Server API Key:</label>
                             <input type="text" id="<?php echo $data_field_name_btcpay_api_key; ?>" name="<?php echo $data_field_name_btcpay_api_key; ?>" value="<?php echo $opt_val_btcpay_api_key; ?>">
                         </div>
 
-                        <div class="hdq_row">
-                            <input type="submit" class="hdq_button2" id="hdq_save_settings" value="SAVE">
+                        <div class="bitc_row">
+                            <input type="submit" class="bitc_button2" id="bitc_save_settings" value="SAVE">
                         </div>
 
                     </div>
                 </form>
             </div>
-            <div id="hdq_tab_rewards" class="hdq_tab">
+            <div id="bitc_tab_rewards" class="bitc_tab">
                 <?php
                 $total_sent_values = check_quiz_budgets();
                 ?>
-                <form id="hdq_rewards" method="post">
-                    <input type="hidden" name="hdq_submit_hidden" value="Y">
-                    <?php wp_nonce_field('hdq_about_options_nonce', 'hdq_about_options_nonce'); ?>
+                <form id="bitc_rewards" method="post">
+                    <input type="hidden" name="bitc_submit_hidden" value="Y">
+                    <?php wp_nonce_field('bitc_about_options_nonce', 'bitc_about_options_nonce'); ?>
 
                     <h3>Available Quizzes</h3>
                     
@@ -220,7 +220,7 @@ wp_enqueue_script(
                     if (!empty($quizzes)) {
                     ?>
 
-                    <table class="hdq_a_light_table">
+                    <table class="bitc_a_light_table">
                         <thead>
                             <tr>
                                 <th>Quiz Name</th>
@@ -272,7 +272,7 @@ wp_enqueue_script(
                         </tbody>
                     </table>
                     
-                    <button type="submit" name="hdq_rewards_save" class="hdq_button3">Save Rewards Settings</button>    
+                    <button type="submit" name="bitc_rewards_save" class="bitc_button3">Save Rewards Settings</button>    
 
                     <?php 
                     } else {

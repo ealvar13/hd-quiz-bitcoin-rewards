@@ -1,24 +1,24 @@
 <?php
-function hdq_printField_checkbox($tab, $tab_slug, $fields)
+function bitc_printField_checkbox($tab, $tab_slug, $fields)
 {
-    $value = hdq_getValue($tab, $fields);
-    $placeholder = hdq_getPlaceholder($tab, $fields);
-    $required = hdq_getRequired($tab, $fields); ?>
+    $value = bitc_getValue($tab, $fields);
+    $placeholder = bitc_getPlaceholder($tab, $fields);
+    $required = bitc_getRequired($tab, $fields); ?>
 
-<div class="hdq_input_item">
-    <label class="hdq_input_label" for="<?php echo $tab["name"]; ?>">
+<div class="bitc_input_item">
+    <label class="bitc_input_label" for="<?php echo $tab["name"]; ?>">
         <?php
             if ($required) {
-                hdq_print_tab_requiredIcon();
+                bitc_print_tab_requiredIcon();
                 $required = "required";
             }
             echo $tab["label"];
             if (isset($tab["tooltip"]) && $tab["tooltip"] != "") {
-                hdq_print_fields_tooltip($tab["tooltip"]);
+                bitc_print_fields_tooltip($tab["tooltip"]);
             }
         ?>
     </label>
-<div class="hdq_checkbox_wrapper hderp_input" data-tab = "<?php echo $tab_slug; ?>" data-type = "checkbox" data-id = "<?php echo $tab["name"]; ?>" id = "<?php echo $tab["name"]; ?>">	
+<div class="bitc_checkbox_wrapper hderp_input" data-tab = "<?php echo $tab_slug; ?>" data-type = "checkbox" data-id = "<?php echo $tab["name"]; ?>" id = "<?php echo $tab["name"]; ?>">	
     <?php
         if (isset($tab["options"])) {
 			// first check if we should set a default value or not
@@ -54,20 +54,20 @@ function hdq_printField_checkbox($tab, $tab_slug, $fields)
 				}
 				?>
 
-                <div class="hdq_checkbox_container">
-                    <div class="hdq_checkbox">
+                <div class="bitc_checkbox_container">
+                    <div class="bitc_checkbox">
                         <input 
                             data-tab="<?php echo $tab_slug; ?>" 
                             type="checkbox" 
                             onchange="HDQ.checkboxFieldSelect(this)" 
                             value="<?php echo $v; ?>" 
                             data-type="radio" 
-                            class="hdq_checkbox_input" 
+                            class="bitc_checkbox_input" 
                             data-id="<?php echo $tab["name"]; ?>" 
                             id="variation_field_<?php echo $tab["name"].$v; ?>" 
                             <?php echo $checked; ?>
                         />                
-                        <label class = "hdq_toggle" for="variation_field_<?php echo $tab["name"].$v; ?>"></label>
+                        <label class = "bitc_toggle" for="variation_field_<?php echo $tab["name"].$v; ?>"></label>
                     </div>
                     <label for="variation_field_<?php echo $tab["name"].$v; ?>"><?php echo $n; ?></label>
                 </div>

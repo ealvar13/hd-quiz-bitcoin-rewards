@@ -9,15 +9,15 @@ if (!current_user_can('edit_others_pages')) {
 }
 
 wp_enqueue_style(
-    'hdq_admin_style',
-    plugin_dir_url(__FILE__) . 'css/hdq_admin.css?v='.HDQ_PLUGIN_VERSION
+    'bitc_admin_style',
+    plugin_dir_url(__FILE__) . 'css/bitc_admin.css?v='.bitc_PLUGIN_VERSION
 );
         
 wp_enqueue_script(
-    'hdq_admin_script',
-    plugins_url('/js/hdq_admin.js?v='.HDQ_PLUGIN_VERSION, __FILE__),
+    'bitc_admin_script',
+    plugins_url('/js/bitc_admin.js?v='.bitc_PLUGIN_VERSION, __FILE__),
     array('jquery', 'jquery-ui-draggable'),
-    HDQ_PLUGIN_VERSION,
+    bitc_PLUGIN_VERSION,
     true
 );
         
@@ -35,14 +35,14 @@ wp_enqueue_script(
 		will never need to use any of the tools on this page, but these tools are still here to help you out when
 		needed.</p>
 
-	<div class="hdq_tool_item">
+	<div class="bitc_tool_item">
 		<div>
 			<h4>Quiz and Question Data Updater</h4>
 			<p>
 				<small>This tool is only needed for users upgrading from Bitcoin Mastermind 1.7 or lower.<br/><strong>DO NOT USE if you are upgrading from a version higher than 1.7</strong></small>
 			</p>
 
-			<div class="hdq_accordion">
+			<div class="bitc_accordion">
 				<h3>What does this tool do?</h3>
 				<div style="display: none;">
 					<p>
@@ -62,24 +62,24 @@ wp_enqueue_script(
 					worry</strong>. None of your old data has been deleted or modified in any way. In fact, you can
 				easily replace this version of Bitcoin Mastermind by downloading the <a
 					href="https://wordpress.org/plugins/hd-quiz/advanced/" target="_blank">previous version of Bitcoin Mastermind
-					here</a> <span class="hdq_tooltip">
+					here</a> <span class="bitc_tooltip">
 					?
-					<span class="hdq_tooltip_content">
+					<span class="bitc_tooltip_content">
 						<span>The download link is at the very bottom of the page</span>
 					</span>
 				</span>.
 			</p>
 		</div>
-		<a href = "<?php echo get_admin_url(null, "?page=hdq_tools_data_upgrade"); ?>" class="hdq_button" role="button" title="init tool">
+		<a href = "<?php echo get_admin_url(null, "?page=bitc_tools_data_upgrade"); ?>" class="bitc_button" role="button" title="init tool">
 			RUN TOOL
 		</a>
 	</div>
 
 
-	<div class="hdq_tool_item">
+	<div class="bitc_tool_item">
 		<div>
 			<h4>Question CSV Uploader</h4>
-			<div class="hdq_accordion">
+			<div class="bitc_accordion">
 				<h3>What does this tool do?</h3>
 				<div style="display: none;">
 					<p>
@@ -98,7 +98,7 @@ wp_enqueue_script(
 				<strong>NOTE:</strong> It is YOUR responsibility to ensure that your CSV is properly formatted. Due to the almost infinte ways that a CSV can be inproperly formatted for Bitcoin Mastermind, I can only offer a very limited support to help with any issues arising from this feature.
 			</p>
 		</div>
-		<a href = "<?php echo get_admin_url(null, "?page=hdq_tools_csv_importer"); ?>" class="hdq_button" role="button" title="init tool">
+		<a href = "<?php echo get_admin_url(null, "?page=bitc_tools_csv_importer"); ?>" class="bitc_button" role="button" title="init tool">
 			RUN TOOL
 		</a>
 	</div>

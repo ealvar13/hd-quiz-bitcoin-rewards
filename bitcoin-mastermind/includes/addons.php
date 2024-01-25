@@ -9,21 +9,21 @@ if (!current_user_can('edit_others_pages')) {
 }
 
 wp_enqueue_style(
-    'hdq_admin_style',
-    plugin_dir_url(__FILE__) . 'css/hdq_admin.css?v=' . HDQ_PLUGIN_VERSION
+    'bitc_admin_style',
+    plugin_dir_url(__FILE__) . 'css/bitc_admin.css?v=' . bitc_PLUGIN_VERSION
 );
 
 wp_enqueue_script(
-    'hdq_admin_script',
-    plugins_url('/js/hdq_admin.js?v=' . HDQ_PLUGIN_VERSION, __FILE__),
+    'bitc_admin_script',
+    plugins_url('/js/bitc_admin.js?v=' . bitc_PLUGIN_VERSION, __FILE__),
     array('jquery', 'jquery-ui-draggable'),
-    HDQ_PLUGIN_VERSION,
+    bitc_PLUGIN_VERSION,
     true
 );
 
 $today = date("Ymd");
-update_option("hdq_new_addon", $today);
-set_transient("hdq_new_addon", array("date" => $today, "isNew" => ""), WEEK_IN_SECONDS);
+update_option("bitc_new_addon", $today);
+set_transient("bitc_new_addon", array("date" => $today, "isNew" => ""), WEEK_IN_SECONDS);
 ?>
 
 
@@ -34,7 +34,7 @@ set_transient("hdq_new_addon", array("date" => $today, "isNew" => ""), WEEK_IN_S
         </h1>
     </div>
 
-    <div id="hdq_addons">
+    <div id="bitc_addons">
         <?php
 
         // TODO! convert to ajax for faster initial page load
@@ -69,18 +69,18 @@ set_transient("hdq_new_addon", array("date" => $today, "isNew" => ""), WEEK_IN_S
                     }
 
         ?>
-                    <div class="hdq_addon_item">
-                        <div class="hdq_addon_item_image">
+                    <div class="bitc_addon_item">
+                        <div class="bitc_addon_item_image">
                             <img src="<?php echo $thumb; ?>" alt="<?php echo $title; ?>">
                         </div>
-                        <div class="hdq_addon_content">
+                        <div class="bitc_addon_content">
                             <h2>
                                 <?php
                                 echo $title;
                                 if ($verified == "verified") {
-                                    echo '<span class = "hdq_verified hdq_tooltip hdq_tooltip_question">verified<span class="hdq_tooltip_content"><span>This plugin has either been developed by the author of Bitcoin Mastermind or has been audited by the developer.</span></span></span>';
-                                } ?> <span class="hdq_price"><?php echo esc_html($price); ?></span></h2>
-                            <h4 class="hdq_addon_author">
+                                    echo '<span class = "bitc_verified bitc_tooltip bitc_tooltip_question">verified<span class="bitc_tooltip_content"><span>This plugin has either been developed by the author of Bitcoin Mastermind or has been audited by the developer.</span></span></span>';
+                                } ?> <span class="bitc_price"><?php echo esc_html($price); ?></span></h2>
+                            <h4 class="bitc_addon_author">
                                 developed by: <?php echo esc_html($author); ?>
                             </h4>
 
@@ -88,9 +88,9 @@ set_transient("hdq_new_addon", array("date" => $today, "isNew" => ""), WEEK_IN_S
                             <p style="text-align:right">
                                 <?php
                                 if ($slug != "" && $slug != null) {
-                                    echo '<a class = "hdq_button" target = "_blank" href = "plugin-install.php?tab=plugin-information&amp;plugin=' . $slug . '">VIEW ADDON PAGE</a>';
+                                    echo '<a class = "bitc_button" target = "_blank" href = "plugin-install.php?tab=plugin-information&amp;plugin=' . $slug . '">VIEW ADDON PAGE</a>';
                                 } else {
-                                    echo '<a href = "' . $url . '?utm_source=HDQuiz&utm_medium=addonsPage" target = "_blank" class = "hdq_button2 hdq_reverse">View Addon Page</a>';
+                                    echo '<a href = "' . $url . '?utm_source=HDQuiz&utm_medium=addonsPage" target = "_blank" class = "bitc_button2 bitc_reverse">View Addon Page</a>';
                                 } ?>
                             </p>
                         </div>

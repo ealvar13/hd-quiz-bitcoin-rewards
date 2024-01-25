@@ -6,14 +6,14 @@
 
 window.addEventListener("load", (event) => {
 	console.log("Bitcoin Mastermind Save Results Light INIT");
-	hdq_a_light_start();
+	bitc_a_light_start();
     initializeFieldLogic();
 });
 
 function initializeFieldLogic() {
-    const joltzFields = document.querySelectorAll('[name="hdq_joltz_brand_id"], [name="hdq_joltz_brand_secret"]');
-    const btcFields = document.querySelectorAll('[name="hdq_btcpay_url"], [name="hdq_btcpay_api_key"]');
-    const saveButton = document.querySelector('#hdq_save_settings');
+    const joltzFields = document.querySelectorAll('[name="bitc_joltz_brand_id"], [name="bitc_joltz_brand_secret"]');
+    const btcFields = document.querySelectorAll('[name="bitc_btcpay_url"], [name="bitc_btcpay_api_key"]');
+    const saveButton = document.querySelector('#bitc_save_settings');
 
     function disableFields(fields) {
         fields.forEach(field => {
@@ -67,36 +67,36 @@ function initializeFieldLogic() {
     }
 }
 
-function hdq_a_light_start() {
-	hdq_a_light_load_active_tab();
+function bitc_a_light_start() {
+	bitc_a_light_load_active_tab();
 }
 
 // show the default tab on load
-function hdq_a_light_load_active_tab() {
-	var activeTab = jQuery("#hdq_tabs .hdq_active_tab").attr("data-hdq-content");
-	jQuery("#" + activeTab).addClass("hdq_tab_active");
-	jQuery(".hdq_tab_active").slideDown(500);
+function bitc_a_light_load_active_tab() {
+	var activeTab = jQuery("#bitc_tabs .bitc_active_tab").attr("data-hdq-content");
+	jQuery("#" + activeTab).addClass("bitc_tab_active");
+	jQuery(".bitc_tab_active").slideDown(500);
 }
 
-jQuery(".hdq_accordion h3").click(function () {
+jQuery(".bitc_accordion h3").click(function () {
 	jQuery(this).next("div").toggle(600);
 });
 
 /* Tab navigation
 ------------------------------------------------------- */
-jQuery("#hdq_form_wrapper").on("click", "#hdq_tabs li", function (event) {
-	jQuery("#hdq_tabs li").removeClass("hdq_active_tab");
-	jQuery(this).addClass("hdq_active_tab");
+jQuery("#bitc_form_wrapper").on("click", "#bitc_tabs li", function (event) {
+	jQuery("#bitc_tabs li").removeClass("bitc_active_tab");
+	jQuery(this).addClass("bitc_active_tab");
 	var hdqContent = jQuery(this).attr("data-hdq-content");
-	jQuery(".hdq_tab_active").fadeOut();
-	jQuery(".hdq_tab").removeClass("hdq_tab_active");
+	jQuery(".bitc_tab_active").fadeOut();
+	jQuery(".bitc_tab").removeClass("bitc_tab_active");
 	jQuery("#" + hdqContent)
 		.delay(250)
 		.fadeIn();
-	jQuery("#" + hdqContent).addClass("hdq_tab_active");
+	jQuery("#" + hdqContent).addClass("bitc_tab_active");
 });
 
-function hdq_a_light_scroll_to_top() {
+function bitc_a_light_scroll_to_top() {
 	jQuery("html").animate(
 		{
 			scrollTop: 0,
@@ -106,77 +106,77 @@ function hdq_a_light_scroll_to_top() {
 }
 
 // start loading stuff
-function hdq_a_light_start_load() {
-	jQuery("#hdq_message").fadeOut();
-	jQuery("#hdq_loading ").fadeIn();
+function bitc_a_light_start_load() {
+	jQuery("#bitc_message").fadeOut();
+	jQuery("#bitc_loading ").fadeIn();
 }
 // after stuff has loaded
-function hdq_a_light_after_load(editor = false) {
-	jQuery("#hdq_loading ").delay(600).fadeOut();
-	hdq_load_active_tab();
-	hdq_scroll_to_top();
+function bitc_a_light_after_load(editor = false) {
+	jQuery("#bitc_loading ").delay(600).fadeOut();
+	bitc_load_active_tab();
+	bitc_scroll_to_top();
 }
 
 // show message box
-function hdq_a_light_show_message(message) {
-	jQuery("#hdq_message").html(message);
-	jQuery("#hdq_message").fadeIn();
+function bitc_a_light_show_message(message) {
+	jQuery("#bitc_message").html(message);
+	jQuery("#bitc_message").fadeIn();
 }
 
 // hide message
-jQuery("#hdq_wrapper").on("click", "#hdq_message", function (event) {
-	jQuery("#hdq_message").fadeOut();
+jQuery("#bitc_wrapper").on("click", "#bitc_message", function (event) {
+	jQuery("#bitc_message").fadeOut();
 });
 
 // delete all results
-jQuery("#hdq_wrapper").on("click", "#hdq_a_light_delete_results", function (event) {
-	jQuery("#hdq_a_light_delete_results").fadeOut();
+jQuery("#bitc_wrapper").on("click", "#bitc_a_light_delete_results", function (event) {
+	jQuery("#bitc_a_light_delete_results").fadeOut();
 
 	jQuery.ajax({
 		type: "POST",
 		data: {
-			action: "hdq_a_light_delete_results",
-			nonce: jQuery("#hdq_about_options_nonce").val(),
+			action: "bitc_a_light_delete_results",
+			nonce: jQuery("#bitc_about_options_nonce").val(),
 		},
 		url: ajaxurl,
 		success: function (data) {
-			jQuery("#hdq_a_light_delete_results").html("results deleted");
-			jQuery("#hdq_tab_content").html("");
+			jQuery("#bitc_a_light_delete_results").html("results deleted");
+			jQuery("#bitc_tab_content").html("");
 		},
 		error: function () {
-			jQuery("#hdq_a_light_delete_results").html("permission denied");
+			jQuery("#bitc_a_light_delete_results").html("permission denied");
 		},
 		complete: function () {
-			jQuery("#hdq_a_light_delete_results").fadeIn();
+			jQuery("#bitc_a_light_delete_results").fadeIn();
 		},
 	});
 });
 
 /* Export Table as CSV */
-function hdq_a_light_export() {
+function bitc_a_light_export() {
 	let csv = [];
 	let rows = document.querySelectorAll("table tr");
 
 	for (var i = 0; i < rows.length; i++) {
 		let row = [],
-			cols = rows[i].querySelectorAll(".hdq_a_light_table td, .hdq_a_light_table th");
+			cols = rows[i].querySelectorAll(".bitc_a_light_table td, .bitc_a_light_table th");
 
 		for (var j = 0; j < cols.length; j++) row.push(cols[j].innerText);
 
 		csv.push(row.join(","));
 	}
-	hdq_a_light_download_csv(csv);
+	bitc_a_light_download_csv(csv);
 
-	function hdq_a_light_download_csv(csv) {
+	function bitc_a_light_download_csv(csv) {
 		console.log(csv);
 		csv = csv.join("\n");
 		console.log(csv);
 		let csvFile = new Blob([csv], { type: "text/csv" });
 		let downloadLink = document.createElement("a");
-		downloadLink.download = "hdq_results.csv";
+		downloadLink.download = "bitc_results.csv";
 		downloadLink.href = window.URL.createObjectURL(csvFile);
 		downloadLink.innerHTML = "download export";
-		document.getElementById("hdq_a_light_export_csv_wrap").appendChild(downloadLink);
+		document.getElementById("bitc_a_light_export_csv_wrap").appendChild(downloadLink);
 	}
 }
-document.getElementById("hdq_a_light_export_results").addEventListener("click", hdq_a_light_export);
+document.getElementById("bitc_a_light_export_results").addEventListener("click", bitc_a_light_export);

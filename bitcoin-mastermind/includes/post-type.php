@@ -6,7 +6,7 @@
 
 /* Register Forms
 ------------------------------------------------------- */
-function hdq_cpt_quizzes()
+function bitc_cpt_quizzes()
 {
     $labels = array(
         'name'                => _x('Questions', 'Post Type General Name', 'text_domain'),
@@ -46,11 +46,11 @@ function hdq_cpt_quizzes()
     );
     register_post_type('post_type_questionna', $args);
 }
-add_action('init', 'hdq_cpt_quizzes', 0);
+add_action('init', 'bitc_cpt_quizzes', 0);
 
 
 // Register Quiz taxonomy
-function hdq_tax_quizzes()
+function bitc_tax_quizzes()
 {
     $labels = array(
         'name'                       => _x('Quizzes', 'Taxonomy General Name', 'text_domain'),
@@ -83,22 +83,22 @@ function hdq_tax_quizzes()
     );
     register_taxonomy('quiz', array('post_type_questionna'), $args);
 }
-add_action('init', 'hdq_tax_quizzes', 0);
+add_action('init', 'bitc_tax_quizzes', 0);
 
-function hdq_add_warning()
+function bitc_add_warning()
 {
 ?>
     <style>
-        #hdq_quiz_tax_warning {
+        #bitc_quiz_tax_warning {
             padding: 12px;
             border: 2px solid #ff6666;
         }
 
-        #hdq_quiz_tax_warning * {
+        #bitc_quiz_tax_warning * {
             font-size: 1.4em;
         }
 
-        .hdq_button4 {
+        .bitc_button4 {
             font-size: 0.8em;
             display: inline-block;
             padding: 12px 14px;
@@ -114,12 +114,12 @@ function hdq_add_warning()
         window.onload = function(e) {
             if (jQuery("body").hasClass("post-type-post_type_questionna") && jQuery("body").hasClass("taxonomy-quiz")) {
                 // add warning to quiz taxonomy page
-                let warning = '<div id = "hdq_quiz_tax_warning"><h2>WARNING</h2><p>Please note that deleting a quiz here will NOT delete any attached questions to it. You can delete questions in bulk by clicking the following button</p><a href = "./edit.php?post_type=post_type_questionna" class = "hdq_button4">DELETE QUESTIONS</a></div>';
+                let warning = '<div id = "bitc_quiz_tax_warning"><h2>WARNING</h2><p>Please note that deleting a quiz here will NOT delete any attached questions to it. You can delete questions in bulk by clicking the following button</p><a href = "./edit.php?post_type=post_type_questionna" class = "bitc_button4">DELETE QUESTIONS</a></div>';
                 jQuery(".form-wrap").append(warning)
             } else if (jQuery("body").hasClass("post-type-post_type_questionna")) {
 
                 // add warning to quiz taxonomy page
-                let warning = '<br/><br/><br/><br/><div id = "hdq_quiz_tax_warning"><p>This page is just a quick and easy way to bulk delete questions, or add multiple questions to a quiz at the same time. WordPress already has this functionality built in, so no point in reinventing the wheel :)</p></div><br/>';
+                let warning = '<br/><br/><br/><br/><div id = "bitc_quiz_tax_warning"><p>This page is just a quick and easy way to bulk delete questions, or add multiple questions to a quiz at the same time. WordPress already has this functionality built in, so no point in reinventing the wheel :)</p></div><br/>';
                 jQuery("#posts-filter").prepend(warning);
                 jQuery(".page-title-action").remove();
             }
@@ -130,22 +130,22 @@ function hdq_add_warning()
 }
 
 
-function hdq_add_warning_to_quiz_tax($hook)
+function bitc_add_warning_to_quiz_tax($hook)
 {
     if ($hook === "edit-tags.php" || $hook === "edit.php") {
-        hdq_add_warning();
+        bitc_add_warning();
     }
 }
-add_action('admin_enqueue_scripts', 'hdq_add_warning_to_quiz_tax', 10, 1);
+add_action('admin_enqueue_scripts', 'bitc_add_warning_to_quiz_tax', 10, 1);
 
 
-function hdq_cpt_question_meta_notice()
+function bitc_cpt_question_meta_notice()
 {
-    add_meta_box('hdq_question_meta', "NOTICE", 'hdq_question_meta_notice', 'post_type_questionna');
+    add_meta_box('bitc_question_meta', "NOTICE", 'bitc_question_meta_notice', 'post_type_questionna');
 }
-add_action('add_meta_boxes', 'hdq_cpt_question_meta_notice');
+add_action('add_meta_boxes', 'bitc_cpt_question_meta_notice');
 
-function hdq_question_meta_notice()
+function bitc_question_meta_notice()
 {
     echo '<p>the ablity to modify question data from here has been depricated since Bitcoin Mastermind 1.6, and removed since Bitcoin Mastermind 1.8. The bulk question edit page still exists so that you can easily delete questions in bulk, or add questions to quizzes in bulk.</p>';
 }
