@@ -1,0 +1,547 @@
+.bitc_quiz_wrapper {
+	margin: 0 auto;
+	padding-bottom: 60px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	position: relative;
+	max-width: 100%;
+}
+
+.bitc_quiz_wrapper *,
+.bitc_quiz_wrapper:before,
+*:after {
+	-webkit-box-sizing: inherit;
+	-moz-box-sizing: inherit;
+	box-sizing: inherit;
+}
+
+.bitc_quiz {
+	width: 100%;
+	max-width: 600px;
+	margin: 0 auto;
+	position: relative;
+}
+
+.bitc_hidden,
+.bitc_aria_label {
+	display: none !important;
+}
+
+.bitc_quiz > .bitc_jPaginate {
+	display: block;
+}
+
+.bitc_quiz > .bitc_jPaginate ~ .bitc_jPaginate {
+	display: none;
+}
+
+.bitc_jPaginate,
+.bitc_finish,
+.bitc_next_page {
+	text-align: center;
+}
+
+.bitc_quiz_wrapper .bitc_button {
+	display: inline-block;
+	margin: 0 auto;
+	padding: 12px 22px;
+	text-align: center;
+	background: #2d2d2d;
+	color: #fff;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.bitc_button:hover,
+.bitc_complete {
+	opacity: 0.6;
+}
+
+.bitc_complete {
+	cursor: default;
+}
+
+.bitc_quiz_start.bitc_button {
+	display: block;
+}
+
+.bitc_quiz .bitc_input {
+	padding: 1rem;
+	font-size: 1em;
+	width: 100%;
+	color: #2d2d2d;
+	border-bottom: 1px dashed #aaa !important;
+	line-height: inherit;
+	height: auto;
+	cursor: initial !important;
+}
+
+#bitc_fb_sharer {
+	cursor: pointer;
+}
+
+.bitc_result_pass,
+.bitc_result_fail {
+	display: none;
+}
+
+.bitc_result_pass,
+.bitc_result_fail {
+	font-size: 1.3em;
+	margin: 1rem 0;
+}
+
+.bitc_result {
+	font-size: 2.4em;
+	font-weight: bold;
+}
+
+.bitc_results_wrapper {
+	padding: 2rem;
+	margin: 1rem 0;
+	padding: 2rem;
+	background: #fafafa;
+	border-bottom: 2px solid #dedede;
+	display: none;
+}
+
+.bitc_share {
+	text-align: center;
+	background: rgba(0, 0, 0, 0.1);
+	padding: 22px;
+	display: flex;
+	justify-content: center;
+}
+
+.bitc_social_icon {
+	display: inline-block;
+	line-height: 1;
+	margin: 0.4em;
+}
+
+.bitc_social_icon > a {
+	display: inline-block;
+}
+
+.bitc_jPaginate ~ .bitc_question,
+.bitc_jPaginate ~ .bitc_adset_container {
+	display: none;
+}
+
+.bitc_adset_container {
+	margin: 0 auto;
+	padding: 1em;
+}
+
+.bitc_quiz_wrapper img {
+	max-width: 100%;
+	height: auto !important;
+}
+
+.bitc_question_featured_image {
+	text-align: center;
+}
+
+.bitc_featured_image {
+	display: block;
+	width: inherit;
+	height: auto;
+	margin: 0 auto;
+}
+
+.bitc_question_answers_images {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	grid-gap: 1rem;
+}
+
+.bitc_quiz .bitc_row:hover {
+	background: rgba(0, 0, 0, 0.1);
+}
+
+.bitc_disabled {
+	opacity: 0.8;
+}
+
+.bitc_disabled .bitc_row:hover {
+	cursor: default;
+	background: rgba(0, 0, 0, 0);
+}
+
+.bitc_disabled label {
+	cursor: default !important;
+}
+
+.bitc_row_image > .bitc_label_answer {
+	display: grid;
+	grid-template-rows: max-content 1fr;
+	grid-gap: 1rem;
+}
+
+.bitc_question {
+	margin: 1rem 0;
+	padding: 2rem;
+	background: #fafafa;
+	border-bottom: 2px solid #dedede;
+	transition: all 350ms ease-in-out;
+}
+
+.bitc_question.bitc_active_question {
+	box-shadow: 0px 0px 1rem 0px rgba(0, 0, 0, 0.4);
+}
+
+.bitc_question_after_text {
+	display: none;
+	margin-top: 12px;
+	padding: 12px 22px;
+	background: rgba(0, 0, 0, 0.1);
+	border-bottom: 2px solid #dedede;
+}
+
+.hdq-options-check {
+	display: inline-block;
+	margin-right: 12px;
+	top: 4px;
+	position: relative;
+}
+
+.bitc_label_answer {
+	display: block;
+	font-size: 1.2em;
+	cursor: pointer;
+	padding: 12px;
+	color: #2d2d2d !important;
+	line-height: 1.4;
+}
+
+.bitc_correct {
+	border: 4px solid green;
+	background: rgba(0, 128, 0, 0.1);
+}
+
+.bitc_wrong {
+	border: 4px dashed red;
+	background: rgba(128, 0, 0, 0.1);
+}
+
+.bitc_correct_not_selected {
+	border-bottom: 4px solid green;
+	background: rgba(0, 128, 0, 0.1);
+	margin-bottom: 2px;
+}
+
+.bitc_checkbox .hdq-options-check {
+	font-size: 24px;
+}
+
+.bitc_question_title {
+	border-bottom: 3px solid #999;
+}
+
+.bitc_heart {
+	text-align: right;
+	font-size: 0.8em;
+	margin-top: 4px;
+}
+
+.bitc_results_inner > .bitc_results_title,
+h3.bitc_question_as_tile {
+	margin: 0;
+	padding: 0;
+}
+
+.bitc_checkbox .hdq-options-check label {
+	width: 2em;
+	height: 1em;
+	position: relative;
+	cursor: pointer;
+	display: block;
+	font-size: 22px !important;
+}
+
+/* checkbox */
+.hdq-options-check {
+	font-size: 24px;
+}
+
+.hdq-options-check input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+}
+
+.hdq-options-check .bitc_toggle {
+	width: 2em;
+	height: 1em;
+	position: relative;
+	cursor: pointer;
+	display: block !important;
+	font-size: 22px !important;
+	margin: 0;
+}
+
+.bitc_checkbox .bitc_toggle {
+	margin-bottom: 0 !important;
+}
+
+.hdq-options-check .bitc_toggle:before {
+	content: "";
+	position: absolute;
+	width: 2em;
+	height: 1em;
+	left: 0.1em;
+	transition: background 0.1s ease;
+	background: #476777;
+	border-radius: 50px;
+	box-shadow: inset 0px 1px 1px rgba(171, 171, 171, 0.5);
+}
+
+.hdq-options-check .bitc_toggle:after {
+	content: "";
+	position: absolute;
+	width: 1em;
+	height: 1em;
+	border-radius: 50px;
+	left: 0;
+	transition: all 0.2s ease;
+	box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+	background: #efefef;
+	animation: bitc_switch-off 0.2s ease-out;
+	z-index: 2;
+}
+
+.hdq-options-check input[type="checkbox"]:checked + .bitc_toggle:before {
+	background: #72a0c4;
+	box-shadow: inset 0px 1px 1px rgba(84, 152, 140, 0.5);
+}
+
+.hdq-options-check input[type="checkbox"]:checked + .bitc_toggle:after {
+	animation: bitc_switch-on 0.2s ease-out;
+	left: 1.1em;
+	background: #efefef;
+}
+
+.hdq-options-check input[type="checkbox"]:focus + .bitc_toggle:after {
+	border: 1px solid #66cbff;
+}
+
+label.non-block {
+	display: inline-block !important;
+	margin-right: 12px !important;
+}
+
+@keyframes bitc_switch-on {
+	50% {
+		transform: scaleX(1.3);
+	}
+}
+
+@keyframes bitc_switch-off {
+	50% {
+		transform: scaleX(1.3);
+	}
+}
+
+.bitc_timer {
+	position: fixed;
+	bottom: 40px;
+	right: 40px;
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	background: #2d2d2d;
+	color: #fff;
+	width: 60px;
+	height: 60px;
+	line-height: 60px;
+	text-align: center;
+	z-index: 999;
+}
+
+.bitc_timer.bitc_timer_warning {
+	background: #f17222;
+}
+
+.bitc_timer.bitc_timer_danger {
+	background: #ab2121;
+	box-shadow: 0 0 0 rgba(204, 169, 44, 0.7);
+	animation: bitc_pulse 1s infinite;
+}
+
+@-webkit-keyframes bitc_pulse {
+	0% {
+		-webkit-box-shadow: 0 0 0 0 rgba(171, 33, 33, 0.7);
+	}
+
+	70% {
+		-webkit-box-shadow: 0 0 0 10px rgba(171, 33, 33, 0);
+	}
+
+	100% {
+		-webkit-box-shadow: 0 0 0 0 rgba(171, 33, 33, 0);
+	}
+}
+
+@keyframes bitc_pulse {
+	0% {
+		-moz-box-shadow: 0 0 0 0 rgba(171, 33, 33, 0.7);
+		box-shadow: 0 0 0 0 rgba(171, 33, 33, 0.4);
+	}
+
+	70% {
+		-moz-box-shadow: 0 0 0 10px rgba(171, 33, 33, 0);
+		box-shadow: 0 0 0 10px rgba(171, 33, 33, 0);
+	}
+
+	100% {
+		-moz-box-shadow: 0 0 0 0 rgba(171, 33, 33, 0);
+		box-shadow: 0 0 0 0 rgba(171, 33, 33, 0);
+	}
+}
+
+.bitc_loading_bar {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	z-index: -1;
+	width: 100%;
+	height: 8px;
+	background: rgba(15, 143, 18, 0.7);
+	-webkit-transform: translate3d(-103%, 0, 0);
+	transform: translate3d(-103%, 0, 0);
+	pointer-events: none;
+}
+
+.bitc_loading_bar.bitc_animate {
+	bottom: -20px;
+	z-index: 100;
+	-webkit-transition: -webkit-transform 1.2s ease-in, bottom 0.3s 2.7s;
+	transition: transform 1.2s ease-in, bottom 0.3s 2.7s;
+	-webkit-transform: translate3d(0%, 0, 0);
+	transform: translate3d(0%, 0, 0);
+}
+
+h2.bitc_results_title,
+h3.bitc_question_heading {
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	line-height: 1.2;
+	color: #222;
+}
+
+.bitc_question_number {
+	opacity: 0.8;
+}
+
+.bitc_tooltip {
+	position: relative;
+	width: 20px;
+	height: 20px;
+	background-color: rgb(95, 102, 109);
+	color: #fff;
+	display: inline-flex;
+	justify-content: center;
+	align-content: center;
+	align-items: center;
+	font-size: 0.6em;
+	border-radius: 50%;
+	top: -3px;
+	font-family: monospace;
+}
+
+.bitc_tooltip_content {
+	font-family: sans-serif;
+	position: absolute;
+	top: calc(100% + 1em);
+	font-size: 0.8em;
+	width: 260px;
+	left: -130px;
+	line-height: 1.4;
+	background-color: rgb(95, 102, 109);
+	border-radius: 10px;
+	box-shadow: 0px 13px 10px rgba(72, 72, 72, 0.025), 0 1px 16px rgba(72, 72, 72, 0.55);
+	color: #fff;
+	padding: 1.4em;
+	text-align: left;
+	pointer-events: none;
+	opacity: 0;
+	transform: translate3d(0, 30px, 0);
+	transition: all 0.3s cubic-bezier(0.1, 1, 0.9, 1);
+	transition-property: opacity, transform;
+}
+
+.bitc_tooltip_content span {
+	display: block;
+	letter-spacing: initial;
+}
+
+.bitc_tooltip_content::after {
+	content: "";
+	position: absolute;
+	bottom: 100%;
+	left: 50%;
+	display: block;
+	border-style: solid;
+	border-top-color: transparent;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	border-bottom: 10px solid rgb(95, 102, 109);
+}
+
+.bitc_tooltip:hover .bitc_tooltip_content {
+	opacity: 1;
+	transform: translate3d(0, 0, 0);
+	z-index: 99999;
+}
+
+@media screen and (max-width: 800px) {
+	.bitc_timer {
+		bottom: 10px;
+		right: 10px;
+	}
+
+	.bitc_share {
+		padding: 8px;
+		line-height: 1;
+	}
+
+	.bitc_question,
+	.bitc_results_wrapper {
+		padding: 1rem;
+	}
+
+	.bitc_tooltip_content {
+		position: fixed;
+		top: initial;
+		bottom: 10px;
+		width: 80%;
+		left: 10%;
+		margin: 0;
+	}
+
+	.bitc_tooltip_content::after {
+		display: none;
+	}
+
+	.bitc_quiz_wrapper {
+		overflow-x: hidden;
+	}
+
+	.bitc_label_answer {
+		font-size: 1rem;
+	}
+
+	.bitc_question_answers_images {
+		grid-gap: 0.4rem;
+	}
+
+	.bitc_row_image > .bitc_label_answer {
+		grid-gap: 0.5rem;
+		padding: 0.4em;
+	}
+
+	.bitc_row_image .hdq-options-check {
+		display: block;
+		margin-bottom: 0.4em;
+	}
+}

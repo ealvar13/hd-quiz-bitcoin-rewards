@@ -1,5 +1,5 @@
 ## 1. Project Requirements and Goals
-- **Objective**: Develop a WordPress plugin add-on for the HD Quiz plugin.
+- **Objective**: Develop a WordPress plugin add-on for the Bitcoin Mastermind plugin.
 - **Functionality**: Integrate Bitcoin Lightning rewards, allowing quiz participants to earn Satoshis based on performance.
 
 ## 2. Current Functionality
