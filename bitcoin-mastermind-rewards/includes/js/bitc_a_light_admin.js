@@ -130,32 +130,37 @@ jQuery("#bitc_wrapper").on("click", "#bitc_message", function (event) {
 
 // delete all results
 jQuery("#bitc_wrapper").on("click", "#bitc_a_light_delete_results", function (event) {
-	jQuery("#bitc_a_light_delete_results").fadeOut();
 
-	jQuery.ajax({
-		type: "POST",
-		data: {
-			action: "bitc_a_light_delete_results",
-			nonce: jQuery("#bitc_about_options_nonce").val(),
-		},
-		url: ajaxurl,
-		success: function (data) {
-			jQuery("#bitc_a_light_delete_results").html("results deleted");
-			jQuery("#bitc_tab_content").html("");
-		},
-		error: function () {
-			jQuery("#bitc_a_light_delete_results").html("permission denied");
-		},
-		complete: function () {
-			jQuery("#bitc_a_light_delete_results").fadeIn();
-		},
-	});
+	var userConfirmed = confirm('Are you sure you want to proceed?');
+	  // Check if the user clicked "OK"
+  if (userConfirmed) {
+		jQuery("#bitc_a_light_delete_results").fadeOut();
+
+		jQuery.ajax({
+			type: "POST",
+			data: {
+				action: "bitc_a_light_delete_results",
+				nonce: jQuery("#bitc_about_options_nonce").val(),
+			},
+			url: ajaxurl,
+			success: function (data) {
+				jQuery("#bitc_a_light_delete_results").html("Results deleted");
+				jQuery("#bitc_tab_content").html("");
+			},
+			error: function () {
+				jQuery("#bitc_a_light_delete_results").html("permission denied");
+			},
+			complete: function () {
+				jQuery("#bitc_a_light_delete_results").fadeIn();
+			},
+		});
+	}
 });
 
 /* Export Table as CSV */
 function bitc_a_light_export() {
 	let csv = [];
-	let rows = document.querySelectorAll("table tr");
+	let rows = document.querySelectorAll("#bitc_tab_content table tr");
 
 	for (var i = 0; i < rows.length; i++) {
 		let row = [],
