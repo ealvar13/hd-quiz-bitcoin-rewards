@@ -123,7 +123,8 @@ function bitc_create_settings_page()
     if (bitc_user_permission()) {
         function bitc_register_quizzes_page()
         {
-            add_menu_page('Bitcoin Mastermind', 'Bitcoin Mastermind', 'publish_posts', 'bitc_quizzes', 'bitc_register_quizzes_page_callback', 'dashicons-clipboard', 5);
+            $icon = plugin_dir_url( __FILE__ ).'img/plugin-img.jpeg';
+            add_menu_page('Bitcoin Mastermind', 'Bitcoin Mastermind', 'publish_posts', 'bitc_quizzes', 'bitc_register_quizzes_page_callback', $icon, 5);
             add_menu_page('Bitcoin Mastermind Addons', 'HDQ Addons', 'edit_posts', 'bitc_addons', 'bitc_register_addons_page_callbak', '', 99);
             add_menu_page('Bitcoin Mastermind Tools', 'HDQ Tools', 'edit_posts', 'bitc_tools', 'bitc_register_tools_page_callbak', '', 99);
 
