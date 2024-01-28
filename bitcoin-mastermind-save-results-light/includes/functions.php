@@ -77,6 +77,8 @@ function bitc_a_light_submit_action($data)
 
     // re-encode and update record
     $result = json_encode($data);
+
+    print_r($result );die;
     update_option("bitc_quiz_results_l", sanitize_text_field($result));
 
     echo "Quiz result has been logged";

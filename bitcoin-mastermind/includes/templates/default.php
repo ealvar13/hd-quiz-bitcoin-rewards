@@ -7,6 +7,7 @@ bitc_print_question_title($question_number, $question);
 
 // print out answers
 $answers = $question["answers"]["value"];
+//echo"-----------";print_r($answers);die;
 echo '<div class = "bitc_answers">';
 for ($i = 0; $i < count($answers); $i++) {
     if ($answers[$i]["answer"] != "" && $answers[$i]["answer"] != null) {
@@ -19,6 +20,8 @@ for ($i = 0; $i < count($answers); $i++) {
                 <div class="hdq-options-check">
                     <input type="checkbox" aria-labelledby="hda_label_<?php echo $i . '_' . $question_ID; ?>" autocomplete="off" title="<?php echo htmlentities($answers[$i]["answer"]); ?>" data-id="<?php echo $question_ID; ?>" class="bitc_option bitc_check_input" data-type="radio" value="<?php echo $selected; ?>" name="bitc_option_<?php echo $i . '_' . $question_ID; ?>" id="bitc_option_<?php echo $i . '_' . $question_ID; ?>">
                     <span class="bitc_toggle"><span class="bitc_aria_label"><?php echo $answers[$i]["answer"]; ?></span></span>
+                    <input type="hidden" name="questions_id[]" value="<?php echo $question_ID; ?>">
+                    <input type="hidden" name="selected_answers[]" value="">
                 </div>
                 <?php
                 if (str_contains($answers[$i]["answer"], "[")) {

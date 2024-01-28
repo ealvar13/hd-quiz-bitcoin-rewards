@@ -131,7 +131,8 @@ jQuery("#bitc_wrapper").on("click", "#bitc_message", function (event) {
 // delete all results
 jQuery("#bitc_wrapper").on("click", "#bitc_a_light_delete_results", function (event) {
 
-	var userConfirmed = confirm('Are you sure you want to proceed?');
+	var userConfirmed = confirm('Are you sure you want to proceed? This action cannot be undone.');
+
 	  // Check if the user clicked "OK"
   if (userConfirmed) {
 		jQuery("#bitc_a_light_delete_results").fadeOut();

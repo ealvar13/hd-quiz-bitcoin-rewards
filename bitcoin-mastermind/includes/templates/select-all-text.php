@@ -24,7 +24,7 @@
 			<div class = "bitc_row">
 				<label class="bitc_label_answer" id = "hda_label_<?php echo $i . '_' . $question_ID; ?>" data-type = "radio" data-id = "bitc_question_<?php echo $question_ID; ?>" for="bitc_option_<?php echo $i . '_' . $question_ID; ?>">
 					<div class="hdq-options-check">
-						<input aria-labelledby = "hda_label_<?php echo $i . '_' . $question_ID; ?>" autocomplete="off" type="checkbox" data-id = "<?php echo $question_ID; ?>" class="bitc_option bitc_check_input" data-type = "radio_multi" value="<?php echo $selected; ?>" name="bitc_option_<?php echo $i . '_' . $question_ID; ?>" id="bitc_option_<?php echo $i . '_' . $question_ID; ?>">
+						<input data-name="<?php echo $answers[$i]["answer"]; ?>" aria-labelledby = "hda_label_<?php echo $i . '_' . $question_ID; ?>" autocomplete="off" type="checkbox" data-id = "<?php echo $question_ID; ?>" class="bitc_option bitc_check_input" data-type = "radio_multi" value="<?php echo $selected; ?>" name="bitc_option_<?php echo $i . '_' . $question_ID; ?>" id="bitc_option_<?php echo $i . '_' . $question_ID; ?>">
 						<span class = "bitc_toggle"><span class = "bitc_aria_label"><?php echo $answers[$i]["answer"]; ?></span></span>						
 					</div>
 				<?php echo $answers[$i]["answer"]; ?>

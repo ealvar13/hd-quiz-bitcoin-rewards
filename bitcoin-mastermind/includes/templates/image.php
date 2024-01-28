@@ -26,7 +26,7 @@
             } ?>
 					<div>					
 						<div class="hdq-options-check">
-							<input type="checkbox" autocomplete="off" data-id = "<?php echo $question_ID; ?>" class="bitc_option bitc_check_input" data-type = "image" value="<?php echo $selected; ?>" name="bitc_option_<?php echo $i . '_' . $question_ID; ?>" id="bitc_option_<?php echo $i . '_' . $question_ID; ?>">
+							<input data-name="<?php echo $answers[$i]["answer"]; ?>" type="checkbox" autocomplete="off" data-id = "<?php echo $question_ID; ?>" class="bitc_option bitc_check_input" data-type = "image" value="<?php echo $selected; ?>" name="bitc_option_<?php echo $i . '_' . $question_ID; ?>" id="bitc_option_<?php echo $i . '_' . $question_ID; ?>">
 							<span class = "bitc_toggle"><span class = "bitc_aria_label"><?php echo $answers[$i]["answer"]; ?></span></span>
 						</div>
 					<?php echo $answers[$i]["answer"]; ?>

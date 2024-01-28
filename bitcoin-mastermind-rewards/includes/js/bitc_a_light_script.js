@@ -268,14 +268,71 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (resultElement) {
                     let scoreText = resultElement.textContent;
                     let correctAnswers = parseInt(scoreText.split(' / ')[0], 10);
+                    var details = new Array();
+                    
+                    jQuery(".bitc_quiz .bitc_question").each(function(index, value) {
+                             var question_type = jQuery(this).data('type');
+                             var question_id = jQuery(this).attr('id');
+                             console.log(question_type);
 
-                    fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
+
+                            if(question_type=="multiple_choice_text"){
+                                      //if(question_type=="")  
+                                      var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
+                                        checkedCheckboxes.each(function() {
+                                          console.log(jQuery(this).attr("title") + " is checked.");
+                                        
+                                 })
+
+                             } else if(question_type=="text_based"){
+                                      var getText = jQuery("#"+question_id+" input.bitc_label_answer").val();
+                                        console.log("--------------content is here----"+getText);                              
+
+
+                             }else if(question_type=="multiple_choice_image"){
+
+
+                                var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
+                                        checkedCheckboxes.each(function() {
+                                          console.log(jQuery(this).data('name')+ "is checked.");
+                                        });
+
+                               // console.log("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
+                              
+
+                                
+                             }else if(question_type=="select_all_apply_text"){
+
+                                    var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
+                                        checkedCheckboxes.each(function() {
+                                          console.log(jQuery(this).data('name')+ "is checked.");
+                                        });
+                                
+                             }else if(question_type=="select_all_apply_image"){
+
+                                  var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
+                                        checkedCheckboxes.each(function() {
+                                          console.log(jQuery(this).data('name')+ "is checked.");
+                                        });
+
+                             }else{
+                                console.log("something is wrong");
+                             }
+                             
+
+
+
+                        });
+
+
+                    fetch(`/wordpress/wp-json/hdq/v1/sats_per_answer/${quizID}`)
                     .then(response => response.json())
                     .then(data => {
                         let satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
                         let totalSats = correctAnswers * satsPerCorrect;
 
                         jQuery('#step-generating').addClass('active-step');
+
 
                         getBolt11(email, totalSats)
                         .then(bolt11 => {
@@ -288,6 +345,8 @@ document.addEventListener("DOMContentLoaded", function() {
                                     let satoshisToSend = paymentSuccessful ? totalSats : 0;
                                     jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
                                     jQuery('#step-reward').addClass('active-step');
+
+                                   
 
                                     saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID);
                                 })
