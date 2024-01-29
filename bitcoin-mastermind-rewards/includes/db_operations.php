@@ -28,3 +28,24 @@ function create_custom_bitcoin_table() {
     // Log to debug.log
     error_log("create_custom_bitcoin_table function was triggered!");
 }
+
+function create_custom_survey_results_table() {
+    global $wpdb;
+    $charset_collate = $wpdb->get_charset_collate();
+    $table_name = $wpdb->prefix . 'bitcoin_survey_results';
+
+    $sql = "CREATE TABLE $table_name (
+        id mediumint(9) NOT NULL AUTO_INCREMENT,
+        question varchar(255) DEFAULT '' NOT NULL,
+        result_id mediumint(9) NOT NULL
+        selected varchar(255) DEFAULT '' NOT NULL,
+        correct varchar(255) DEFAULT '' NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
+
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+    dbDelta( $sql );
+
+    // Log to debug.log
+    error_log("create_surevy_results_bitcoin_table function was triggered!");
+}

@@ -182,9 +182,12 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress) {
     });
 }
 
-async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID) {
+async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID,results_details_selections) {
     try {
         console.log(`Sending AJAX request with Quiz ID: ${quizID}`);
+        console.log(results_details_selections);
+            var formData = jQuery.param({ dataArray: results_details_selections });
+
         const response = await fetch(bitc_data.ajaxurl, {
             method: 'POST',
             headers: {
@@ -198,7 +201,8 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
                 'quiz_id': quizID,
                 'quiz_name': quizName,
                 'send_success': sendSuccess,
-                'satoshis_sent': satoshisSent
+                'satoshis_sent': satoshisSent,
+                'selected_results': formData
             })
         });
         const data = await response.json();
@@ -268,61 +272,90 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (resultElement) {
                     let scoreText = resultElement.textContent;
                     let correctAnswers = parseInt(scoreText.split(' / ')[0], 10);
-                    var details = new Array();
+                    var results_details_selections = [];
                     
                     jQuery(".bitc_quiz .bitc_question").each(function(index, value) {
                              var question_type = jQuery(this).data('type');
                              var question_id = jQuery(this).attr('id');
                              console.log(question_type);
-
-
+                             var fetch_numeric_ques_id = question_id.split('bitc_question_');
+                             fetch_numeric_ques_id = fetch_numeric_ques_id[1];
+                            // console.log("-----------------"+fetch_numeric_ques_id);
+                             var select_val ="";
                             if(question_type=="multiple_choice_text"){
                                       //if(question_type=="")  
                                       var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                                         checkedCheckboxes.each(function() {
-                                          console.log(jQuery(this).attr("title") + " is checked.");
+                                          select_val =  jQuery(this).attr("title");
+                                          console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+select_val);
+                                    results_details_selections.push({ key: fetch_numeric_ques_id, value: select_val });
+
                                         
                                  })
 
+
+
                              } else if(question_type=="text_based"){
                                       var getText = jQuery("#"+question_id+" input.bitc_label_answer").val();
-                                        console.log("--------------content is here----"+getText);                              
+                                       // console.log("--------------content is here----"+getText);   
+                                    console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+getText);
+  
+                                results_details_selections.push({ key: fetch_numeric_ques_id, value: getText });
+                         
 
 
                              }else if(question_type=="multiple_choice_image"){
-
+                                var all_selected_options = "";
 
                                 var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                                         checkedCheckboxes.each(function() {
-                                          console.log(jQuery(this).data('name')+ "is checked.");
+                                          //console.log(jQuery(this).data('name')+ "is checked.");
+                                            all_selected_options += jQuery(this).data('name');
                                         });
+                                console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+all_selected_options);
+
+                                 results_details_selections.push({ key: fetch_numeric_ques_id, value: all_selected_options });
+
 
                                // console.log("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                               
 
                                 
                              }else if(question_type=="select_all_apply_text"){
-
+                                    var all_selected_options = "";
                                     var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                                         checkedCheckboxes.each(function() {
-                                          console.log(jQuery(this).data('name')+ "is checked.");
+                                          //console.log(jQuery(this).data('name')+ "is checked.");
+                                            all_selected_options += jQuery(this).data('name')+",";
                                         });
+                                 console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+all_selected_options);
+                                results_details_selections.push({ key: fetch_numeric_ques_id, value: all_selected_options });
+
                                 
                              }else if(question_type=="select_all_apply_image"){
-
-                                  var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
+                                    var all_selected_options = "";
+                                    var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                                         checkedCheckboxes.each(function() {
-                                          console.log(jQuery(this).data('name')+ "is checked.");
+                                         // console.log(jQuery(this).data('name')+ "is checked.");
+                                        all_selected_options += jQuery(this).data('name')+",";
+
+
                                         });
+                                     console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+all_selected_options);
+                                    results_details_selections.push({ key: fetch_numeric_ques_id, value: all_selected_options });
+
 
                              }else{
                                 console.log("something is wrong");
                              }
-                             
 
-
+                          
+                            
 
                         });
+
+
+
 
 
                     fetch(`/wordpress/wp-json/hdq/v1/sats_per_answer/${quizID}`)
@@ -344,11 +377,8 @@ document.addEventListener("DOMContentLoaded", function() {
                                     let paymentSuccessful = paymentResponse.success;
                                     let satoshisToSend = paymentSuccessful ? totalSats : 0;
                                     jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
-                                    jQuery('#step-reward').addClass('active-step');
-
-                                   
-
-                                    saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID);
+                                    jQuery('#step-reward').addClass('active-step');                                 
+                                    saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID, results_details_selections);
                                 })
                                 .catch(error => {
                                     console.error('Error paying BOLT11 Invoice:', error);

@@ -68,6 +68,7 @@ add_action('init', 'bitc_br_create_settings_page');
 
 // Hook the table creation function to plugin activation
 register_activation_hook(__FILE__, 'create_custom_bitcoin_table');
+register_activation_hook(__FILE__, 'create_custom_survey_results_table');
 
 // Settings Page Callback: Load the Bitcoin Rewards settings page
 function bitc_br_settings_page_callback() {

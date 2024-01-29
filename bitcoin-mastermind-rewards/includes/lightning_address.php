@@ -302,6 +302,47 @@ function bitc_save_quiz_results() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
 
+    // Decode the URL-encoded string
+$decodedString = urldecode($_POST['selected_results']);
+
+
+// Remove any trailing commas
+$dataString = rtrim($decodedString, ',');
+
+// Explode the string into key-value pairs
+$pairs = explode('&', $dataString);
+
+// Initialize an empty associative array
+$resultArray = [];
+
+// Loop through each key-value pair
+foreach ($pairs as $pair) {
+    // Explode the pair into key and value
+    list($key, $value) = explode('=', $pair);
+
+    // URL-decode and assign to the result array
+    $resultArray[urldecode($key)] = urldecode($value);
+}
+// Initialize an empty associative array
+$dataResults = array();
+
+// Loop through each key-value pair in the provided array
+foreach ($resultArray as $key => $value) {
+    // Extract the numeric key from the string
+    preg_match('/(\d+)/', $key, $matches);
+    $numericKey = $matches[0];
+
+    // Set the key-value pair in the result array
+    $dataResults[$resultArray["dataArray[$numericKey][key]"]] = $resultArray["dataArray[$numericKey][value]"];
+}
+
+// Output the result
+//print_r($dataResults);
+
+
+
+   //print_r($_POST['selected_results']);
+//die("sudhhhhhhhhhhhhhhhhhhhhh");
     // Get current user information
     $current_user = wp_get_current_user();
 
@@ -319,6 +360,8 @@ function bitc_save_quiz_results() {
     $send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
     $satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;
 
+
+
     // Insert data into the database
     $insert_result = $wpdb->insert(
         $table_name,
@@ -334,6 +377,9 @@ function bitc_save_quiz_results() {
         ),
         array('%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d')
     );
+
+    // Get the last insert ID
+    $last_insert_id = $wpdb->insert_id;
 
     if ($insert_result !== false) {
         // Success, send back the inserted data
