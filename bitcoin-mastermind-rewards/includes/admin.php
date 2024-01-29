@@ -169,18 +169,18 @@ wp_enqueue_script(
                                 </div>
                         </div>
 
-                        <label style="grid-column: span 2;">Enter either Joltz or BTCPay Server Details and click SAVE
+                        <label style="grid-column: span 2;">Enter Alby, Joltz-coming soon - or BTCPay Server Details and click SAVE
                                 <span class="bitc_tooltip bitc_tooltip_question">?<span class="bitc_tooltip_content"><span>Only one is allowed. If one is filled, filling the other will erase the existing info.
                         </label>
                         
                         <div class="bitc_row">
                             <label for="<?php echo $data_field_name_joltz; ?>">Joltz Brand Id:</label>
-                            <input type="text" id="<?php echo $data_field_name_joltz; ?>" name="<?php echo $data_field_name_joltz; ?>" value="<?php echo $opt_val_joltz; ?>">
+                            <input type="text" id="<?php echo $data_field_name_joltz; ?>" name="<?php echo $data_field_name_joltz; ?>" value="<?php echo $opt_val_joltz; ?>" disabled style="background-color: #e0e0e0; color: #a0a0a0;" placeholder="Coming soon">
                         </div>
 
                         <div class="bitc_row">
                             <label for="<?php echo $data_field_name_joltz_secret; ?>">Joltz Secret Key:</label>
-                            <input type="text" id="<?php echo $data_field_name_joltz_secret; ?>" name="<?php echo $data_field_name_joltz_secret; ?>" value="<?php echo $opt_val_joltz_secret; ?>">
+                            <input type="text" id="<?php echo $data_field_name_joltz_secret; ?>" name="<?php echo $data_field_name_joltz_secret; ?>" value="<?php echo $opt_val_joltz_secret; ?>" disabled style="background-color: #e0e0e0; color: #a0a0a0;" placeholder="Coming soon">
                         </div>
                         
                         <div class="bitc_row">
@@ -196,6 +196,23 @@ wp_enqueue_script(
                         <div class="bitc_row">
                             <label for="<?php echo $data_field_name_btcpay_api_key; ?>">BTCPay Server API Key:</label>
                             <input type="text" id="<?php echo $data_field_name_btcpay_api_key; ?>" name="<?php echo $data_field_name_btcpay_api_key; ?>" value="<?php echo $opt_val_btcpay_api_key; ?>">
+                        </div>
+
+                        <div class="bitc_row">
+                            <label for="<?php echo $data_field_name_alby_url; ?>">
+                                Alby API Endpoint URL:
+                                <span class="bitc_tooltip bitc_tooltip_question">?
+                                    <span class="bitc_tooltip_content">
+                                        <span>This is the recommended URL and should not need editing except in special cases</span>
+                                    </span>
+                                </span>
+                            </label>
+                            <input type="text" id="<?php echo $data_field_name_alby_url; ?>" name="<?php echo $data_field_name_alby_url; ?>" value="<?php echo $opt_val_alby_url; ?>">
+                        </div>
+
+                        <div class="bitc_row">
+                            <label for="<?php echo $data_field_name_alby_token; ?>">Alby Account Access Token:</label>
+                            <input type="text" id="<?php echo $data_field_name_alby_token; ?>" name="<?php echo $data_field_name_alby_token; ?>" value="<?php echo $opt_val_alby_token; ?>">
                         </div>
 
                         <div class="bitc_row">

@@ -100,12 +100,11 @@ function should_enable_rewards($quiz_id, $lightning_address) {
 }
 
 // Function to display the quiz rules modal at the start of the quiz
-// TODO: remove the inline styles and add them to the stylesheet
 function la_modal_html($quiz_id) {
     ?>
-    <div id="la-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-        <div class="la-modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 5px;">
-            <span class="la-close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+    <div id="la-modal" class="la-modal">
+        <div class="la-modal-content">
+            <span class="la-close">&times;</span>
             <p>Here are the rules for the quiz:</p>
             <ul>
                 <li>Enter a valid Bitcoin Lightning address to receive rewards.</li>
@@ -114,7 +113,8 @@ function la_modal_html($quiz_id) {
                 <li>You have <?php echo get_option('max_retries_for_' . $quiz_id, 0); ?> tries.</li>
                 <li>Rewards are calculated based on correct answers.</li>
             </ul>
-            <button id="la-start-quiz" style="background-color: #FF9900; color: white; padding: 10px 20px; margin: 10px auto; border: none; cursor: pointer; border-radius: 4px; display: block;">Start Quiz</button>
+            <button id="la-start-quiz" class="la-start-quiz">Start Quiz</button>
+            <div class="la-powered-by">Powered by <a href="https://velascommerce.com/bitcoin-mastermind/" target="_blank" class="la-powered-link">Bitcoin Mastermind</a></div>
         </div>
     </div>
     <?php
@@ -123,7 +123,7 @@ function la_modal_html($quiz_id) {
 
 
 /**
- * Check if rewards are and should beenabled. 
+ * Check if rewards are and should be enabled. 
  * If so, display a user input form to collect the Lightning Address at the start of the quiz.
  * Display quiz instructions in a modal.
  */
@@ -132,13 +132,14 @@ function la_input_lightning_address_on_quiz_start($quiz_id) {
     la_modal_html($quiz_id);
     
     if (should_enable_rewards($quiz_id, '')) {
-        echo '<div class="bitc_row">';
-        echo '<label for="lightning_address" class="bitc_input" style="font-size: 150%;">Enter your Lightning Address: </label>';
-        echo '<input type="text" id="lightning_address" name="lightning_address" class="bitc_lightning_input" placeholder="bolt@lightning.com" style="padding: 0.8rem; font-size: 1.2em; width: 100%; color: #2d2d2d; border-bottom: 1px dashed #aaa; line-height: inherit; height: auto; cursor: initial; margin-bottom: 15px;">';
-        echo '<input type="submit" class="bitc_button" id="bitc_save_settings" value="SAVE" style="margin-left:10px;" onclick="validateLightningAddress(event);">';
+        echo '<div class="bitc_input_container">';
+            echo '<label for="lightning_address" class="bitc_input_label">Enter your Lightning Address: </label>';
+            echo '<input type="text" id="lightning_address" name="lightning_address" class="bitc_lightning_input" placeholder="bolt@lightning.com">';
+            echo '<div class="bitc_disclaimer">You need to enter a valid Lightning Address to receive rewards.</div>';
+            echo '<input type="submit" class="bitc_button" id="bitc_save_settings" value="SAVE" onclick="validateLightningAddress(event);">';
         echo '</div>';
     } else {
-        echo '<div class="bitc_row">Rewards are not currently available for this quiz. You can still take the quiz if you want though ; )</div>';
+        echo '<div class="bitc_input_container">Rewards are not currently available for this quiz. You can still take the quiz if you want though ; )</div>';
     }
 }
 
@@ -197,21 +198,21 @@ add_action('wp_ajax_store_lightning_address', 'store_lightning_address_in_sessio
 add_action('wp_ajax_nopriv_store_lightning_address', 'store_lightning_address_in_session'); // If the user is not logged in
 
 // Modal to display the steps of the payment process
-// TODO remove inline styles and add them to the stylesheet
 function la_steps_indicator_modal() {
     ?>
-    <div id="steps-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-        <div class="modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 5px;">
-            <span class="close-modal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-            <h2 style="margin-top: 0;">Processing Your Rewards</h2>
-            <div id="steps-indicator" style="margin-top: 20px;">
-                <div id="step-calculating" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">Calculating Rewards</div>
-                <div id="step-generating" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">Using your Lightning Address to generate Bolt 11 Invoice</div>
-                <div id="step-reward" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">You earned <span id="satoshis-sent-display">0</span> Satoshis.</div>
-                <div id="step-sending" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">Sending Reward Payment</div>
-                <div id="step-result" class="step" style="margin: 10px 0; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">Awaiting Result...</div>
+    <div id="steps-modal" class="la-modal">
+        <div class="la-modal-content">
+            <span class="la-close">&times;</span>
+            <h3>Processing Your Rewards</h3>
+            <div id="steps-indicator" class="steps-indicator">
+                <div id="step-calculating" class="step">Calculating Rewards</div>
+                <div id="step-generating" class="step">Using your Lightning Address to generate Bolt 11 Invoice</div>
+                <div id="step-reward" class="step">You earned <span id="satoshis-sent-display" class="reward-calculation">Calculating...</span> Satoshis.</div>
+                <div id="step-sending" class="step">Sending Reward Payment</div>
+                <div id="step-result" class="step">Awaiting Result...</div>
             </div>
-            <button id="close-steps-modal" style="margin-top: 20px; padding: 10px 20px; background-color: #FF9900; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+            <button id="close-steps-modal" class="la-start-quiz">Close</button>
+            <div class="la-powered-by">Powered by <a href="https://velascommerce.com/bitcoin-mastermind/" target="_blank" class="la-powered-link">Bitcoin Mastermind</a></div>
         </div>
     </div>
     <?php
@@ -248,48 +249,105 @@ function bitc_pay_bolt11_invoice() {
         wp_die();
     }
 
-    $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
-    $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+    // Check which payment option is configured
     $btcpayServerUrl = get_option('bitc_btcpay_url', '');
-    $apiKey = get_option('bitc_btcpay_api_key', '');
-    $storeId = get_option('bitc_btcpay_store_id', '');
-    $cryptoCode = "BTC"; // Hardcoded as BTC
-    $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
+    $albyAccessToken = get_option('bitc_alby_token', '');
 
-    // Remove any trailing slashes
-    $btcpayServerUrl = rtrim($btcpayServerUrl, '/');
+    if (!empty($btcpayServerUrl)) {
+        // BTCPay Server is configured, process payment using BTCPay Server
+        $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
+        $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+        $btcpayServerUrl = get_option('bitc_btcpay_url', '');
+        $apiKey = get_option('bitc_btcpay_api_key', '');
+        $storeId = get_option('bitc_btcpay_store_id', '');
+        $cryptoCode = "BTC"; // Hardcoded as BTC
+        $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
 
-    // Construct the correct URL
-    $url = $btcpayServerUrl . "/api/v1/stores/" . $storeId . "/lightning/" . $cryptoCode . "/invoices/pay";
-    $body = json_encode(['BOLT11' => $bolt11]);
+        // Remove any trailing slashes
+        $btcpayServerUrl = rtrim($btcpayServerUrl, '/');
 
-    // Send payment request to BTCPay Server
-    $response = wp_remote_post($url, [
-        'headers' => [
-            'Content-Type'  => 'application/json',
-            'Authorization' => 'token ' . $apiKey,
-        ],
-        'body' => $body,
-        'data_format' => 'body',
-    ]);
+        // Construct the correct URL
+        $url = $btcpayServerUrl . "/api/v1/stores/" . $storeId . "/lightning/" . $cryptoCode . "/invoices/pay";
+        $body = json_encode(['BOLT11' => $bolt11]);
 
-    if (is_wp_error($response)) {
-        error_log('Payment request error: ' . $response->get_error_message());
-        echo json_encode(['error' => 'Payment request failed', 'details' => $response->get_error_message()]);
-    } else {
+        // Send payment request to BTCPay Server
+        $response = wp_remote_post($url, [
+            'headers' => [
+                'Content-Type'  => 'application/json',
+                'Authorization' => 'token ' . $apiKey,
+            ],
+            'body' => $body,
+            'data_format' => 'body',
+        ]);
+
+        if (is_wp_error($response)) {
+            error_log('Payment request error: ' . $response->get_error_message());
+            echo json_encode(['error' => 'Payment request failed', 'details' => $response->get_error_message()]);
+        } else {
+            $responseBody = wp_remote_retrieve_body($response);
+            error_log('BTCPay Server response: ' . $responseBody);
+
+            // Decode JSON response
+            $decodedResponse = json_decode($responseBody, true);
+
+            // Check if the payment status is 'Complete'
+            if (isset($decodedResponse['status']) && $decodedResponse['status'] === 'Complete') {
+                echo json_encode(['success' => true, 'details' => $decodedResponse]);
+            } else {
+                echo json_encode(['success' => false, 'details' => $decodedResponse]);
+            }
+        }
+    } elseif (!empty($albyAccessToken)) {
+        // Alby is configured, process payment using Alby
+        $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
+        if (empty($bolt11)) {
+            echo json_encode(['error' => 'Invoice is required.']);
+            wp_die();
+        }
+        
+        // Alby endpoint for processing payments
+        $url = 'https://api.getalby.com/payments/bolt11';
+        
+        // Prepare the headers and body for the POST request to Alby
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $albyAccessToken,
+        ];
+        $body = json_encode(['invoice' => $bolt11]); 
+        
+        // Send payment request to Alby
+        $response = wp_remote_post($url, [
+            'headers' => $headers,
+            'body' => $body,
+            'data_format' => 'body',
+        ]);
+        
+        if (is_wp_error($response)) {
+            error_log('Alby payment request error: ' . $response->get_error_message());
+            echo json_encode(['error' => 'Alby payment request failed', 'details' => $response->get_error_message()]);
+            wp_die();
+        }
+    
         $responseBody = wp_remote_retrieve_body($response);
-        error_log('BTCPay Server response: ' . $responseBody);
-
+        error_log('Alby response: ' . $responseBody);
+    
         // Decode JSON response
         $decodedResponse = json_decode($responseBody, true);
-
-        // Check if the payment status is 'Complete'
-        if (isset($decodedResponse['status']) && $decodedResponse['status'] === 'Complete') {
+    
+        // Check for a successful status or handle errors
+        if (isset($decodedResponse['payment_preimage'])) {
+            // Assuming 'payment_preimage' presence indicates a successful payment
             echo json_encode(['success' => true, 'details' => $decodedResponse]);
         } else {
+            // Handle different errors based on your API response structure
             echo json_encode(['success' => false, 'details' => $decodedResponse]);
         }
-    }
+    
+        wp_die();
+    } else {
+        // No payment option is configured
+        echo json_encode(['error' => 'No payment system is configured.']);
+    }    
 
     wp_die();
 }

@@ -168,7 +168,10 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress) {
     .then(response => response.json())
     .then(data => {
         console.log('Raw payment response data:', data); // Added for debugging
-        if (data && data.details && data.details.status === "Complete") {
+
+        // Check for Alby's successful response or BTCPay Server's successful response
+        if ((data && data.success && data.details && data.details.payment_preimage) || 
+            (data && data.details && data.details.status === "Complete")) {
             console.log('Payment Successful:', data.details);
             return { success: true, data: data.details };
         } else {
@@ -229,7 +232,7 @@ function setupStepsIndicatorModal() {
     }
 
     // Event listener for the close button of the steps indicator modal
-    jQuery('.close-modal').click(function() {
+    jQuery('.la-close').click(function() {
         closeStepsModal();
     });
 
@@ -251,57 +254,68 @@ const { openStepsModal, closeStepsModal } = setupStepsIndicatorModal();
 document.addEventListener("DOMContentLoaded", function() {
     // Set up modals
     setupModal();
-    const { openStepsModal } = setupStepsIndicatorModal(); // Removed closeStepsModal from destructuring
+    const { openStepsModal } = setupStepsIndicatorModal();
 
     let finishButton = document.querySelector(".bitc_finsh_button");
     if (finishButton) {
         finishButton.addEventListener("click", function() {
-            openStepsModal(); // Open the modal when Finish button is clicked
-            jQuery('#step-calculating').addClass('active-step'); // Set the first step as active
-
-            let email = document.getElementById("lightning_address").value;
+            let lightningAddress = document.getElementById("lightning_address").value.trim();
+            let email = lightningAddress; // Use the trimmed Lightning Address
             let quizName = document.querySelector(".wp-block-post-title").textContent;
             let quizID = finishButton.getAttribute('data-id');
 
+            let scoreText, correctAnswers, satsPerCorrect, totalSats, paymentSuccessful, satoshisToSend;
+
+            // Fetch quiz results and calculate rewards
             setTimeout(function() {
                 let resultElement = document.querySelector('.bitc_result');
                 if (resultElement) {
-                    let scoreText = resultElement.textContent;
-                    let correctAnswers = parseInt(scoreText.split(' / ')[0], 10);
+                    scoreText = resultElement.textContent;
+                    correctAnswers = parseInt(scoreText.split(' / ')[0], 10);
 
                     fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
                     .then(response => response.json())
                     .then(data => {
-                        let satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
-                        let totalSats = correctAnswers * satsPerCorrect;
+                        satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
+                        totalSats = correctAnswers * satsPerCorrect;
 
-                        jQuery('#step-generating').addClass('active-step');
+                        // If Lightning Address is provided, proceed to payment
+                        if (lightningAddress) {
+                            openStepsModal();
+                            jQuery('#step-calculating').addClass('active-step');
+                            
+                            // Reintegrate payment processing logic
+                            getBolt11(email, totalSats)
+                            .then(bolt11 => {
+                                if (bolt11) {
+                                    jQuery('#step-generating').addClass('active-step');
+                                    jQuery('#step-sending').addClass('active-step');
 
-                        getBolt11(email, totalSats)
-                        .then(bolt11 => {
-                            if (bolt11) {
-                                jQuery('#step-sending').addClass('active-step');
+                                    sendPaymentRequest(bolt11, quizID, email)
+                                    .then(paymentResponse => {
+                                        paymentSuccessful = paymentResponse.success;
+                                        satoshisToSend = paymentSuccessful ? totalSats : 0;
+                                        jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
+                                        jQuery('#step-reward').addClass('active-step');
 
-                                sendPaymentRequest(bolt11, quizID, email)
-                                .then(paymentResponse => {
-                                    let paymentSuccessful = paymentResponse.success;
-                                    let satoshisToSend = paymentSuccessful ? totalSats : 0;
-                                    jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
-                                    jQuery('#step-reward').addClass('active-step');
-
-                                    saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID);
-                                })
-                                .catch(error => {
-                                    console.error('Error paying BOLT11 Invoice:', error);
-                                    jQuery('#step-result').addClass('active-step').text('Payment Failed');
-                                });
-                            } else {
-                                console.log(`Failed to generate BOLT11 Invoice.`);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error generating BOLT11:', error);
-                        });
+                                        saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID);
+                                    })
+                                    .catch(error => {
+                                        console.error('Error paying BOLT11 Invoice:', error);
+                                        jQuery('#step-result').addClass('active-step').text('Payment Failed');
+                                    });
+                                } else {
+                                    console.error('Failed to generate BOLT11 Invoice.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error generating BOLT11:', error);
+                            });
+                        } else {
+                            // Notify the user and save quiz results without payment
+                            alert("Next time enter your Lightning Address to receive rewards! Thanks for taking our quiz.");
+                            saveQuizResults(email, scoreText, totalSats, quizName, 0, 0, quizID);
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -313,4 +327,5 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
 
