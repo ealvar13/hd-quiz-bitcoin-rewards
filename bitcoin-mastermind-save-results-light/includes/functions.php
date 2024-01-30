@@ -77,6 +77,8 @@ function bitc_a_light_submit_action($data)
 
     // re-encode and update record
     $result = json_encode($data);
+
+    //print_r($result );die;
     update_option("bitc_quiz_results_l", sanitize_text_field($result));
 
     echo "Quiz result has been logged";
@@ -101,3 +103,47 @@ function bitc_a_light_delete_results()
     die();
 }
 add_action('wp_ajax_bitc_a_light_delete_results', 'bitc_a_light_delete_results');
+
+
+function fetch_survey_detail_results(){
+    global $wpdb;
+    $table_name = $wpdb->prefix.'bitcoin_survey_results';
+    if(!empty($_POST['id'])){
+        // Your WHERE clause condition
+        $condition = "result_id=".$_POST['id']; // Replace 'your_column_name' and 'your_value' with the actual column name and value
+
+        // SQL query
+        $query = $wpdb->prepare("SELECT * FROM $table_name WHERE $condition");
+
+        // Execute the query
+        $results = $wpdb->get_results($query);
+
+       // print_r($results);die;
+        $html="<table class='survey-details-table'>
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Question</th>
+                            <th>Selected</th>
+                            <th>Correct</th>
+                        </tr>
+                    </thead><tbody>";
+        if(!empty($results)){
+            $i=1;
+            foreach ($results as $key => $value) {
+                $html .="<tr>";
+                $html .="<td>".$i."</td>";
+                $html .="<td>".$value->question."</td>";
+                $html .="<td>".rtrim($value->selected,',')."</td>";
+                $html .="<td>".rtrim($value->correct,',')."</td>";
+                $html .="</tr>";
+            $i++;}
+
+        }
+        $html .="</tbody></table>";
+        //$result = json_encode($html);
+        echo $html;die;
+    }
+}
+add_action('wp_ajax_fetch_survey_details', 'fetch_survey_detail_results');
+add_action('wp_ajax_nopriv_fetch_survey_details', 'fetch_survey_detail_results');

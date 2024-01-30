@@ -1100,3 +1100,4 @@ jQuery("#bitc_fb_sharer").on("click", function () {
 		}
 	);
 });
+

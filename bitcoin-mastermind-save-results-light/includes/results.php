@@ -35,6 +35,14 @@ if (isset($_POST['bitc_about_options_nonce'])) {
 }
 ?>
 <div id="bitc_meta_forms">
+     <div id="survey-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+        <div class="la-modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 5px;">
+            <span class="la-close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <p>Here are the results of the quiz:</p>
+            <div id="survey-results-container"></div>            
+        </div>
+    </div>
+
     <div id="bitc_wrapper">
         <div id="bitc_form_wrapper">
             <h1>Bitcoin Mastermind Results - Light</h1>
@@ -89,8 +97,9 @@ if (isset($_POST['bitc_about_options_nonce'])) {
             <div id="bitc_tab_content" class="bitc_tab">
 
                 <?php
-                $data = get_option("bitc_quiz_results_l");
-                $data = json_decode(html_entity_decode($data), true);
+                global $wpdb;
+                $table_name = $wpdb->prefix.'bitcoin_quiz_results';
+                $data =  $wpdb->get_results("SELECT * FROM $table_name", OBJECT);                
                 $total = 0;
                 if (!empty($data)) {
                     $total = count($data);
@@ -112,34 +121,59 @@ if (isset($_POST['bitc_about_options_nonce'])) {
                             <th>Datetime (MM-DD-YYY)</th>
                             <th>Score</th>
                             <th>User</th>
+                            <th>Details</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         if ($data != "" && $data != null) {
 
-                            $data = array_reverse($data);
                             $x = 0;
 
                             //print_r($data);
                             foreach ($data as $d) {
                                 $x++;
-                                $d["quizName"] = sanitize_text_field($d["quizName"]);
-                                $d["datetime"] = sanitize_text_field($d["datetime"]);
-                                $d["quizTaker"][1] = sanitize_text_field($d["quizTaker"][1]);
-                                $d["score"][0] = intval($d["score"][0]);
-                                $d["score"][1] = intval($d["score"][1]);
-                                $d["passPercent"] = intval($d["passPercent"]);
+                                $quizName = sanitize_text_field($d->quiz_name);
+                                $datetime = sanitize_text_field($d->timestamp);
+                                $score = sanitize_text_field($d->quiz_result);
+                                $user = sanitize_text_field($d->user_id);
+                                $passPercent = "";
+                                 if (bitc_PLUGIN_VERSION < 1.8) {
+                                    $bitc_quiz_options = bitc_get_quiz_options($d->quiz_id);
+                                    $passPercent = intval($bitc_quiz_options["passPercent"]);
+                                } else {
+                                    $bitc_quiz_options = get_bitc_quiz($d->quiz_id);
+                                    $passPercent = $bitc_quiz_options["quiz_pass_percentage"]["value"];
+                                }
+                               //$d["passPercent"] = intval($d["passPercent"]);
+                               // echo $passPercent;
+                                //echo $score;
+
+                                // Attempt to convert string to integer
+                               // Use eval to evaluate the fractional expression
+                                $result = eval('return ' . $score . ';');
+                                $updated_score = "";
+                                // Check if the result is not null (indicating a successful evaluation)
+                                if ($result !== null) {
+                                    // Print the result
+                                    $updated_score =  $result * 100; // Output: 0.2
+                                } else {
+                                    // Handle the error if the evaluation fails
+                                    echo "Error: Unable to evaluate the expression";
+                                }
 
                                 $passFail = "fail";
-                                if ($d["score"][1]!==0 && ($d["score"][0] / $d["score"][1] * 100 >= $d["passPercent"])) {
-                                    $passFail = "pass";
+                                $test= (int)$score * 100;
+                               // echo $test;
+                                if ( $updated_score >= $passPercent) {
+                                   $passFail = "pass";
                                 } ?>
                                 <tr class="<?php echo $passFail; ?>">
-                                    <td><?php echo $d["quizName"]; ?></td>
-                                    <td><?php echo $d["datetime"]; ?></td>
-                                    <td><?php echo $d["score"][0]; ?>/<?php echo $d["score"][1]; ?></td>
-                                    <td><?php echo $d["quizTaker"][1]; ?></td>
+                                    <td><?php echo $quizName; ?></td>
+                                    <td><?php echo $datetime; ?></td>
+                                    <td><?php echo $score; ?></td>
+                                    <td><?php echo $user; ?></td>
+                                    <td><a href="javascript:void(0);" class="survey-results-details" id="<?php echo $d->id; ?>">Show Details</td>
                                 </tr>
                         <?php
                                 // limit total results for super large datasets

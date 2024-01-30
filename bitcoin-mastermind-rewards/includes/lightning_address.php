@@ -359,7 +359,49 @@ add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice'); // I
 function bitc_save_quiz_results() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+    $table_name2 = $wpdb->prefix . 'bitcoin_survey_results';
 
+    // Decode the URL-encoded string
+$decodedString = urldecode($_POST['selected_results']);
+
+
+// Remove any trailing commas
+$dataString = rtrim($decodedString, ',');
+
+// Explode the string into key-value pairs
+$pairs = explode('&', $dataString);
+
+// Initialize an empty associative array
+$resultArray = [];
+
+// Loop through each key-value pair
+foreach ($pairs as $pair) {
+    // Explode the pair into key and value
+    list($key, $value) = explode('=', $pair);
+
+    // URL-decode and assign to the result array
+    $resultArray[urldecode($key)] = urldecode($value);
+}
+// Initialize an empty associative array
+$dataResults = array();
+
+// Loop through each key-value pair in the provided array
+foreach ($resultArray as $key => $value) {
+    // Extract the numeric key from the string
+    preg_match('/(\d+)/', $key, $matches);
+    $numericKey = $matches[0];
+
+    // Set the key-value pair in the result array
+    $dataResults[$resultArray["dataArray[$numericKey][key]"]] = $resultArray["dataArray[$numericKey][value]"];
+}
+
+// Output the result
+//print_r($dataResults);
+
+
+
+   //print_r($_POST['selected_results']);
+//die("sudhhhhhhhhhhhhhhhhhhhhh");
     // Get current user information
     $current_user = wp_get_current_user();
 
@@ -377,6 +419,8 @@ function bitc_save_quiz_results() {
     $send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
     $satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;
 
+
+
     // Insert data into the database
     $insert_result = $wpdb->insert(
         $table_name,
@@ -392,6 +436,37 @@ function bitc_save_quiz_results() {
         ),
         array('%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d')
     );
+
+    // Get the last insert ID
+    $last_insert_id = $wpdb->insert_id;
+    $quiz_settings = get_bitc_quiz($quiz_ID);
+
+    foreach($dataResults as $key=>$value){
+        $get_question_name = sanitize_text_field(get_the_title($key));
+        $question = get_bitc_question($key);
+        $answers = $question["answers"]["value"];
+        $correct_answer = "";
+        $ans_cor = bitc_get_question_answers($question["answers"]["value"], $question["selected"]["value"], $quiz_settings["randomize_answers"]["value"][0]);
+        foreach($ans_cor as $val){
+            if(!empty($val['correct']) && $val['correct']==1 ){
+                 $correct_answer .= $val['answer'].",";
+            }
+        }
+
+       
+
+        $wpdb->insert(
+        $table_name2,
+        array(
+            'result_id' => $last_insert_id,
+            'question' => $get_question_name,
+            'selected' => $value,
+            'correct' => $correct_answer
+        ),
+        array('%s', '%s', '%s', '%s')
+    );
+
+    }
 
     if ($insert_result !== false) {
         // Success, send back the inserted data
