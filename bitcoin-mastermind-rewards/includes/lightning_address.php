@@ -396,7 +396,7 @@ foreach ($resultArray as $key => $value) {
 }
 
 // Output the result
-//print_r($dataResults);
+//print_r($dataResults);die;
 
 
 
