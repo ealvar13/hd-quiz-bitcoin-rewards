@@ -41,7 +41,7 @@ if (!defined('bitc_BR_PLUGIN_VERSION')) {
 ------------------------------------------------------- */
 function bitc_br_check_hd_quiz_active() {
     if (function_exists('is_plugin_active')) {
-        if (!is_plugin_active("hd-quiz/index.php")) {
+        if (!is_plugin_active("bitcoin-mastermind/index.php")) {
             deactivate_plugins(plugin_basename(__FILE__));
         }
     }
@@ -53,7 +53,7 @@ add_action('init', 'bitc_br_check_hd_quiz_active');
 ------------------------------------------------------- */
 // require dirname(__FILE__) . '/includes/functions.php'; // commenting out for now, general functions for Bitcoin rewards
 require dirname(__FILE__) . '/includes/lightning_address.php';
-require dirname(__FILE__) . '/includes/db_operations.php';
+//require dirname(__FILE__) . '/includes/db_operations.php';
 require dirname(__FILE__) . '/includes/api_endpoints.php';
 
 /* Create Bitcoin Mastermind Bitcoin Rewards Settings page
@@ -66,9 +66,6 @@ function bitc_br_create_settings_page() {
 }
 add_action('init', 'bitc_br_create_settings_page');
 
-// Hook the table creation function to plugin activation
-register_activation_hook(__FILE__, 'create_custom_bitcoin_table');
-register_activation_hook(__FILE__, 'create_custom_survey_results_table');
 
 // Settings Page Callback: Load the Bitcoin Rewards settings page
 function bitc_br_settings_page_callback() {
@@ -76,3 +73,10 @@ function bitc_br_settings_page_callback() {
 }
 
 
+
+//add_action('admin_init','create_custom_bitcoin_table');
+
+// Hook the table creation function to plugin activation
+//register_activation_hook(__FILE__, 'create_custom_bitcoin_table');
+// Correct file path example
+//register_activation_hook(__DIR__ . '/index.php', 'create_custom_bitcoin_table');

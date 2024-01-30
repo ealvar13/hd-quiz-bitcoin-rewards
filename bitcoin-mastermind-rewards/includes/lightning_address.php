@@ -301,6 +301,7 @@ add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice'); // I
 function bitc_save_quiz_results() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+    $table_name2 = $wpdb->prefix . 'bitcoin_survey_results';
 
     // Decode the URL-encoded string
 $decodedString = urldecode($_POST['selected_results']);
@@ -380,6 +381,34 @@ foreach ($resultArray as $key => $value) {
 
     // Get the last insert ID
     $last_insert_id = $wpdb->insert_id;
+    $quiz_settings = get_bitc_quiz($quiz_ID);
+
+    foreach($dataResults as $key=>$value){
+        $get_question_name = sanitize_text_field(get_the_title($key));
+        $question = get_bitc_question($key);
+        $answers = $question["answers"]["value"];
+        $correct_answer = "";
+        $ans_cor = bitc_get_question_answers($question["answers"]["value"], $question["selected"]["value"], $quiz_settings["randomize_answers"]["value"][0]);
+        foreach($ans_cor as $val){
+            if(!empty($val['correct']) && $val['correct']==1 ){
+                 $correct_answer .= $val['answer'].",";
+            }
+        }
+
+       
+
+        $wpdb->insert(
+        $table_name2,
+        array(
+            'result_id' => $last_insert_id,
+            'question' => $get_question_name,
+            'selected' => $value,
+            'correct' => $correct_answer
+        ),
+        array('%s', '%s', '%s', '%s')
+    );
+
+    }
 
     if ($insert_result !== false) {
         // Success, send back the inserted data

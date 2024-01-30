@@ -225,5 +225,11 @@ add_filter("plugin_action_links_" . plugin_basename(__FILE__), 'hddq_plugin_link
 function bitc_deactivation()
 {
     wp_clear_scheduled_hook('bitc_check_for_updates');
+
+
 }
 register_deactivation_hook(__FILE__, 'bitc_deactivation');
+
+
+
+
