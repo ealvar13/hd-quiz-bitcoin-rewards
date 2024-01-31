@@ -386,7 +386,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                         jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
                                         jQuery('#step-reward').addClass('active-step');
 
-                                        saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID);
+                                        saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID, results_details_selections);
                                     })
                                     .catch(error => {
                                         console.error('Error paying BOLT11 Invoice:', error);
@@ -402,7 +402,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         } else {
                             // Notify the user and save quiz results without payment
                             alert("Next time enter your Lightning Address to receive rewards! Thanks for taking our quiz.");
-                            saveQuizResults(email, scoreText, totalSats, quizName, 0, 0, quizID);
+                            saveQuizResults(email, scoreText, totalSats, quizName, 0, 0, quizID, results_details_selections);
                         }
 
                     })
