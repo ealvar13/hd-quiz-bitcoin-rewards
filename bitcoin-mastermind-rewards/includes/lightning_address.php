@@ -461,9 +461,12 @@ foreach ($resultArray as $key => $value) {
             'result_id' => $last_insert_id,
             'question' => $get_question_name,
             'selected' => $value,
-            'correct' => $correct_answer
+            'correct' => $correct_answer,
+            'quiz_name' => $quiz_term ? $quiz_term->name : 'Unknown Quiz',
+            'user_id' => $user_id
+
         ),
-        array('%s', '%s', '%s', '%s')
+        array('%s', '%s', '%s', '%s', '%s', '%s')
     );
 
     }
@@ -481,3 +484,66 @@ foreach ($resultArray as $key => $value) {
 
 add_action('wp_ajax_bitc_save_quiz_results', 'bitc_save_quiz_results');
 add_action('wp_ajax_nopriv_bitc_save_quiz_results', 'bitc_save_quiz_results');
+
+
+
+function bitc_export_csv_results(){
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    global $wpdb;
+    // Specify your table name
+    $table1_name = $wpdb->prefix . 'bitcoin_quiz_results';
+    $table2_name = $wpdb->prefix . 'bitcoin_survey_results';    
+        // Fetch data from the first table
+    $data1 = $wpdb->get_results("SELECT * FROM $table1_name", ARRAY_A);
+
+    // Fetch data from the second table
+    $data2 = $wpdb->get_results("SELECT * FROM $table2_name", ARRAY_A);
+
+    // Create a ZIP file
+    $zipFileName = 'exported_data.zip';
+    $zip = new ZipArchive;
+    if ($zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+        // Add the first CSV file
+        $csvData1 = csvFromArray($data1);
+        $zip->addFromString('table1_data.csv', $csvData1);
+
+        // Add the second CSV file
+        $csvData2 = csvFromArray($data2);
+        $zip->addFromString('table2_data.csv', $csvData2);
+
+        // Close the ZIP file
+        $zip->close();
+
+        // Respond with the ZIP file name
+        echo json_encode(['zipFileName' => $zipFileName]);
+    } else {
+        echo json_encode(['error' => 'Failed to create ZIP file.']);
+    }
+    die;
+    // Always exit after processing AJAX
+    wp_die();
+
+
+
+}
+
+
+add_action('wp_ajax_export_csv_results', 'bitc_export_csv_results');
+add_action('wp_ajax_nopriv_export_csv_results', 'bitc_export_csv_results');
+
+
+
+// Function to convert array to CSV string
+function csvFromArray($data) {
+    $output = fopen('php://temp', 'w');
+    fputcsv($output, array_keys($data[0])); // Header
+    foreach ($data as $row) {
+        fputcsv($output, $row);
+    }
+    rewind($output);
+    $csv = stream_get_contents($output);
+    fclose($output);
+    return $csv;
+}
+
