@@ -186,3 +186,33 @@ function bitc_a_light_export() {
 	}
 }
 document.getElementById("bitc_a_light_export_results").addEventListener("click", bitc_a_light_export);
+jQuery(document).on("click",".bitc_a_light_table a.survey-results-details",function(){
+
+    var getSurveryID = jQuery(this).attr('id');
+        jQuery.ajax({
+            type: "POST",
+            data: {
+                action: "fetch_survey_details",
+                nonce: jQuery("#bitc_about_options_nonce").val(),
+                id: getSurveryID
+            },
+            url: ajaxurl,
+            success: function (data) {
+                console.log(data);
+                jQuery('#survey-modal').show();
+                jQuery('#survey-results-container').empty().html(data);
+                //jQuery("#bitc_a_light_delete_results").html("Results Deleted");
+                //jQuery("#bitc_tab_content").html("");
+            },
+            error: function () {
+            },
+            complete: function () {
+            },
+        });
+ 
+
+})
+
+jQuery('.la-close').click(function() {
+         jQuery('#survey-modal').hide();
+     });

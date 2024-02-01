@@ -43,7 +43,7 @@ function bitc_a_light_create_settings_page()
     }
     add_action('admin_menu', 'bitc_a_light_register_settings_page', 11);
 }
-add_action('init', 'bitc_a_light_create_settings_page');
+//add_action('init', 'bitc_a_light_create_settings_page');
 
 function bitc_a_light_register_quizzes_page_callback()
 {

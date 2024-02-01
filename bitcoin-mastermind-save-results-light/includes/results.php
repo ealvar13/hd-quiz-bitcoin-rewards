@@ -35,13 +35,7 @@ if (isset($_POST['bitc_about_options_nonce'])) {
 }
 ?>
 <div id="bitc_meta_forms">
-     <div id="survey-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-        <div class="la-modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 5px;">
-            <span class="la-close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-            <p>Here are the results of the quiz:</p>
-            <div id="survey-results-container"></div>            
-        </div>
-    </div>
+    
 
     <div id="bitc_wrapper">
         <div id="bitc_form_wrapper">
