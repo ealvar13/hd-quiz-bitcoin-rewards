@@ -53,6 +53,13 @@ wp_enqueue_script(
 
 ?>
 <div id="bitc_meta_forms">
+     <div id="survey-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+        <div class="la-modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 5px;">
+            <span class="la-close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <p>Here are the results of the quiz:</p>
+            <div id="survey-results-container"></div>            
+        </div>
+    </div>
     <div id="bitc_wrapper">
         <div id="bitc_form_wrapper">
             <h1>Bitcoin Mastermind Results - Bitcoin Rewards</h1>
@@ -77,6 +84,18 @@ wp_enqueue_script(
             </div>
             <div id="bitc_tab_content" class="bitc_tab">
 
+                <div class="bitc_row" style="grid-column: span 2;">
+                              <div class="bitc_check_row">
+                                    <div role="button" id="bitc_a_light_delete_results" class="bitc_button4" title="clear all of the current results and start from scratch"><span class="dashicons dashicons-trash"></span> DELETE ALL RESULTS</div>
+
+                                    <div style="float: left;" id="bitc_a_light_export_csv_wrap">
+                                        <div role="button" id="bitc_a_light_export_results" class="bitc_button3" title="clear all of the current results and start from scratch">EXPORT AS CSV</div>
+                                    </div>
+
+                                </div>
+                              
+                        </div>
+
                 <?php
                 $data = get_option("bitc_quiz_results_l");
                 $data = json_decode(html_entity_decode($data), true);
@@ -87,9 +106,7 @@ wp_enqueue_script(
                         $total = 1000;
                     }
                 }
-                ?>
-
-                <?php
+                
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
 
@@ -98,11 +115,7 @@ wp_enqueue_script(
                 $total_records = $wpdb->get_var($total_query);
 
                 echo "<h3>" . esc_html($total_records) . " records in table</h3>";
-                ?>
-
-
-                <?php
-                global $wpdb;
+                
                 $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
                 $query = "SELECT * FROM $table_name ORDER BY timestamp DESC LIMIT 1000"; // Limiting to 1000 rows for performance
                 $results = $wpdb->get_results($query, ARRAY_A);
@@ -117,6 +130,8 @@ wp_enqueue_script(
                             <th>Satoshis Earned</th>
                             <th>Send Success</th>
                             <th>Satoshis Sent</th>
+                            <th>User</th>
+                            <th>Details</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -136,6 +151,9 @@ wp_enqueue_script(
                                 echo "<td>" . intval($row['satoshis_earned']) . "</td>";
                                 echo "<td>" . esc_html($send_success) . "</td>";
                                 echo "<td>" . intval($row['satoshis_sent']) . "</td>";
+                                echo "<td>" . esc_html($row['user_id']) . "</td>";
+                                echo "<td><a href='javascript:void(0);' class='survey-results-details' id=".$row['id'].">Show Details</a></td>";
+
                                 echo "</tr>";
                             }
                         }
@@ -148,26 +166,7 @@ wp_enqueue_script(
                     <input type="hidden" name="bitc_submit_hidden" value="Y">
                     <?php wp_nonce_field('bitc_about_options_nonce', 'bitc_about_options_nonce'); ?>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 2rem">
-                        <div class="bitc_row" style="grid-column: span 2;">
-                            <!--<label for="bitc_a_l_members_only">Only save results for logged in users
-                                <span class="bitc_tooltip bitc_tooltip_question">?<span class="bitc_tooltip_content"><span>By default, all results will be saved, and non-logged-in users will show up as
-                                            <code>--</code></span></span></span></label>
-                            
-                                <div class="hdq-options-check">
-                                    <input type="checkbox" id="bitc_a_l_members_only" name="bitc_a_l_members_only" value="yes" <?php if ($opt_val1 == "yes") {
-                                                                                                                                    echo 'checked = ""';
-                                                                                                                                } ?> />
-                                    <label for="bitc_a_l_members_only"></label>
-                                </div>-->
-                                <div class="bitc_check_row">
-                                    <div role="button" id="bitc_a_light_delete_results" class="bitc_button4" title="clear all of the current results and start from scratch"><span class="dashicons dashicons-trash"></span> DELETE ALL RESULTS</div>
-
-                                    <div id="bitc_a_light_export_csv_wrap">
-                                        <div role="button" id="bitc_a_light_export_results" class="bitc_button3" title="clear all of the current results and start from scratch">EXPORT AS CSV</div>
-                                    </div>
-
-                                </div>
-                        </div>
+                        
 
                         <label style="grid-column: span 2;">Enter Alby, Joltz-coming soon - or BTCPay Server Details and click SAVE
                                 <span class="bitc_tooltip bitc_tooltip_question">?<span class="bitc_tooltip_content"><span>Only one is allowed. If one is filled, filling the other will erase the existing info.

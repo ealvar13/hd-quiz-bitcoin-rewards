@@ -60,7 +60,7 @@ require dirname(__FILE__) . '/includes/api_endpoints.php';
 ------------------------------------------------------- */
 function bitc_br_create_settings_page() {
     function bitc_br_register_settings_page() {
-        add_submenu_page('bitc_quizzes', 'Bitcoin Rewards', 'Bitcoin Rewards', 'publish_posts', 'bitc_bitcoin_rewards', 'bitc_br_settings_page_callback');
+        add_submenu_page('bitc_quizzes', 'Bitcoin Settings & Rewards', 'Bitcoin Settings & Rewards', 'publish_posts', 'bitc_bitcoin_rewards', 'bitc_br_settings_page_callback');
     }
     add_action('admin_menu', 'bitc_br_register_settings_page', 11);
 }

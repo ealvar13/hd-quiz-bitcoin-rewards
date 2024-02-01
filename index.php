@@ -41,6 +41,8 @@ function create_custom_bitcoin_table() {
     $sql2 = "CREATE TABLE $table_name2 (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         question varchar(255) DEFAULT '' NOT NULL,
+        quiz_name varchar(255) DEFAULT '' NOT NULL,
+        user_id varchar(255) DEFAULT NULL,
         result_id mediumint(9) NOT NULL,
         selected varchar(255) DEFAULT '' NOT NULL,
         correct varchar(255) DEFAULT '' NOT NULL,

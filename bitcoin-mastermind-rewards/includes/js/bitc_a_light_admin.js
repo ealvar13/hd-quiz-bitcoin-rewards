@@ -158,31 +158,96 @@ jQuery("#bitc_wrapper").on("click", "#bitc_a_light_delete_results", function (ev
 	}
 });
 
-/* Export Table as CSV */
-function bitc_a_light_export() {
-	let csv = [];
-	let rows = document.querySelectorAll("#bitc_tab_content table tr");
 
-	for (var i = 0; i < rows.length; i++) {
-		let row = [],
-			cols = rows[i].querySelectorAll(".bitc_a_light_table td, .bitc_a_light_table th");
+jQuery(document).on("click",".bitc_a_light_table a.survey-results-details",function(){
 
-		for (var j = 0; j < cols.length; j++) row.push(cols[j].innerText);
+    var getSurveryID = jQuery(this).attr('id');
+        jQuery.ajax({
+            type: "POST",
+            data: {
+                action: "fetch_survey_details",
+                nonce: jQuery("#bitc_about_options_nonce").val(),
+                id: getSurveryID
+            },
+            url: ajaxurl,
+            success: function (data) {
+                console.log(data);
+                jQuery('#survey-modal').show();
+                jQuery('#survey-results-container').empty().html(data);
+                //jQuery("#bitc_a_light_delete_results").html("Results Deleted");
+                //jQuery("#bitc_tab_content").html("");
+            },
+            error: function () {
+            },
+            complete: function () {
+            },
+        });
+ 
 
-		csv.push(row.join(","));
-	}
-	bitc_a_light_download_csv(csv);
+})
 
-	function bitc_a_light_download_csv(csv) {
-		console.log(csv);
-		csv = csv.join("\n");
-		console.log(csv);
-		let csvFile = new Blob([csv], { type: "text/csv" });
-		let downloadLink = document.createElement("a");
-		downloadLink.download = "bitc_results.csv";
-		downloadLink.href = window.URL.createObjectURL(csvFile);
-		downloadLink.innerHTML = "download export";
-		document.getElementById("bitc_a_light_export_csv_wrap").appendChild(downloadLink);
-	}
-}
-document.getElementById("bitc_a_light_export_results").addEventListener("click", bitc_a_light_export);
+jQuery('.la-close').click(function() {
+         jQuery('#survey-modal').hide();
+});
+
+jQuery(document).on("click",".bitc_a_light_table a.survey-results-details",function(){
+
+    var getSurveryID = jQuery(this).attr('id');
+        jQuery.ajax({
+            type: "POST",
+            data: {
+                action: "fetch_survey_details",
+                nonce: jQuery("#bitc_about_options_nonce").val(),
+                id: getSurveryID
+            },
+            url: ajaxurl,
+            success: function (data) {
+                console.log(data);
+                jQuery('#survey-modal').show();
+                jQuery('#survey-results-container').empty().html(data);
+                //jQuery("#bitc_a_light_delete_results").html("Results Deleted");
+                //jQuery("#bitc_tab_content").html("");
+            },
+            error: function () {
+            },
+            complete: function () {
+            },
+        });
+ 
+
+})
+
+jQuery(document).on("click","#bitc_a_light_export_results",function(){
+        jQuery.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'export_csv_results', // Action defined in wp_ajax_export_data
+            },
+            success: function (response) {
+                 if (response.zipFileName) {
+                    // Create a link to trigger the download
+                    var downloadLink = document.createElement('a');
+                    downloadLink.href = response.zipFileName;
+                    downloadLink.download = 'exported_data.zip';
+
+                    // Append the link to the body and trigger the click event
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+
+                    // Remove the link from the body
+                    document.body.removeChild(downloadLink);
+                } else {
+                    console.error('Error: ' + response.error);
+                }
+            },
+            error: function (xhr, status, error) {
+            	console.error('AJAX Error: ' + status + ' - ' + error);
+            },
+            complete: function () {
+            },
+        });
+ 
+
+})
