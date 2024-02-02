@@ -266,7 +266,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let lightningAddress = document.getElementById("lightning_address").value.trim();
             let email = lightningAddress; // Use the trimmed Lightning Address
             let quizName = '';
-            alert("quizzz is here-----------"+quizName);
+            //alert("quizzz is here-----------"+quizName);
             let quizID = finishButton.getAttribute('data-id');
 
             let scoreText, correctAnswers, satsPerCorrect, totalSats, paymentSuccessful, satoshisToSend;
