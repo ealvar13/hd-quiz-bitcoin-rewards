@@ -9,7 +9,7 @@
 - **Features**: Tracking budget, limiting retries based on lightning addresses, and managing rewards.
 
 ## 3. Known Issues and Challenges
-- **Main Challenge**: Improving styling (currently inline).  Next steps are improving ux, testing and adding alternatives to btcpay server.
+- **Main Challenge**: Deployment and testing for user feedback.
 
 ## 4. Technology Stack Details
 - **Environment**: WordPress with custom PHP scripts.
