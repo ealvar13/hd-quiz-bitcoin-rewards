@@ -13,6 +13,13 @@ wp_enqueue_script(
     bitc_PLUGIN_VERSION,
     true
 );
+wp_enqueue_script(
+    'confetti-script',
+    plugins_url('./js/tsparticles.confetti.bundle.min.js?', __FILE__),
+    array('jquery'),
+    bitc_PLUGIN_VERSION,
+    true
+);
 
 $buildQuiz = true;
 
