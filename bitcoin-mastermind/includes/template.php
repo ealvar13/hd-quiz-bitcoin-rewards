@@ -19,7 +19,7 @@ wp_enqueue_script(
     array('jquery'),
     bitc_PLUGIN_VERSION,
     true
-);
+); 
 
 $buildQuiz = true;
 
