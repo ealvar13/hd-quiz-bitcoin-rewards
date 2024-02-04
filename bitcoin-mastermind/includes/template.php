@@ -15,7 +15,7 @@ wp_enqueue_script(
 );
 wp_enqueue_script(
     'confetti-script',
-    plugins_url('./js/tsparticles.confetti.bundle.min.js?', __FILE__),
+    plugins_url('./js/tsparticles.confetti.bundle.js?', __FILE__),
     array('jquery'),
     bitc_PLUGIN_VERSION,
     true
