@@ -96,6 +96,14 @@ async function validateLightningAddress(event) {
         success: function(response) {
             console.log(response); // Log server's response.
             alert(response); // Show the server response instead of a static message
+
+            // Change the "Save" button color to black and text to "Saved"
+            const saveButton = document.getElementById("bitc_save_settings");
+            if (saveButton) {
+                saveButton.style.setProperty('background-color', '#000000', 'important'); // Change color to black
+                saveButton.value = "Saved"; // Change button text to "Saved"
+                saveButton.style.animation = "none"; // Stop the animation
+            }
         }
     });
     event.preventDefault(); // Stop the form submission in either case
