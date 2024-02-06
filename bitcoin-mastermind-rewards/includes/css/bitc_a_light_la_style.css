@@ -12,7 +12,7 @@
 
 .la-modal-content {
     background: linear-gradient(to bottom, #3c3c3c 0%, #222 100%);
-	color: #FFF;
+	color: #FFF !important;
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
@@ -20,18 +20,33 @@
     max-width: 500px;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
     border-radius: 5px;
+    overflow: hidden;
 }
 
 .la-modal-content a {
-    color: #F2A900;
+    color: #F2A900 !important;
     text-decoration: none;
-    transition: color 0.3s ease, text-decoration 0.3s ease; 
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+    word-wrap: break-word; /* Break the words to prevent overflow */
+    overflow-wrap: break-word; /* Ensures that long strings of text will wrap and not overflow */
+    white-space: normal; /* Allows the text to wrap as needed */
+    display: block; /* Block display to allow the use of margin and padding for positioning */
+    margin: 0 auto; /* Center the link horizontally if it's less than the container width */ 
 }
 
 .la-modal-content a:hover,
 .la-modal-content a:focus {
     color: #FF4500; 
     text-decoration: underline; 
+}
+
+/* Ensure that the modal content is scrollable on small screens */
+@media (max-width: 480px) {
+    .la-modal-content {
+        width: 90%; /* Slightly increase the width to give more room for the text */
+        max-width: none; /* Remove max-width to allow the modal to be responsive */
+        overflow-y: auto; /* Allow vertical scrolling if the content is too tall */
+    }
 }
 
 .la-close {
@@ -111,6 +126,7 @@
     font-size: 150%;
     display: block; /* Makes label display as block, which can help with spacing */
     margin-bottom: 10px; /* Spacing between label and input */
+    color: #FF4500;
 }
 
 .bitc_lightning_input {
@@ -125,16 +141,44 @@
     margin-bottom: 15px; /* Spacing between input and button */
 }
 
+/* Pulsing animation for the save button */
+@keyframes pulseAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.10); }
+    100% { transform: scale(1); }
+}
+
 .bitc_button {
-    margin-left: 10px;
+    animation: pulseAnimation 2s infinite;
+    margin: 10px 0; /* Adjust margin to center the button */
     padding: 10px 20px;
-    background-color: #FF9900; /* Example button color */
+    background-color: #FF9900 !important;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease; /* Smooth transition for background color */
+    width: auto; /* Default width */
+    max-width: 200px; /* Maximum width for large screens */
+    display: block; /* Make the button a block element to fill the container width */
+    text-align: center; /* Center the text inside the button */
 }
+
+/* Media queries for responsive adjustments */
+@media (max-width: 768px) { /* For tablets */
+    .bitc_button {
+        max-width: 180px;
+        padding: 10px 15px; /* Slightly smaller padding */
+    }
+}
+
+@media (max-width: 480px) { /* For mobile devices */
+    .bitc_button {
+        max-width: 160px;
+        padding: 8px 10px; /* Even smaller padding for small screens */
+    }
+}
+
 
 .bitc_button:hover {
     background-color: #E85D04; /* Darker shade for button hover state */

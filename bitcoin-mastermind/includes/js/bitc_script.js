@@ -1092,7 +1092,7 @@ jQuery("#bitc_fb_sharer").on("click", function () {
 		{
 			method: "share",
 			href: HDQ.VARS.permalink,
-			hashtag: "#hdquiz",
+			hashtag: "#bitcoin-mastermind",
 			quote: text, // Note: It looks like Meta depricated sending custom text altogether :(
 		},
 		function (res) {

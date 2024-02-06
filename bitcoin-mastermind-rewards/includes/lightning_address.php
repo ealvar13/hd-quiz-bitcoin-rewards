@@ -105,15 +105,15 @@ function la_modal_html($quiz_id) {
     <div id="la-modal" class="la-modal">
         <div class="la-modal-content">
             <span class="la-close">&times;</span>
-            <p>Here are the rules for the quiz:</p>
+            <p>Here are the rules:</p>
             <ul>
-                <li>Enter a valid Bitcoin Lightning address to receive rewards.</li>
-                <li>If you need a Lightning address, get one here for free: <a href="https://lightningaddress.com/#providers" target="_blank">https://lightningaddress.com/#providers</a></li>
-                <li>Each correct answer will earn you <?php echo get_option('sats_per_answer_for_' . $quiz_id, 0); ?> satoshis.</li>
+                <li>Enter a Bitcoin Lightning Address to get rewards.</li>
+                <li>If you need a Lightning Address, get one here: <a href="https://lightningaddress.com/#providers" target="_blank">https://lightningaddress.com/#providers</a></li>
+                <li>Each correct answer earns you <?php echo get_option('sats_per_answer_for_' . $quiz_id, 0); ?> satoshis.</li>
                 <li>You have <?php echo get_option('max_retries_for_' . $quiz_id, 0); ?> tries.</li>
-                <li>Rewards are calculated based on correct answers.</li>
+                <li>Rewards are based on correct answers.</li>
             </ul>
-            <button id="la-start-quiz" class="la-start-quiz">Start Quiz</button>
+            <button id="la-start-quiz" class="la-start-quiz">Start</button>
             <div class="la-powered-by">Powered by <a href="https://velascommerce.com/bitcoin-mastermind/" target="_blank" class="la-powered-link">Bitcoin Mastermind</a></div>
         </div>
     </div>
