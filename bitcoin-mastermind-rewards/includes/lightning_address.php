@@ -312,6 +312,7 @@ function bitc_pay_bolt11_invoice() {
                 'Authorization' => 'token ' . $apiKey,
             ],
             'body' => $body,
+            'timeout'     => 45,
             'data_format' => 'body',
         ]);
 
@@ -353,6 +354,7 @@ function bitc_pay_bolt11_invoice() {
         // Send payment request to Alby
         $response = wp_remote_post($url, [
             'headers' => $headers,
+            'timeout'     => 45,
             'body' => $body,
             'data_format' => 'body',
         ]);
