@@ -226,6 +226,32 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress) {
     });
 }
 
+async function fetchRemainingTries(lightningAddress,quizID){
+
+            try {
+                    const response = await fetch(bitc_data.ajaxurl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'action': 'count_attempts_by_lightning_address_ajax',
+                            'lightningAddress': lightningAddress,
+                            'quizID':quizID
+                        })
+                    });
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error saving quiz results:', error);
+                    return null;
+                }
+}
+
+
+
+
+
 async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID,results_details_selections) {
     try {
         console.log(`Sending AJAX request with Quiz ID: ${quizID}`);
@@ -421,7 +447,13 @@ document.addEventListener("DOMContentLoaded", function() {
                                 if (bolt11) {
                                     jQuery('#step-generating').addClass('active-step');
                                     jQuery('#step-sending').addClass('active-step');
+                                    fetchRemainingTries(lightningAddress,quizID).then(response => { 
+
+                                       // alert("------------"+response.remaining_attempts);
+                                  
+                                            
                                     sendPaymentRequest(bolt11, quizID, email)
+
                                     .then(paymentResponse => {
                                         paymentSuccessful = paymentResponse.success;
                                         satoshisToSend = paymentSuccessful ? totalSats : 0;
@@ -430,7 +462,16 @@ document.addEventListener("DOMContentLoaded", function() {
                                             jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
 
                                        }else{
-                                            jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have X more tries to get it right!');
+                                           if(response.remaining_attempts==0){
+
+                                            jQuery('#step-result').addClass('active-step').text('Better luck next time :)');
+
+
+                                           }else{
+
+                                            jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have '+response.remaining_attempts+' more tries to get it right!');
+
+                                           }
 
                                        }
                                        
@@ -438,6 +479,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
                                         saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID, results_details_selections);
                                     })
+                                    })
+                                
                                     .catch(error => {
                                         console.error('Error paying BOLT11 Invoice:', error);
                                         jQuery('#step-result').addClass('active-step').text('Payment Failed');
@@ -446,6 +489,9 @@ document.addEventListener("DOMContentLoaded", function() {
                                     console.error('Failed to generate BOLT11 Invoice.');
                                 }
                             })
+
+                              
+                        
                             .catch(error => {
                                 console.error('Error generating BOLT11:', error);
                             });

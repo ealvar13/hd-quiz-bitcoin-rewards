@@ -1,4 +1,6 @@
 <?php
+//error_reporting(-1);
+//ini_set('display_errors', 1);
 /**
  * Lightning Address Add-Ons:
  * Get the Lightning Address from the user and store it in the session.
@@ -152,6 +154,7 @@ function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
 
+
     $count = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM $table_name WHERE lightning_address = %s AND quiz_id = %d",
         $lightning_address, 
@@ -165,6 +168,38 @@ function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
 
     return ['count' => intval($count), 'max_retries_exceeded' => $max_retries_exceeded];
 }
+
+
+// Function to count the attempts a user's lightning address has made for a specific quiz
+function count_attempts_by_lightning_address_ajax() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+
+    if(!empty($_POST['lightningAddress']) && !empty($_POST['quizID'])){
+        $lightning_address = $_POST['lightningAddress'];
+        $quiz_id = $_POST['quizID'];
+    }
+    
+
+    $count = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $table_name WHERE lightning_address = %s AND quiz_id = %d",
+        $lightning_address, 
+        $quiz_id
+    ));
+
+   
+
+    error_log("Retrieved count for $lightning_address, Quiz ID $quiz_id: $count");
+
+    $max_retries = get_option("max_retries_for_" . $quiz_id, 0);
+    //$max_retries_exceeded = intval($count) >= $max_retries;
+    $remaining_attempts = $max_retries - $count;
+    echo json_encode(array('count' => intval($count), 'max_retries' => $max_retries,'remaining_attempts'=>$remaining_attempts));
+    die;
+}
+add_action('wp_ajax_count_attempts_by_lightning_address_ajax', 'count_attempts_by_lightning_address_ajax');
+add_action('wp_ajax_nopriv_count_attempts_by_lightning_address_ajax', 'count_attempts_by_lightning_address_ajax');
+
 
 
 function store_lightning_address_in_session() {
@@ -277,6 +312,7 @@ function bitc_pay_bolt11_invoice() {
                 'Authorization' => 'token ' . $apiKey,
             ],
             'body' => $body,
+            'timeout'     => 45,
             'data_format' => 'body',
         ]);
 
@@ -318,6 +354,7 @@ function bitc_pay_bolt11_invoice() {
         // Send payment request to Alby
         $response = wp_remote_post($url, [
             'headers' => $headers,
+            'timeout'     => 45,
             'body' => $body,
             'data_format' => 'body',
         ]);
