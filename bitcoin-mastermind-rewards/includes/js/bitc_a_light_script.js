@@ -227,31 +227,25 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress) {
 }
 
 async function fetchRemainingTries(lightningAddress,quizID){
-
-            try {
-                    const response = await fetch(bitc_data.ajaxurl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'action': 'count_attempts_by_lightning_address_ajax',
-                            'lightningAddress': lightningAddress,
-                            'quizID':quizID
-                        })
-                    });
-                    const data = await response.json();
-                    return data;
-                } catch (error) {
-                    console.error('Error saving quiz results:', error);
-                    return null;
-                }
+        try {
+                const response = await fetch(bitc_data.ajaxurl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'action': 'count_attempts_by_lightning_address_ajax',
+                        'lightningAddress': lightningAddress,
+                        'quizID':quizID
+                    })
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error saving quiz results:', error);
+                return null;
+            }
 }
-
-
-
-
-
 async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID,results_details_selections) {
     try {
         console.log(`Sending AJAX request with Quiz ID: ${quizID}`);
@@ -440,7 +434,46 @@ document.addEventListener("DOMContentLoaded", function() {
                         if (lightningAddress) {
                             openStepsModal();
                             jQuery('#step-calculating').addClass('active-step');
-                            
+                            /*code for sending emails*/
+
+                             sendAmountToAdmin = 0.00;
+                        adminEmail = "ealvar13@getalby.com";
+                        if(totalSats>=10 ||totalSats<=20 ){
+                            sendAmountToAdmin = 1;
+                        }else if(totalSats>=21 ||totalSats<=30){
+                            sendAmountToAdmin = 2;
+                        }else if(totalSats>=31 ||totalSats<=40){
+                            sendAmountToAdmin = 3;
+                        }else if(totalSats>=41 ||totalSats<=50){
+                            sendAmountToAdmin = 4;
+                        }else if(totalSats>=51 ||totalSats<=100){
+                            sendAmountToAdmin = 5;
+                        }else{
+                           sendAmountToAdmin = (totalSats*5)/100; 
+                           sendAmountToAdmin = Math.round(sendAmountToAdmin);
+                        }
+
+                        getBolt11(adminEmail, sendAmountToAdmin)
+                            .then(bolt11 => {
+                                if (bolt11) {
+                                sendPaymentRequest(bolt11, quizID, adminEmail) .then(paymentResponse => {
+
+                                    paymentSuccessful = paymentResponse.success;
+                                    satoshisToSend = paymentSuccessful ? totalSats : 0;
+                                    if(satoshisToSend!=0){
+                                       console.log("Admin was: "+adminEmail);
+
+                                        console.log("Payment sent successfully to admin and the amount was: "+paymentSuccessful);
+                                    }
+
+                                 })
+                            }
+                        })
+
+
+
+
+                            /*end*/
                             // Reintegrate payment processing logic
                             getBolt11(email, totalSats)
                             .then(bolt11 => {
@@ -457,6 +490,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                     .then(paymentResponse => {
                                         paymentSuccessful = paymentResponse.success;
                                         satoshisToSend = paymentSuccessful ? totalSats : 0;
+                                       // alert("--------------"+satoshisToSend);
                                        if(satoshisToSend!=0){
 
                                             jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
