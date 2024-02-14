@@ -490,7 +490,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                     .then(paymentResponse => {
                                         paymentSuccessful = paymentResponse.success;
                                         satoshisToSend = paymentSuccessful ? totalSats : 0;
-                                        alert("--------------"+satoshisToSend);
+                                       // alert("--------------"+satoshisToSend);
                                        if(satoshisToSend!=0){
 
                                             jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
