@@ -111,9 +111,9 @@ function la_modal_html($quiz_id) {
             <ul>
                 <li>Enter a Bitcoin Lightning Address to get rewards.</li>
                 <li>If you need a Lightning Address, get one here: <a href="https://lightningaddress.com/#providers" target="_blank">https://lightningaddress.com/#providers</a></li>
-                <li>Each correct answer earns you <?php echo get_option('sats_per_answer_for_' . $quiz_id, 0); ?> satoshis.</li>
-                <li>You have <?php echo get_option('max_retries_for_' . $quiz_id, 0); ?> tries.</li>
-                <li>Rewards are based on correct answers.</li>
+                <li>Each complete answer earns you <?php echo get_option('sats_per_answer_for_' . $quiz_id, 0); ?> satoshis.</li>
+                <li>Don't worry, if something goes wrong, you still have  <?php echo get_option('max_retries_for_' . $quiz_id, 0); ?> tries per Lightning Address.</li>
+                <li>For quizzes, rewards are based on correct answers.</li>
             </ul>
             <button id="la-start-quiz" class="la-start-quiz">Start</button>
             <div class="la-powered-by">Powered by <a href="https://velascommerce.com/bitcoin-mastermind/" target="_blank" class="la-powered-link">Bitcoin Mastermind</a></div>
@@ -221,7 +221,7 @@ function store_lightning_address_in_session() {
             $_SESSION['lightning_address'] = $lightning_address;
             echo 'Address stored successfully.';
         } else {
-            echo 'Maximum attempts reached for this Lightning Address. You can still take the quiz, but you won\'t get sats ; )';
+            echo 'Maximum attempts reached for this Lightning Address. You can still proceed, you just won’t get sats ; )';
         }
     } else {
         echo 'No address or quiz ID provided.';
