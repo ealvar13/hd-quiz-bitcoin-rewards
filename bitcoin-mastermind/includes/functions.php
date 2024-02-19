@@ -2,7 +2,7 @@
 
 /* Include the basic required files
 ------------------------------------------------------- */
-require dirname(__FILE__) . '/tools/data_upgrade.php';
+// require dirname(__FILE__) . '/tools/data_upgrade.php';
 require dirname(__FILE__) . '/tools/csv_import.php';
 
 // Register Bitcoin Mastermind pages
@@ -14,11 +14,6 @@ function bitc_register_quizzes_page_callback()
 function bitc_register_settings_page_callback()
 {
     require dirname(__FILE__) . '/about.php';
-}
-
-function bitc_register_addons_page_callbak()
-{
-    require dirname(__FILE__) . '/addons.php';
 }
 
 function bitc_register_tools_page_callbak()

@@ -60,7 +60,7 @@ if (!defined('bitc_EDIT_AUTHORED')) {
 		<div id="header_actions">
 			<a title="delete or rename quizzes" href="./edit-tags.php?taxonomy=quiz&post_type=post_type_questionna" class="bitc_button_warning"><span class="dashicons dashicons-trash"></span> DELETE QUIZZES</a>
 			<a title="add to multiple quizzes, or delete multiple questions" href="./edit.php?post_type=post_type_questionna" class="bitc_button_warning">BULK MODIFY QUESTIONS</a>
-			<a href="https://hdplugins.com/learn/hd-quiz/hd-quiz-documentation/?utm_source=hd-quiz" target="_blank" title="Documentation" class="bitc_button2">Documentation</a>
+			<a href="https://hdplugins.com/learn/hd-quiz/hd-quiz-documentation/?utm_source=hd-quiz" target="_blank" title="Documentation" class="bitc_button2">HD Quiz Documentation</a>
 		</div>
 	</div>
 	<div id="bitc_quizzes_page" class="content">
@@ -116,7 +116,8 @@ if (!defined('bitc_EDIT_AUTHORED')) {
 		</div>
 	</div>
 
-	<p>If you have any questions or need support, please do not hesitate to ask on the <a href="https://wordpress.org/support/plugin/hd-quiz">official&nbsp;WordPress support page</a> or on our own&nbsp;<a href="https://hdplugins.com/forum/hd-quiz-support/?utm_source=hd-quiz" target="_blank" rel="noopener">support page at HDPlugins</a>.</p>
+	<p>If you have any questions or need support, please do not hesitate to contact us at <a href="https://velascommerce.com/" target="_blank" rel="noopener noreferrer">Velas Commerce</a>.</p>
+
 </div>
 
 <div id="bitc_footer_highlight_wrapper">
@@ -125,7 +126,15 @@ if (!defined('bitc_EDIT_AUTHORED')) {
 			<img src="<?php echo plugin_dir_url(__FILE__); ?>../images/hd_patreon.png" alt="Donate" />
 		</div>
 		<p>
-			Bitcoin Mastermind is a 100% free plugin developed in my spare time, and as such, I get paid in nothing but good will and positive reviews. If you are enjoying Bitcoin Mastermind and would like to show your support, please consider contributing to my <a href="https://www.patreon.com/harmonic_design" target="_blank">patreon page</a> to help continued development, or consider <a href="https://wordpress.org/support/plugin/hd-quiz/reviews/" target="_blank">leaving a positive review for Bitcoin Mastermind</a> on the offical WordPress plugin page so that others can find Bitcoin Mastermind too.
+			Bitcoin Mastermind is a 100% free plugin. We do not charge anything for downloading it 
+			and we don't do add-ons or premium versions.  
+			We make bitcoin to fund this project by sending a tiny amount of each reward sent to our Lightning Address.<br /><br />
+			If you think that is annoying, this is 100% FOSS.  You can download the code, fork it and maintain it yourself. <br /><br />
+			If you are enjoying Bitcoin Mastermind, we are a fork of an existing WP plugin. 
+			You can show your support to them by contributing to their 
+			<a href="https://www.patreon.com/harmonic_design" target="_blank">patreon page</a>
+			to help continued development. <br /><br />
+			They are cool and it would be cool of you to support FOSS.
 		</p>
 	</div>
 </div>

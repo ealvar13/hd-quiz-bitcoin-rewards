@@ -62,16 +62,9 @@ wp_enqueue_script(
     </div>
     <div id="bitc_wrapper">
         <div id="bitc_form_wrapper">
-            <h1>Bitcoin Mastermind Results - Bitcoin Rewards</h1>
+            <h1>Bitcoin Mastermind - Bitcoin Settings and Rewards</h1>
             <p>
-                This add-on allows you to send bitcoin rewards over the Lightning Network for correct quiz answers.
-            </p>
-
-            <p>
-                NOTE: The main Bitcoin Mastermind plugin never stores <em>any</em> user information for submitted quizzes and thus
-                is 100% GDPR compliant. The use of this addon, however, requires storing some information when a user
-                submits a quiz meaning that you will need to update your privacy policy to disclose this if you wish to
-                be GDPR compliant.
+                These settings enable you to send bitcoin rewards over the Lightning Network for correct quiz answers.
             </p>
 
             <div id="bitc_tabs">
@@ -79,6 +72,7 @@ wp_enqueue_script(
                     <li class="bitc_active_tab" data-hdq-content="bitc_tab_content">Results</li>
                     <li data-hdq-content="bitc_tab_rewards">Rewards</li>
                     <li data-hdq-content="bitc_tab_settings">Settings</li>
+                    <li data-hdq-content="bitc_tab_payment_splits">Payment Splits</li>
                 </ul>
                 <div class="clear"></div>
             </div>
@@ -167,23 +161,25 @@ wp_enqueue_script(
                     <?php wp_nonce_field('bitc_about_options_nonce', 'bitc_about_options_nonce'); ?>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 2rem">
                         
-
-                        <label style="grid-column: span 2;">Enter Alby, Joltz-coming soon - or BTCPay Server Details and click SAVE
-                                <span class="bitc_tooltip bitc_tooltip_question">?<span class="bitc_tooltip_content"><span>Only one is allowed. If one is filled, filling the other will erase the existing info.
-                        </label>
+                    <label style="grid-column: span 2;">Enter Alby OR BTCPay Server Details and click SAVE
+                        <span class="bitc_tooltip bitc_tooltip_question">?
+                            <span class="bitc_tooltip_content">
+                                <span>Only one is allowed. If you enter both, the BTCPay Server details will be used.</span>
+                            </span>
+                        </span>
+                    </label>
                         
                         <div class="bitc_row">
-                            <label for="<?php echo $data_field_name_joltz; ?>">Joltz Brand Id:</label>
-                            <input type="text" id="<?php echo $data_field_name_joltz; ?>" name="<?php echo $data_field_name_joltz; ?>" value="<?php echo $opt_val_joltz; ?>" disabled style="background-color: #e0e0e0; color: #a0a0a0;" placeholder="Coming soon">
-                        </div>
-
-                        <div class="bitc_row">
-                            <label for="<?php echo $data_field_name_joltz_secret; ?>">Joltz Secret Key:</label>
-                            <input type="text" id="<?php echo $data_field_name_joltz_secret; ?>" name="<?php echo $data_field_name_joltz_secret; ?>" value="<?php echo $opt_val_joltz_secret; ?>" disabled style="background-color: #e0e0e0; color: #a0a0a0;" placeholder="Coming soon">
-                        </div>
-                        
-                        <div class="bitc_row">
-                            <label for="<?php echo $data_field_name_btcpay_url; ?>">BTCPay Server URL:</label>
+                            <label for="<?php echo $data_field_name_btcpay_url; ?>">BTCPay Server URL:
+                                <span class="bitc_tooltip bitc_tooltip_question">?
+                                    <span class="bitc_tooltip_content">
+                                        <span>BTCPay Server can be easily used with Testnet.  We recommend testing 
+                                            thoroughly with Testnet before using Mainnet and limiting the amount of funds
+                                            available to the store selected for sending rewards.
+                                        </span>
+                                    </span>
+                                </span>
+                            </label>
                             <input type="text" id="<?php echo $data_field_name_btcpay_url; ?>" name="<?php echo $data_field_name_btcpay_url; ?>" value="<?php echo $opt_val_btcpay_url; ?>">
                         </div>
                         
@@ -194,7 +190,7 @@ wp_enqueue_script(
 
                         <div class="bitc_row">
                             <label for="<?php echo $data_field_name_btcpay_api_key; ?>">BTCPay Server API Key:</label>
-                            <input type="text" id="<?php echo $data_field_name_btcpay_api_key; ?>" name="<?php echo $data_field_name_btcpay_api_key; ?>" value="<?php echo $opt_val_btcpay_api_key; ?>">
+                            <input type="password" id="<?php echo $data_field_name_btcpay_api_key; ?>" name="<?php echo $data_field_name_btcpay_api_key; ?>" value="<?php echo $opt_val_btcpay_api_key; ?>">
                         </div>
 
                         <div class="bitc_row">
@@ -211,7 +207,8 @@ wp_enqueue_script(
 
                         <div class="bitc_row">
                             <label for="<?php echo $data_field_name_alby_token; ?>">Alby Account Access Token:</label>
-                            <input type="text" id="<?php echo $data_field_name_alby_token; ?>" name="<?php echo $data_field_name_alby_token; ?>" value="<?php echo $opt_val_alby_token; ?>">
+                            <input type="password" id="<?php echo $data_field_name_alby_token; ?>" name="<?php echo $data_field_name_alby_token; ?>" value="<?php echo esc_attr($opt_val_alby_token); ?>">
+
                         </div>
 
                         <div class="bitc_row">
@@ -296,7 +293,47 @@ wp_enqueue_script(
                     }
                     ?>
                 </form>
-            </div>                                                                                  
+            </div> 
+            <div id="bitc_tab_payment_splits" class="bitc_tab" style="display:none;">
+                <p>Bitcoin Mastermind is a 100% free plugin. 
+                    We do not charge anything for downloading it and we don't do add-ons or premium versions.
+                    We make bitcoin to fund this project by sending a tiny amount of each reward sent to our Lightning Address.
+                </p>
+                <table class="bitc_a_light_table">
+                    <thead>
+                        <tr>
+                            <th>Amount of Reward</th>
+                            <th>Satoshis Sent to us</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1 to 20 satoshis</td>
+                            <td>1 satoshi</td>
+                        </tr>
+                        <tr>
+                            <td>21 to 30 satoshis</td>
+                            <td>2 satoshis</td>
+                        </tr>
+                        <tr>
+                            <td>31 to 40 satoshis</td>
+                            <td>3 satoshis</td>
+                        </tr>
+                        <tr>
+                            <td>41 to 50 satoshis</td>
+                            <td>4 satoshis</td>
+                        </tr>
+                        <tr>
+                            <td>51 to 100 satoshis</td>
+                            <td>5 satoshis</td>
+                        </tr>
+                        <tr>
+                            <td>Over 100 satoshis</td>
+                            <td>5% of Total satoshis (rounded)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>                                                                                 
         </div>
     </div>
 </div>

@@ -12,11 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// TODO: Get this working. Right now styling is inline
 // Enqueue the front-end stylesheet
 function bitc_enqueue_lightning_la_style() {
     wp_enqueue_style(
-        'bitc_front_end_style', // Unique handle for your front-end style
+        'bitc_front_end_style', 
         plugin_dir_url(dirname(__FILE__)) . 'includes/css/bitc_a_light_la_style.css',
         array(),
         bitc_A_LIGHT_PLUGIN_VERSION
@@ -26,8 +25,8 @@ add_action('wp_enqueue_scripts', 'bitc_enqueue_lightning_la_style');
 
 // Enqueue the JavaScript file
 function bitc_enqueue_lightning_script() {
-    global $post; // Ensure you have access to the global post object
-    $quiz_id = $post->ID; // This assumes that you are on a single quiz post. Adjust if necessary.
+    global $post; 
+    $quiz_id = $post->ID; 
     
     // Get the Satoshi value for the current quiz
     $sats_field = "sats_per_answer_for_" . $quiz_id;
@@ -40,7 +39,7 @@ function bitc_enqueue_lightning_script() {
     $script_path = plugin_dir_url(__FILE__) . 'js/bitc_a_light_script.js';
     wp_enqueue_script('hdq-lightning-script', $script_path, array('jquery'), '1.0.0', true);
 
-    // Localize the script with your data including the sats value and the BTCPay Server URL and API Key
+    // Localize the script including the sats value and the BTCPay Server URL and API Key
     wp_localize_script('hdq-lightning-script', 'bitc_data', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
         'satsPerAnswer' => $sats_value,
@@ -94,9 +93,6 @@ function should_enable_rewards($quiz_id, $lightning_address) {
         $quiz_name
     ));
     $over_budget = ($total_sent >= $max_budget);
-    error_log("Max budget for quiz ID $quiz_id: $max_budget");
-    error_log("Total sent for quiz ID $quiz_id: $total_sent");
-    error_log("Quiz ID $quiz_id over budget: " . ($over_budget ? 'Yes' : 'No'));
 
     return $rewards_enabled && !$over_budget;
 }
@@ -121,7 +117,6 @@ function la_modal_html($quiz_id) {
     </div>
     <?php
 }
-
 
 
 /**
@@ -161,8 +156,6 @@ function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
         $quiz_id
     ));
 
-    error_log("Retrieved count for $lightning_address, Quiz ID $quiz_id: $count");
-
     $max_retries = get_option("max_retries_for_" . $quiz_id, 0);
     $max_retries_exceeded = intval($count) >= $max_retries;
 
@@ -187,10 +180,6 @@ function count_attempts_by_lightning_address_ajax() {
         $quiz_id
     ));
 
-   
-
-    error_log("Retrieved count for $lightning_address, Quiz ID $quiz_id: $count");
-
     $max_retries = get_option("max_retries_for_" . $quiz_id, 0);
     //$max_retries_exceeded = intval($count) >= $max_retries;
     $remaining_attempts = $max_retries - $count;
@@ -206,20 +195,16 @@ function store_lightning_address_in_session() {
     if (isset($_POST['address']) && isset($_POST['quiz_id'])) {
         $lightning_address = sanitize_text_field($_POST['address']);
         $quiz_id = intval($_POST['quiz_id']); // Fetch quiz_id from the POST data
-        error_log("POST Data: " . print_r($_POST, true));
 
         $max_retries = get_option("max_retries_for_" . $quiz_id, 0);
         $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
         $attempts = $attempt_data['count']; // Access the count of attempts
         $max_retries_exceeded = $attempt_data['max_retries_exceeded'];
 
-        error_log("Max retries: $max_retries");
-        error_log("Attempts: $attempts");
         $_SESSION['max_retries_exceeded'] = $max_retries_exceeded;
 
         if (!$max_retries_exceeded) {
             $_SESSION['lightning_address'] = $lightning_address;
-            echo 'Address stored successfully.';
         } else {
             echo 'Maximum attempts reached for this Lightning Address. You can still proceed, you just won’t get sats ; )';
         }
@@ -254,9 +239,6 @@ function la_steps_indicator_modal() {
 }
 
 function la_add_steps_indicator_modal($quiz_id) {
-    // Log a message for debugging purposes
-    error_log("la_add_steps_indicator_modal called for quiz ID: " . $quiz_id);
-    
     // Call the steps indicator modal function
     la_steps_indicator_modal();
 }
@@ -267,18 +249,14 @@ add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
 function bitc_pay_bolt11_invoice() {
     global $wpdb;
 
-    error_log("POST Data: " . print_r($_POST, true)); // Debug log to check all POST data
     // Retrieve quiz_id from POST data
     $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
-    error_log("Quiz ID from post data: " . $quiz_id);
-
 
     $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
     $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
 
     // Get attempt count and check if maximum retries have been exceeded
     $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
-    error_log("Attempt data: " . print_r($attempt_data, true));
     if ($attempt_data['max_retries_exceeded']) {
         echo json_encode(['error' => 'Maximum attempts reached for this Lightning Address.']);
         wp_die();
@@ -366,7 +344,6 @@ function bitc_pay_bolt11_invoice() {
         }
     
         $responseBody = wp_remote_retrieve_body($response);
-        error_log('Alby response: ' . $responseBody);
     
         // Decode JSON response
         $decodedResponse = json_decode($responseBody, true);
@@ -431,14 +408,6 @@ foreach ($resultArray as $key => $value) {
     // Set the key-value pair in the result array
     $dataResults[$resultArray["dataArray[$numericKey][key]"]] = $resultArray["dataArray[$numericKey][value]"];
 }
-
-// Output the result
-//print_r($dataResults);die;
-
-
-
-   //print_r($_POST['selected_results']);
-//die("sudhhhhhhhhhhhhhhhhhhhhh");
     // Get current user information
     $current_user = wp_get_current_user();
 
@@ -455,8 +424,6 @@ foreach ($resultArray as $key => $value) {
 
     $send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
     $satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;
-
-
 
     // Insert data into the database
     $insert_result = $wpdb->insert(
@@ -476,7 +443,7 @@ foreach ($resultArray as $key => $value) {
 
     // Get the last insert ID
     $last_insert_id = $wpdb->insert_id;
-    $quiz_settings = get_bitc_quiz($quiz_ID);
+    $quiz_settings = get_bitc_quiz($quiz_id);
 
     foreach($dataResults as $key=>$value){
         $get_question_name = sanitize_text_field(get_the_title($key));
@@ -489,8 +456,6 @@ foreach ($resultArray as $key => $value) {
                  $correct_answer .= $val['answer'].",";
             }
         }
-
-       
 
         $wpdb->insert(
         $table_name2,
@@ -523,7 +488,6 @@ add_action('wp_ajax_bitc_save_quiz_results', 'bitc_save_quiz_results');
 add_action('wp_ajax_nopriv_bitc_save_quiz_results', 'bitc_save_quiz_results');
 
 
-
 function bitc_export_csv_results(){
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
@@ -531,7 +495,7 @@ function bitc_export_csv_results(){
     // Specify your table name
     $table1_name = $wpdb->prefix . 'bitcoin_quiz_results';
     $table2_name = $wpdb->prefix . 'bitcoin_survey_results';    
-        // Fetch data from the first table
+    // Fetch data from the first table
     $data1 = $wpdb->get_results("SELECT * FROM $table1_name", ARRAY_A);
 
     // Fetch data from the second table
@@ -560,15 +524,10 @@ function bitc_export_csv_results(){
     die;
     // Always exit after processing AJAX
     wp_die();
-
-
-
 }
-
 
 add_action('wp_ajax_export_csv_results', 'bitc_export_csv_results');
 add_action('wp_ajax_nopriv_export_csv_results', 'bitc_export_csv_results');
-
 
 
 // Function to convert array to CSV string

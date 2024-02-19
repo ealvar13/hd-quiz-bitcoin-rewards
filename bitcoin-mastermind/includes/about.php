@@ -24,11 +24,7 @@ wp_enqueue_script(
         </h1>
     </div>
 
-    <p>Bitcoin Mastermind was designed and developed to be one of the easiest and most hassle-free quiz builders for WordPress. If you have any questions, or need support, please contact me at either at the WordPress.org <a href="https://wordpress.org/support/plugin/hd-quiz/" data-type="URL" data-id="https://wordpress.org/support/plugin/hd-quiz/">Bitcoin Mastermind support forum</a>, or <a href="https://hdplugins.com/forum/hd-quiz-support/?utm_source=hd-quiz" data-type="URL" data-id="https://hdplugins.com/forum/hd-quiz-support/&amp;utm_source=hd-quiz">our own support forum</a>.</p>
-
-
-
-    <p>As I continue to develop Bitcoin Mastermind, more features, options, customizations, and settings will be introduced. If you have enjoyed Bitcoin Mastermind, then I would sure appreciate it if you could&nbsp;<a href="https://wordpress.org/support/plugin/hd-quiz/reviews/#new-post" target="_blank" rel="noreferrer noopener">leave an honest review</a>. It&#8217;s the little things that make building systems like this worthwhile ❤.</p>
+    <p>Bitcoin Mastermind is designed to be an easy way to engage your site users with bitcoin rewards. It is a modification by Velas Commerce of an original WordPress plugin by Harmonic Design, to whom we are eternally grateful. If you have any questions, or need support, please contact us at <a href="https://velascommerce.com/">Velas Commerce</a>.</p>
 
     <hr style="margin-top:2rem" />
 
@@ -40,7 +36,7 @@ wp_enqueue_script(
             Settings
         </h2>
         <div>
-            <a href="https://hdplugins.com/learn/hd-quiz/hd-quiz-documentation/?utm_source=hd-quiz" title="Documentation" class="bitc_button2">Documentation</a>
+            <a href="https://hdplugins.com/learn/hd-quiz/hd-quiz-documentation/?utm_source=hd-quiz" title="Documentation" class="bitc_button2">HD Quiz Documentation</a>
             <div role="button" title="save HDQ settings" class="bitc_button" id="bitc_save_settings">SAVE</div>
         </div>
     </div>
@@ -57,9 +53,9 @@ wp_enqueue_script(
         <div id="content_tabs">
             <div id="tab_nav_wrapper">
                 <div id="bitc_logo">
-                    <span class="bitc_logo_tooltip"><img src="<?php echo plugins_url('/images/hd-logo.png', __FILE__); ?>" alt="Harmonic Design logo">
+                    <span class="bitc_logo_tooltip"><img src="<?php echo plugins_url('/images/bm-logo.png', __FILE__); ?>" alt="Harmonic Design logo">
                         <span class="bitc_logo_tooltip_content">
-                            <span><strong>Bitcoin Mastermind</strong> is developed by Harmonic Design. Check out the addons page to see how you can extend Bitcoin Mastermind even further.</span>
+                            <span><strong>Bitcoin Mastermind</strong> is developed by Velas Commerce. If you are looking for support or custom implementations, find us at velascommerce.com</span>
                         </span>
                     </span>
                 </div>
@@ -81,10 +77,9 @@ wp_enqueue_script(
             <img src="<?php echo plugins_url('/images/hd_patreon.png', __FILE__); ?>" alt="Donate">
         </div>
         <p>
-            Bitcoin Mastermind is a 100% free plugin developed in my spare time, and as such, I get paid in nothing but good will
-            and positive reviews. If you are enjoying Bitcoin Mastermind and would like to show your support, please consider
-            contributing to my <a href="https://www.patreon.com/harmonic_design" target="_blank">patreon page</a> to
-            help continued development. Every little bit helps, and I am fuelled by ☕.
+            Bitcoin Mastermind is a 100% free plugin. We do not charge anything for downloading it and we don't do add ons or premium versions.  We make bitcoin to fund this project based on a sending a tiny amount of each reward sent to our Lightning Address. If you are enjoying Bitcoin Mastermind, we are a fork of an existing WP plugin, if you would like to show your support to them, please consider
+            contributing to their <a href="https://www.patreon.com/harmonic_design" target="_blank">patreon page</a> to
+            help continued development. They are cool and it would be cool of you to support FOSS.
         </p>
     </div>
     <br />

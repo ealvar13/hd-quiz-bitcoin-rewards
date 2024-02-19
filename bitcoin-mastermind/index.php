@@ -125,13 +125,10 @@ function bitc_create_settings_page()
         {
             $icon = plugin_dir_url( __FILE__ ).'img/plugin-img.jpeg';
             add_menu_page('Bitcoin Mastermind', 'Bitcoin Mastermind', 'publish_posts', 'bitc_quizzes', 'bitc_register_quizzes_page_callback', $icon, 5);
-            add_menu_page('Bitcoin Mastermind Addons', 'HDQ Addons', 'edit_posts', 'bitc_addons', 'bitc_register_addons_page_callbak', '', 99);
             add_menu_page('Bitcoin Mastermind Tools', 'HDQ Tools', 'edit_posts', 'bitc_tools', 'bitc_register_tools_page_callbak', '', 99);
-
             add_menu_page('Bitcoin Mastermind Tools - CSV Importer', 'HDQ Tools CSV', 'edit_posts', 'bitc_tools_csv_importer', 'bitc_register_tools_csv_importer_page_callback', '', 99);
             add_menu_page('Bitcoin Mastermind Tools - Data Upgrade', 'HDQ Tools DATA', 'edit_posts', 'bitc_tools_data_upgrade', 'bitc_register_tools__data_upgrade_page_callback', '', 99);
 
-            remove_menu_page('bitc_addons');
             remove_menu_page('bitc_tools');
             remove_menu_page('bitc_tools_csv_importer');
             remove_menu_page('bitc_tools_data_upgrade');
@@ -140,19 +137,9 @@ function bitc_create_settings_page()
 
         function bitc_register_settings_page()
         {
-            $addon_text = "";
-            $new_addon = get_transient("bitc_new_addon");
-            if ($new_addon === false) {
-                bitc_check_for_updates();
-            } else {
-                $new_addon["isNew"] = sanitize_text_field($new_addon["isNew"]);
-                if ($new_addon["isNew"] === "yes") {
-                    $addon_text = ' <span class="awaiting-mod">NEW</span>';
-                }
-            }
+            $addon_text = "";  
             add_submenu_page('bitc_quizzes', 'Quizzes', 'Quizzes', 'publish_posts', 'bitc_quizzes', 'bitc_register_quizzes_page_callback');
             add_submenu_page('bitc_quizzes', 'Bitcoin Mastermind About', 'About / Options', 'publish_posts', 'bitc_options', 'bitc_register_settings_page_callback');
-            add_submenu_page('bitc_quizzes', 'Addons', 'Addons' . $addon_text, 'manage_options', 'admin.php?page=bitc_addons');
             add_submenu_page('bitc_quizzes', 'Tools', 'Tools', 'manage_options', 'admin.php?page=bitc_tools');
         }
         add_action('admin_menu', 'bitc_register_settings_page', 11);
@@ -170,9 +157,6 @@ function bitc_create_settings_page()
 
     if (bitc_PLUGIN_VERSION != $bitc_version) {
         update_option('bitc_PLUGIN_VERSION', bitc_PLUGIN_VERSION);
-        delete_option("bitc_new_addon");
-        delete_transient("bitc_new_addon");
-        wp_clear_scheduled_hook('bitc_addon_styler_check_for_updates');
         wp_clear_scheduled_hook('bitc_check_for_updates');
     }
 }

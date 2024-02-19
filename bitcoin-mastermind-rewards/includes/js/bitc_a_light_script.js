@@ -32,7 +32,6 @@ function getPayUrl(email) {
         const transformUrl = `https://${domain}/.well-known/lnurlp/${username}`;
         return transformUrl;
     } catch (error) {
-        console.error("Exception, possibly malformed LN Address:", error);
         return null;
     }
 }
@@ -43,7 +42,6 @@ async function getUrl(path) {
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to fetch from the URL:", error);
         return null;
     }
 }
@@ -53,10 +51,8 @@ async function validateLightningAddressWithUrl(email) {
     const responseData = await getUrl(transformUrl);
 
     if (responseData && responseData.tag === "payRequest") {
-        console.log("Valid Lightning Address!");
         return true;
     } else {
-        console.log("Invalid or Inactive Lightning Address.");
         return false;
     }
 }
@@ -68,7 +64,6 @@ async function validateLightningAddress(event) {
     // Retrieve the quiz ID from the finish button's data-id attribute
     const finishButton = document.querySelector(".bitc_finsh_button");
     const quizID = finishButton ? finishButton.getAttribute('data-id') : null;
-    console.log(`Quiz ID from validateLightningAddress: ${quizID}`);
 
     if (!emailRegex.test(email)) {
         alert("Please enter a valid lightning address format.");
@@ -94,9 +89,6 @@ async function validateLightningAddress(event) {
             quiz_id: quizID // Correctly pass quiz_id
         },
         success: function(response) {
-            console.log(response); // Log server's response.
-            alert(response); // Show the server response instead of a static message
-
             // Change the "Save" button color to black and text to "Saved"
             const saveButton = document.getElementById("bitc_save_settings");
             if (saveButton) {
@@ -115,10 +107,8 @@ function getPayUrl(email) {
         const domain = parts[1];
         const username = parts[0];
         const transformUrl = `https://${domain}/.well-known/lnurlp/${username}`;
-        console.log("Transformed URL:", transformUrl);
         return transformUrl;
     } catch (error) {
-        console.error("Exception, possibly malformed LN Address:", error);
         return null;
     }
 }
@@ -129,7 +119,6 @@ async function getUrl(path) {
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to fetch from the URL:", error);
         return null;
     }
 }
@@ -147,7 +136,6 @@ async function getBolt11(email, amount) {
             let payAmount = amount && amount * 1000 > minAmount ? amount * 1000 : minAmount;
 
             const payquery = `${lnurlDetails.callback}?amount=${payAmount}`;
-            console.log("Amount:", amount, "Payquery:", payquery);
 
             const prData = await getUrl(payquery);
             if (prData && prData.pr) {
@@ -156,11 +144,9 @@ async function getBolt11(email, amount) {
                 throw new Error(`Payment request generation failed: ${prData.reason || 'unknown reason'}`);
             }
       }else{
-         console.error("Error in generating BOLT11:", error);
          return null;
       }
     } catch (error) {
-        console.error("Error in generating BOLT11:", error);
         return null;
     }
 }
@@ -180,12 +166,10 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress,showconfetti) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Raw payment response data:', data); // Added for debugging
 
         // Check for Alby's successful response or BTCPay Server's successful response
         if ((data && data.success && data.details && data.details.payment_preimage) || 
             (data && data.details && data.details.status === "Complete")) {
-            console.log('Payment Successful:', data.details);
             if(showconfetti==1){
                 const duration = 15 * 1000,
                       animationEnd = Date.now() + duration,
@@ -222,12 +206,10 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress,showconfetti) {
 
             return { success: true, data: data.details };
         } else {
-            console.log('Payment Not Successful:', data.details || data);
             return { success: false, data: data.details || data };
         }
     })
     .catch(error => {
-        console.error('Error in Payment Request:', error);
         return { success: false, error: error };
     });
 }
@@ -248,15 +230,13 @@ async function fetchRemainingTries(lightningAddress,quizID){
                 const data = await response.json();
                 return data;
             } catch (error) {
-                console.error('Error saving quiz results:', error);
                 return null;
             }
 }
 async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID,results_details_selections) {
     try {
-        console.log(`Sending AJAX request with Quiz ID: ${quizID}`);
-        console.log(results_details_selections);
-            var formData = jQuery.param({ dataArray: results_details_selections });
+        // Convert the results_details_selections array to a query string
+        var formData = jQuery.param({ dataArray: results_details_selections });
 
         const response = await fetch(bitc_data.ajaxurl, {
             method: 'POST',
@@ -276,7 +256,6 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
             })
         });
         const data = await response.json();
-        console.log('Quiz results saved:', data);
 
         // Check if the response contains the satoshis sent and update the modal
         if (data && data.satoshis_sent !== undefined) {
@@ -285,7 +264,6 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
 
         return data;
     } catch (error) {
-        console.error('Error saving quiz results:', error);
         return null;
     }
 }
@@ -353,54 +331,35 @@ document.addEventListener("DOMContentLoaded", function() {
                              console.log(question_type);
                              var fetch_numeric_ques_id = question_id.split('bitc_question_');
                              fetch_numeric_ques_id = fetch_numeric_ques_id[1];
-                            // console.log("-----------------"+fetch_numeric_ques_id);
                              var select_val ="";
                             if(question_type=="multiple_choice_text"){
                                       //if(question_type=="")  
                                       var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                                         checkedCheckboxes.each(function() {
                                         select_val =  jQuery(this).attr("title");
-                                         // console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+select_val);
                                         results_details_selections.push({ key: fetch_numeric_ques_id, value: select_val });
-       
                                  })
-
-
 
                              } else if(question_type=="text_based"){
                                       var getText = jQuery("#"+question_id+" input.bitc_label_answer").val();
-                                       // console.log("--------------content is here----"+getText);   
-                                   // console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+getText);
-  
                                 results_details_selections.push({ key: fetch_numeric_ques_id, value: getText });
                          
-
-
                              }else if(question_type=="multiple_choice_image"){
                                 var all_selected_options = "";
 
                                 var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                                         checkedCheckboxes.each(function() {
-                                          //console.log(jQuery(this).data('name')+ "is checked.");
                                             all_selected_options += jQuery(this).data('name');
                                         });
-                               // console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+all_selected_options);
-
+                               
                                  results_details_selections.push({ key: fetch_numeric_ques_id, value: all_selected_options });
-
-
-                               // console.log("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
-                              
-
                                 
                              }else if(question_type=="select_all_apply_text"){
                                     var all_selected_options = "";
                                     var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                                         checkedCheckboxes.each(function() {
-                                          //console.log(jQuery(this).data('name')+ "is checked.");
                                             all_selected_options += jQuery(this).data('name')+",";
                                         });
-                                 //console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+all_selected_options);
                                 results_details_selections.push({ key: fetch_numeric_ques_id, value: all_selected_options });
 
                                 
@@ -408,27 +367,15 @@ document.addEventListener("DOMContentLoaded", function() {
                                     var all_selected_options = "";
                                     var checkedCheckboxes = jQuery("#"+question_id+" .bitc_row .bitc_option.bitc_check_input:checked");
                                         checkedCheckboxes.each(function() {
-                                         // console.log(jQuery(this).data('name')+ "is checked.");
                                         all_selected_options += jQuery(this).data('name')+",";
-
-
                                         });
-                                     //console.log("key is here---"+fetch_numeric_ques_id+"---value is here--"+all_selected_options);
                                     results_details_selections.push({ key: fetch_numeric_ques_id, value: all_selected_options });
 
 
                              }else{
                                 console.log("something is wrong");
                              }
-
-                          
-                            
-
                         });
-
-
-
-
 
                     fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
                     .then(response => response.json())
@@ -466,18 +413,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
                                     paymentSuccessful = paymentResponse.success;
                                     satoshisToSend = paymentSuccessful ? totalSats : 0;
-                                    if(satoshisToSend!=0){
-                                       console.log("Admin was: "+adminEmail);
-
-                                        console.log("Payment sent successfully to admin and the amount was: "+paymentSuccessful);
-                                    }
-
                                  })
                             }
                         })
-
-
-
 
                             /*end*/
                             // Reintegrate payment processing logic
@@ -487,16 +425,12 @@ document.addEventListener("DOMContentLoaded", function() {
                                     jQuery('#step-generating').addClass('active-step');
                                     jQuery('#step-sending').addClass('active-step');
                                     fetchRemainingTries(lightningAddress,quizID).then(response => { 
-
-                                       // alert("------------"+response.remaining_attempts);
-                                  
                                             
                                     sendPaymentRequest(bolt11, quizID, email,1)
 
                                     .then(paymentResponse => {
                                         paymentSuccessful = paymentResponse.success;
                                         satoshisToSend = paymentSuccessful ? totalSats : 0;
-                                       // alert("--------------"+satoshisToSend);
                                        if(satoshisToSend!=0){
 
                                             jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
@@ -522,16 +456,10 @@ document.addEventListener("DOMContentLoaded", function() {
                                     })
                                 
                                     .catch(error => {
-                                        console.error('Error paying BOLT11 Invoice:', error);
                                         jQuery('#step-result').addClass('active-step').text('Payment Failed');
                                     });
-                                } else {
-                                    console.error('Failed to generate BOLT11 Invoice.');
                                 }
                             })
-
-                              
-                        
                             .catch(error => {
                                 console.error('Error generating BOLT11:', error);
                             });
@@ -540,13 +468,10 @@ document.addEventListener("DOMContentLoaded", function() {
                             alert("Next time enter your Lightning Address to receive rewards! Thanks for taking our quiz.");
                             saveQuizResults(email, scoreText, totalSats, quizName, 0, 0, quizID, results_details_selections);
                         }
-
                     })
                     .catch(error => {
                         console.error('Error:', error);
                     });
-                } else {
-                    console.log('Quiz score not found.');
                 }
             }, 500);
         });
