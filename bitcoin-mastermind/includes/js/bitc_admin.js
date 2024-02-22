@@ -1250,7 +1250,7 @@ if (jQuery("body").hasClass("toplevel_page_bitc_quizzes")) {
 	HDQ.init.quizzes();
 }
 
-if (jQuery("body").hasClass("hd-quiz_page_bitc_options")) {
+if (jQuery("body").hasClass("bitcoin-mastermind_page_bitc_options")) {
 	HDQ.init.settings();
 }
 
