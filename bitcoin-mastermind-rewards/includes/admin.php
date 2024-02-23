@@ -2,6 +2,56 @@
 // Include the logic from settings.php and 
 include 'settings.php';
 include 'rewards.php';
+global $wpdb;
+$table_name3 = $wpdb->prefix . 'bitcoin_encryption_key';
+
+
+function generate_encryption_key() {
+    $key_length = 32;
+    return bin2hex(random_bytes($key_length));
+}
+
+function encryptString($plainText, $encryption_key) {
+    // Store the cipher method
+    $ciphering = "AES-128-CTR";
+
+    // Use OpenSSL Encryption method
+    $iv_length = openssl_cipher_iv_length($ciphering);
+    $options = 0;
+
+    // Non-NULL Initialization Vector for encryption
+    $encryption_iv = '1234567891011121';
+
+    // Store the encryption key
+   // $encryption_key = "GeeksforGeeks";
+
+    // Use openssl_encrypt() function to encrypt the data
+    $encryption = openssl_encrypt($plainText, $ciphering,
+                $encryption_key, $options, $encryption_iv);
+
+    return $encryption;
+}
+
+function decryptString($encryptedText,$decryption_key) {
+    // Store the cipher method
+    $ciphering = "AES-128-CTR";
+
+    // Non-NULL Initialization Vector for decryption
+    $decryption_iv = '1234567891011121';
+
+    // Store the decryption key
+
+    // Use openssl_decrypt() function to decrypt the data
+    $decryption = openssl_decrypt($encryptedText, $ciphering, 
+            $decryption_key, 0, $decryption_iv);
+
+    return $decryption;
+}
+
+
+// Example Usage:
+
+
 
 function compute_rewards($correct_answers, $quiz_id) {
     // Fetch the sats per correct answer for this specific quiz from the database
@@ -207,7 +257,21 @@ wp_enqueue_script(
 
                         <div class="bitc_row">
                             <label for="<?php echo $data_field_name_alby_token; ?>">Alby Account Access Token:</label>
-                            <input type="password" id="<?php echo $data_field_name_alby_token; ?>" name="<?php echo $data_field_name_alby_token; ?>" value="<?php echo esc_attr($opt_val_alby_token); ?>">
+
+                             <?php
+                              //  echo 'Encrypted Value: ' . $encrypted_value . '<br>';
+                            $db_data = $wpdb->get_row("SELECT * FROM $table_name3 order by id DESC LIMIT 0,1", ARRAY_A);
+                            
+                            if ($db_data) {
+                                // Decrypt the value
+                                $decrypted_value = decryptString($opt_val_alby_token,  $db_data['encryption_key']);
+                            }else{
+                                $decrypted_value ="";
+                            }
+                            
+                        ?>
+
+                            <input type="password" id="<?php echo $data_field_name_alby_token; ?>" name="<?php echo $data_field_name_alby_token; ?>" value="<?php echo esc_attr($decrypted_value); ?>">
 
                         </div>
 
