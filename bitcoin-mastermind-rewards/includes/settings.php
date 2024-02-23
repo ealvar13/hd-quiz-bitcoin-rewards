@@ -1,4 +1,7 @@
 <?php
+global $wpdb;
+$table_name3 = $wpdb->prefix . 'bitcoin_encryption_key';
+
 $opt_name1 = 'bitc_a_l_members_only';
 $hidden_field_name = 'hd_submit_hidden';
 $data_field_name1 = 'bitc_a_l_members_only';
@@ -59,6 +62,30 @@ if (isset($_POST['bitc_about_options_nonce'])) {
     $bitc_nonce = $_POST['bitc_about_options_nonce'];
 
     if (wp_verify_nonce($bitc_nonce, 'bitc_about_options_nonce') !== false) {
+
+
+             if (isset($_POST[$data_field_name_alby_token])) {
+                
+                $opt_val_alby_token = sanitize_text_field($_POST[$data_field_name_alby_token]);
+                // Value to be encrypted
+                $original_value = $opt_val_alby_token;
+                // Generate or retrieve the encryption key
+                $encryption_key = generate_encryption_key();
+                $wpdb->insert(
+                                $table_name3,
+                                array(
+                                    'encryption_key' => $encryption_key
+                                )
+                            );
+
+                $encrypted_value = encryptString($original_value, $encryption_key);
+
+
+                update_option($opt_name_alby_token, $encrypted_value);
+
+             
+        }
+
         // Check if the Joltz Brand ID field is set and sanitize its value
         if (isset($_POST[$data_field_name_joltz])) {
             $opt_val_joltz = sanitize_text_field($_POST[$data_field_name_joltz]);
@@ -100,11 +127,11 @@ if (isset($_POST['bitc_about_options_nonce'])) {
             update_option($opt_name_alby_url, $opt_val_alby_url);
         }
 
-        // Check if the Alby Account Access Token field is set and sanitize its value
-        if (isset($_POST[$data_field_name_alby_token])) {
-            $opt_val_alby_token = sanitize_text_field($_POST[$data_field_name_alby_token]);
-            update_option($opt_name_alby_token, $opt_val_alby_token);
-        }
+        // // Check if the Alby Account Access Token field is set and sanitize its value
+        // if (isset($_POST[$data_field_name_alby_token])) {
+        //     $opt_val_alby_token = sanitize_text_field($_POST[$data_field_name_alby_token]);
+        //     update_option($opt_name_alby_token, $opt_val_alby_token);
+        // }
         
         // Read the posted value for the original field
         if (isset($_POST[$data_field_name1])) {

@@ -6,12 +6,30 @@
  * Get the Lightning Address from the user and store it in the session.
  * Use the Lightning Address to send the reward.
  */
-
+global $wpdb;
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+
+function decryptStringFrontend($encryptedText,$decryption_key) {
+    // Store the cipher method
+    $ciphering = "AES-128-CTR";
+
+    // Non-NULL Initialization Vector for decryption
+    $decryption_iv = '1234567891011121';
+
+    // Store the decryption key
+
+    // Use openssl_decrypt() function to decrypt the data
+    $decryption = openssl_decrypt($encryptedText, $ciphering, 
+            $decryption_key, 0, $decryption_iv);
+
+    return $decryption;
+}
 // Enqueue the front-end stylesheet
 function bitc_enqueue_lightning_la_style() {
     wp_enqueue_style(
@@ -265,7 +283,9 @@ function bitc_pay_bolt11_invoice() {
     // Check which payment option is configured
     $btcpayServerUrl = get_option('bitc_btcpay_url', '');
     $albyAccessToken = get_option('bitc_alby_token', '');
-
+    $table_name3 = $wpdb->prefix . 'bitcoin_encryption_key';
+    $db_data = $wpdb->get_row("SELECT * FROM $table_name3 order by id DESC LIMIT 0,1", ARRAY_A);
+    $albyAccessToken = decryptStringFrontend($albyAccessToken,  $db_data['encryption_key']);
     if (!empty($btcpayServerUrl)) {
         // BTCPay Server is configured, process payment using BTCPay Server
         $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
