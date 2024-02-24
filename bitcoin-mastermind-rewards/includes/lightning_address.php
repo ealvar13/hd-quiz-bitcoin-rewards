@@ -7,8 +7,8 @@
  * Use the Lightning Address to send the reward.
  */
 global $wpdb;
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
