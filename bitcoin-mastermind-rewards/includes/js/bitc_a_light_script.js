@@ -161,7 +161,8 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress,showconfetti) {
             'action': 'pay_bolt11_invoice',
             'bolt11': bolt11,
             'quiz_id': quizID,
-            'lightning_address': lightningAddress
+            'lightning_address': lightningAddress,
+             'nonce': nonceAjax.nonce,
         })
     })
     .then(response => response.json())
