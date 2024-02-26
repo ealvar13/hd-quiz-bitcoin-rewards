@@ -139,6 +139,19 @@ async function getBolt11(email, amount) {
 
             const prData = await getUrl(payquery);
             if (prData && prData.pr) {
+                let invoice_code = prData.pr.toUpperCase();
+                fetch(bitc_data.ajaxurl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'action': 'store_invoice_code',
+                            'invoice_code': invoice_code
+                        })
+                    })
+                    .then(response => response.json())
+
                 return prData.pr.toUpperCase();
             } else {
                 throw new Error(`Payment request generation failed: ${prData.reason || 'unknown reason'}`);
@@ -152,6 +165,7 @@ async function getBolt11(email, amount) {
 }
 
 function sendPaymentRequest(bolt11, quizID, lightningAddress,showconfetti) {
+
     return fetch(bitc_data.ajaxurl, {
         method: 'POST',
         headers: {
@@ -162,7 +176,7 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress,showconfetti) {
             'bolt11': bolt11,
             'quiz_id': quizID,
             'lightning_address': lightningAddress,
-             'nonce': nonceAjax.nonce,
+            'nonce': nonceAjax.nonce,
         })
     })
     .then(response => response.json())
@@ -378,7 +392,7 @@ document.addEventListener("DOMContentLoaded", function() {
                              }
                         });
 
-                    fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
+                    fetch(`/wordpress/wp-json/hdq/v1/sats_per_answer/${quizID}`)
                     .then(response => response.json())
                     .then(data => {
                         satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);

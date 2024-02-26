@@ -20,6 +20,8 @@ function create_custom_bitcoin_table() {
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
     $table_name2 = $wpdb->prefix . 'bitcoin_survey_results';
+    $table_name3 = $wpdb->prefix . 'bitcoin_invoice_code';
+
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' ); 
 
     //die("dsadsa");
@@ -49,11 +51,18 @@ function create_custom_bitcoin_table() {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
+      $sql3 = "CREATE TABLE $table_name3 (
+        id mediumint(9) NOT NULL AUTO_INCREMENT,
+        invoice_code TEXT NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
+
     //echo $sql2;die("ddgsadhga");
 
 
     dbDelta( $sql );
     dbDelta( $sql2 );
+    dbDelta( $sql3);
 
     // Log to debug.log
     error_log("create_custom_bitcoin_table function was triggered!");

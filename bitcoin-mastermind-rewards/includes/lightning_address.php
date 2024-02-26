@@ -251,6 +251,18 @@ function bitc_pay_bolt11_invoice() {
 
     if (isset($_POST['nonce']) && wp_verify_nonce($_POST['nonce'], 'my_custom_nonce')) {
 
+        $table_name3 = $wpdb->prefix . 'bitcoin_invoice_code';
+        $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
+        $query_result = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM $table_name3 WHERE invoice_code = %s",
+            $bolt11
+            )
+        );
+
+
+    if ($query_result) {
+
         // Retrieve quiz_id from POST data
         $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
 
@@ -363,7 +375,11 @@ function bitc_pay_bolt11_invoice() {
         } else {
             // No payment option is configured
             echo json_encode(['error' => 'No payment system is configured.']);
-        }  
+        } 
+
+    } else{
+        die("You are smart");
+    }
 
     } else{
 
@@ -372,6 +388,7 @@ function bitc_pay_bolt11_invoice() {
     } 
 
     wp_die();
+    
 }
 
 // Register the new AJAX action
@@ -550,4 +567,27 @@ function csvFromArray($data) {
     fclose($output);
     return $csv;
 }
+
+function saving_invoice_code(){
+    if(isset($_POST) && $_POST['invoice_code']!==''){
+        global $wpdb;
+        $table_name = $wpdb->prefix.'bitcoin_invoice_code';
+        $invoice_code = $_POST['invoice_code'];
+        $wpdb->insert(
+        $table_name,
+        array(
+            'invoice_code' => $invoice_code,
+
+        ),
+        array('%s')
+    );
+
+   
+
+    }
+    die;
+}
+
+add_action('wp_ajax_store_invoice_code', 'saving_invoice_code');
+add_action('wp_ajax_nopriv_store_invoice_code', 'saving_invoice_code');
 
