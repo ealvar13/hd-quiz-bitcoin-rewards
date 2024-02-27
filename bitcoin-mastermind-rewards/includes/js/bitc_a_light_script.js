@@ -392,7 +392,7 @@ document.addEventListener("DOMContentLoaded", function() {
                              }
                         });
 
-                    fetch(`/wordpress/wp-json/hdq/v1/sats_per_answer/${quizID}`)
+                    fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
                     .then(response => response.json())
                     .then(data => {
                         satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
