@@ -246,13 +246,10 @@ function la_add_steps_indicator_modal($quiz_id) {
 // Add the above function to the 'bitc_after' hook
 add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
 
-function bitc_pay_bolt11_invoice() {
-    global $wpdb;
-
-    if (isset($_POST['nonce']) && wp_verify_nonce($_POST['nonce'], 'my_custom_nonce')) {
-
+function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
+        global $wpdb;
         $table_name3 = $wpdb->prefix . 'bitcoin_invoice_code';
-        $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
+        //$bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
         $query_result = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT * FROM $table_name3 WHERE invoice_code = %s",
@@ -264,10 +261,10 @@ function bitc_pay_bolt11_invoice() {
     if ($query_result) {
 
         // Retrieve quiz_id from POST data
-        $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+        //$quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
 
-        $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
-        $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+        $lightning_address = $email;
+        $quiz_id = isset($quiz_id) ? intval($quiz_id) : 0;
 
         // Get attempt count and check if maximum retries have been exceeded
         $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
@@ -282,13 +279,13 @@ function bitc_pay_bolt11_invoice() {
 
         if (!empty($btcpayServerUrl)) {
             // BTCPay Server is configured, process payment using BTCPay Server
-            $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
-            $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+           // $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
+            //$quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
             $btcpayServerUrl = get_option('bitc_btcpay_url', '');
             $apiKey = get_option('bitc_btcpay_api_key', '');
             $storeId = get_option('bitc_btcpay_store_id', '');
             $cryptoCode = "BTC"; // Hardcoded as BTC
-            $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
+           // $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
 
             // Remove any trailing slashes
             $btcpayServerUrl = rtrim($btcpayServerUrl, '/');
@@ -327,7 +324,7 @@ function bitc_pay_bolt11_invoice() {
             }
         } elseif (!empty($albyAccessToken)) {
             // Alby is configured, process payment using Alby
-            $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
+           // $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
             if (empty($bolt11)) {
                 echo json_encode(['error' => 'Invoice is required.']);
                 wp_die();
@@ -361,6 +358,8 @@ function bitc_pay_bolt11_invoice() {
         
             // Decode JSON response
             $decodedResponse = json_decode($responseBody, true);
+
+           // echo "<pre>";print_r($decodedResponse);die;
         
             // Check for a successful status or handle errors
             if (isset($decodedResponse['payment_preimage'])) {
@@ -377,23 +376,16 @@ function bitc_pay_bolt11_invoice() {
             echo json_encode(['error' => 'No payment system is configured.']);
         } 
 
-    } else{
-        die("You are smart");
-    }
-
-    } else{
-
-        wp_send_json_error('Invalid nonce');
-
     } 
+
 
     wp_die();
     
 }
 
 // Register the new AJAX action
-add_action('wp_ajax_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice');        // If the user is logged in
-add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice'); // If the user is not logged in
+//add_action('wp_ajax_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice');        // If the user is logged in
+//add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice'); // If the user is not logged in
 
 function bitc_save_quiz_results() {
     global $wpdb;
@@ -568,26 +560,129 @@ function csvFromArray($data) {
     return $csv;
 }
 
-function saving_invoice_code(){
-    if(isset($_POST) && $_POST['invoice_code']!==''){
-        global $wpdb;
-        $table_name = $wpdb->prefix.'bitcoin_invoice_code';
-        $invoice_code = $_POST['invoice_code'];
-        $wpdb->insert(
-        $table_name,
-        array(
-            'invoice_code' => $invoice_code,
 
-        ),
-        array('%s')
-    );
 
-   
-
+function getPayUrl($email) {
+    try {
+        $parts = explode('@', $email);
+        $domain = $parts[1];
+        $username = $parts[0];
+        $transformUrl = "https://{$domain}/.well-known/lnurlp/{$username}";
+        return $transformUrl;
+    } catch (Exception $error) {
+        return null;
     }
-    die;
 }
 
-add_action('wp_ajax_store_invoice_code', 'saving_invoice_code');
-add_action('wp_ajax_nopriv_store_invoice_code', 'saving_invoice_code');
+function getUrl($path) {
+    try {
+        $response = file_get_contents($path);
+        $data = json_decode($response, true);
+        return $data;
+    } catch (Exception $error) {
+        return null;
+    }
+}
+function getBolt11() {
+    global $wpdb;
+    $table_name = $wpdb->prefix.'bitcoin_invoice_code';
+    $quiz_id = $_POST['quizID'];
+    /*Generate invoice code for admin and send the payment*/
+    if(isset($_POST) && !empty($_POST['adminEmail']!="") && !empty($_POST['sendAmountToAdmin']!="")){
+            $amount = $_POST['sendAmountToAdmin'];
+            $email = $_POST['adminEmail'];
 
+            if ($sendAmountToAdmin !== 0) {
+                $purl = getPayUrl($email);
+                if (!$purl) {                  
+                     echo json_encode(array("success"=>false,"details"=>'Invalid URL generated'));
+                }
+
+                $lnurlDetails = getUrl($purl);
+                if (!$lnurlDetails || !$lnurlDetails['callback']) {
+                    echo json_encode(array("success"=>false,"details"=>'LNURL details not found'));
+                }
+
+                $minAmount = $lnurlDetails['minSendable'];
+                $payAmount = $amount && $amount * 1000 > $minAmount ? $amount * 1000 : $minAmount;
+
+                $payquery = "{$lnurlDetails['callback']}?amount={$payAmount}";
+
+                $prData = getUrl($payquery);
+                if ($prData && $prData['pr']) {
+                    $wpdb->insert(
+                    $table_name,
+                    array(
+                        'invoice_code' => strtoupper($prData['pr']),
+
+                    ),
+                    array('%s')
+                );
+                    /*write your send request payment here*/
+                    bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,0);
+                    echo json_encode(array("success"=>true,"details"=>"OK seems like its done"));
+
+                    /*send request end here*/
+                   
+                } else {
+                   
+                     echo json_encode(array("success"=>false,"details"=>"Payment request generation failed: " . ($prData['reason'] ?? 'unknown reason')));
+                }
+            } else {
+                echo json_encode(array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.'));
+            }
+       
+
+    }
+    /*admin code end*/
+
+    /*Generate invoice code for user and send the payment*/
+    if(isset($_POST) && !empty($_POST['userEmail']!="") && !empty($_POST['sendAmountToUser']!="")){
+       
+            $amount  = $_POST['sendAmountToUser'];
+            $email = $_POST['userEmail'];
+            if ($sendAmountToUser !== 0) {
+                $purl = getPayUrl($email);
+                if (!$purl) {                  
+                     echo json_encode(array("success"=>false,"details"=>'Invalid URL generated'));
+                }
+
+                $lnurlDetails = getUrl($purl);
+                if (!$lnurlDetails || !$lnurlDetails['callback']) {
+                    echo json_encode(array("success"=>false,"details"=>'LNURL details not found'));
+                }
+
+                $minAmount = $lnurlDetails['minSendable'];
+                $payAmount = $amount && $amount * 1000 > $minAmount ? $amount * 1000 : $minAmount;
+
+                $payquery = "{$lnurlDetails['callback']}?amount={$payAmount}";
+
+                $prData = getUrl($payquery);
+                if ($prData && $prData['pr']) {
+                    $wpdb->insert(
+                    $table_name,
+                    array(
+                        'invoice_code' => strtoupper($prData['pr']),
+
+                    ),
+                    array('%s')
+                );
+                    /*write your send request payment here*/
+                    bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,1);
+                 echo json_encode(array("success"=>true,"details"=>"OK seems like its done"));
+
+
+                    /*send request end here*/
+                   
+                } else {
+                   
+                     echo json_encode(array("success"=>false,"details"=>"Payment request generation failed: " . ($prData['reason'] ?? 'unknown reason')));
+                }
+            } else {
+                echo json_encode(array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.'));
+            }
+    }
+    /*user code end*/
+}
+add_action('wp_ajax_generate_invoice_code', 'getBolt11');
+add_action('wp_ajax_nopriv_generate_invoice_code', 'getBolt11');

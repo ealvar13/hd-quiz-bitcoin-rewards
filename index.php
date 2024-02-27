@@ -68,23 +68,3 @@ function create_custom_bitcoin_table() {
     error_log("create_custom_bitcoin_table function was triggered!");
 }
 register_activation_hook(__FILE__, 'create_custom_bitcoin_table');
-
-
-// Create nonce
-function my_custom_nonce() {
-    return wp_create_nonce('my_custom_nonce');
-}
-
-// Enqueue the JavaScript file with the nonce
-function enqueue_scripts_with_nonce() {
-    // Enqueue your JavaScript file
-
-    $plugin_url = plugins_url('/', __FILE__)."/bitcoin-mastermind-rewards";
-     // Enqueue your JavaScript file
-    wp_enqueue_script('nonce-custom-script', $plugin_url . 'includes/js/nonce-script.js', array('jquery'), null, true);
-
-    // Localize the script with nonce
-    wp_localize_script('nonce-custom-script', 'nonceAjax', array('nonce' => my_custom_nonce()));
-}
-
-add_action('wp_head', 'enqueue_scripts_with_nonce');
