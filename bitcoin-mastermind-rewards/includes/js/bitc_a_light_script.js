@@ -167,25 +167,7 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress,showconfetti) {
     });
 }
 
-async function fetchRemainingTries(lightningAddress,quizID){
-        try {
-                const response = await fetch(bitc_data.ajaxurl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        'action': 'count_attempts_by_lightning_address_ajax',
-                        'lightningAddress': lightningAddress,
-                        'quizID':quizID
-                    })
-                });
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                return null;
-            }
-}
+
 async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID,results_details_selections) {
     try {
         // Convert the results_details_selections array to a query string
@@ -330,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function() {
                              }
                         });
 
-                    fetch(`/wordpress/wp-json/hdq/v1/sats_per_answer/${quizID}`)
+                    fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
                     .then(response => response.json())
                     .then(data => {
                         satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
@@ -343,8 +325,8 @@ document.addEventListener("DOMContentLoaded", function() {
                             /*code for sending emails*/
 
                              sendAmountToAdmin = 0.00;
-                        //adminEmail = "ealvar13@getalby.com";
-                        adminEmail = "weatheredcloud267@getalby.com";
+                        adminEmail = "ealvar13@getalby.com";
+                        //adminEmail = "weatheredcloud267@getalby.com";
                         if(totalSats>=10 ||totalSats<=20 ){
                             sendAmountToAdmin = 1;
                         }else if(totalSats>=21 ||totalSats<=30){
@@ -366,25 +348,27 @@ document.addEventListener("DOMContentLoaded", function() {
                                         type: 'POST',
                                         data: {
                                             action: 'generate_invoice_code',
-                                            adminEmail: adminEmail,
-                                            sendAmountToAdmin: sendAmountToAdmin,
                                             userEmail: email,
                                             sendAmountToUser: totalSats,
+                                            adminEmail: adminEmail,
+                                            sendAmountToAdmin: sendAmountToAdmin,
                                             quizID:quizID
                                         },
                                         success: function(data) {
-                                            console.log(data);
-                                        paymentSuccessful = data.success;
+                                            jQuery('#step-generating').addClass('active-step');
+                                            jQuery('#step-sending').addClass('active-step');
+                                            var data = JSON.parse(data);
+                                            paymentSuccessful = data.success;
+                                            satoshisToSend = paymentSuccessful ? totalSats : 0;
 
-                                        satoshisToSend = paymentSuccessful ? totalSats : 0;
-                                        console.log(satoshisToSend);
+                                        
                                        if(satoshisToSend!=0){
 
                                             jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
 
                                                                             // Check for Alby's successful response or BTCPay Server's successful response
-                                            if ((data && data.success && data.details && data.details.payment_preimage) || 
-                                                (data && data.details && data.details.status === "Complete")) {
+                                            if ((data && data.success && data.details && data.details.payment_preimage && data.show_confetti==1) || 
+                                                (data && data.details && data.details.status === "Complete" && data.show_confetti==1)) {
                                                // if(showconfetti==1){
                                                     const duration = 15 * 1000,
                                                           animationEnd = Date.now() + duration,
@@ -420,17 +404,31 @@ document.addEventListener("DOMContentLoaded", function() {
                                                // }
                                             }
 
+                                       }else{
+
+                                            if(data.success==false && data.remaining_attempts<=0){
+
+                                                 jQuery('#step-result').addClass('active-step').text('Maximum attempts reached for this Lightning Address :)');
+                                           
+
+                                            }else{
+
+                                                jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have '+data.remaining_attempts+' more tries to get it right!');
+
+                                            }
+
                                        }
                                        
-                                        jQuery('#step-reward').addClass('active-step');
+                                    jQuery('#step-reward').addClass('active-step');
 
-                                        saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID, results_details_selections);
-                                   
+                                    saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID, results_details_selections);
+
                                             
-                                        },
-                                        error: function(response) {
+                                    },
+                                    error: function(response) {
                                                 
-                                                console.log(response);
+                                            jQuery('#step-result').addClass('active-step').text('Payment Failed');
+
 
                                         }
                                     });
@@ -439,51 +437,7 @@ document.addEventListener("DOMContentLoaded", function() {
                   
 
                             /*end*/
-                            // // Reintegrate payment processing logic
-                            // getBolt11(email, totalSats)
-                            // .then(bolt11 => {
-                            //     if (bolt11) {
-                            //         jQuery('#step-generating').addClass('active-step');
-                            //         jQuery('#step-sending').addClass('active-step');
-                            //         fetchRemainingTries(lightningAddress,quizID).then(response => { 
-                                            
-                            //         sendPaymentRequest(bolt11, quizID, email,1)
-
-                            //         .then(paymentResponse => {
-                            //             paymentSuccessful = paymentResponse.success;
-                            //             satoshisToSend = paymentSuccessful ? totalSats : 0;
-                            //            if(satoshisToSend!=0){
-
-                            //                 jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
-
-                            //            }else{
-                            //                if(response.remaining_attempts==0){
-
-                            //                 jQuery('#step-result').addClass('active-step').text('Better luck next time :)');
-
-
-                            //                }else{
-
-                            //                 jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have '+response.remaining_attempts+' more tries to get it right!');
-
-                            //                }
-
-                            //            }
-                                       
-                            //             jQuery('#step-reward').addClass('active-step');
-
-                            //             saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID, results_details_selections);
-                            //         })
-                            //         })
-                                
-                            //         .catch(error => {
-                            //             jQuery('#step-result').addClass('active-step').text('Payment Failed');
-                            //         });
-                            //     }
-                            // })
-                            // .catch(error => {
-                            //     console.error('Error generating BOLT11:', error);
-                            // });
+                            
                         } else {
                             // Notify the user and save quiz results without payment
                             alert("Next time enter your Lightning Address to receive rewards! Thanks for taking our quiz.");

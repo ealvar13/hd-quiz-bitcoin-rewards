@@ -1,6 +1,6 @@
 <?php
-//error_reporting(-1);
-//ini_set('display_errors', 1);
+// error_reporting(-1);
+// ini_set('display_errors', 1);
 /**
  * Lightning Address Add-Ons:
  * Get the Lightning Address from the user and store it in the session.
@@ -158,36 +158,12 @@ function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
 
     $max_retries = get_option("max_retries_for_" . $quiz_id, 0);
     $max_retries_exceeded = intval($count) >= $max_retries;
-
-    return ['count' => intval($count), 'max_retries_exceeded' => $max_retries_exceeded];
-}
-
-
-// Function to count the attempts a user's lightning address has made for a specific quiz
-function count_attempts_by_lightning_address_ajax() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
-
-    if(!empty($_POST['lightningAddress']) && !empty($_POST['quizID'])){
-        $lightning_address = $_POST['lightningAddress'];
-        $quiz_id = $_POST['quizID'];
-    }
-    
-
-    $count = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM $table_name WHERE lightning_address = %s AND quiz_id = %d",
-        $lightning_address, 
-        $quiz_id
-    ));
-
-    $max_retries = get_option("max_retries_for_" . $quiz_id, 0);
-    //$max_retries_exceeded = intval($count) >= $max_retries;
     $remaining_attempts = $max_retries - $count;
-    echo json_encode(array('count' => intval($count), 'max_retries' => $max_retries,'remaining_attempts'=>$remaining_attempts));
-    die;
+
+    return ['count' => intval($count), 'max_retries_exceeded' => $max_retries_exceeded,'remaining_attempts'=>$remaining_attempts];
 }
-add_action('wp_ajax_count_attempts_by_lightning_address_ajax', 'count_attempts_by_lightning_address_ajax');
-add_action('wp_ajax_nopriv_count_attempts_by_lightning_address_ajax', 'count_attempts_by_lightning_address_ajax');
+
+
 
 
 
@@ -245,11 +221,9 @@ function la_add_steps_indicator_modal($quiz_id) {
 
 // Add the above function to the 'bitc_after' hook
 add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
-
 function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
         global $wpdb;
         $table_name3 = $wpdb->prefix . 'bitcoin_invoice_code';
-        //$bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
         $query_result = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT * FROM $table_name3 WHERE invoice_code = %s",
@@ -260,32 +234,28 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
 
     if ($query_result) {
 
-        // Retrieve quiz_id from POST data
-        //$quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
-
         $lightning_address = $email;
         $quiz_id = isset($quiz_id) ? intval($quiz_id) : 0;
 
-        // Get attempt count and check if maximum retries have been exceeded
-        $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
-        if ($attempt_data['max_retries_exceeded']) {
-            echo json_encode(['error' => 'Maximum attempts reached for this Lightning Address.']);
+        $countingData =  count_attempts_by_lightning_address($lightning_address,$quiz_id);
+        $remaining_attempts = $countingData['remaining_attempts'];
+
+       // echo $remaining_attempts;die;
+        if ($countingData['remaining_attempts']<=0) {
+            echo json_encode(['success' => false,'remaining_attempts'=>$remaining_attempts,'details'=>'Maximum attempts reached for this Lightning Address.']);
             wp_die();
         }
+
 
         // Check which payment option is configured
         $btcpayServerUrl = get_option('bitc_btcpay_url', '');
         $albyAccessToken = get_option('bitc_alby_token', '');
 
         if (!empty($btcpayServerUrl)) {
-            // BTCPay Server is configured, process payment using BTCPay Server
-           // $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
-            //$quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
             $btcpayServerUrl = get_option('bitc_btcpay_url', '');
             $apiKey = get_option('bitc_btcpay_api_key', '');
             $storeId = get_option('bitc_btcpay_store_id', '');
             $cryptoCode = "BTC"; // Hardcoded as BTC
-           // $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
 
             // Remove any trailing slashes
             $btcpayServerUrl = rtrim($btcpayServerUrl, '/');
@@ -316,15 +286,20 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
                 $decodedResponse = json_decode($responseBody, true);
 
                 // Check if the payment status is 'Complete'
-                if (isset($decodedResponse['status']) && $decodedResponse['status'] === 'Complete') {
-                    echo json_encode(['success' => true, 'details' => $decodedResponse]);
-                } else {
-                    echo json_encode(['success' => false, 'details' => $decodedResponse]);
+
+                if($show_confetti==1){
+
+                    if (isset($decodedResponse['status']) && $decodedResponse['status'] === 'Complete') {
+                        echo json_encode(['success' => true, 'details' => $decodedResponse,'show_confetti'=>$show_confetti]);
+                    } else {
+                        echo json_encode(['success' => false, 'details' => $decodedResponse,'remaining_attempts'=>$remaining_attempts]);
+                    }
+
                 }
+                    
             }
         } elseif (!empty($albyAccessToken)) {
             // Alby is configured, process payment using Alby
-           // $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
             if (empty($bolt11)) {
                 echo json_encode(['error' => 'Invoice is required.']);
                 wp_die();
@@ -360,17 +335,19 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
             $decodedResponse = json_decode($responseBody, true);
 
            // echo "<pre>";print_r($decodedResponse);die;
-        
-            // Check for a successful status or handle errors
-            if (isset($decodedResponse['payment_preimage'])) {
-                // Assuming 'payment_preimage' presence indicates a successful payment
-                echo json_encode(['success' => true, 'details' => $decodedResponse]);
-            } else {
-                // Handle different errors based on your API response structure
-                echo json_encode(['success' => false, 'details' => $decodedResponse]);
+            if($show_confetti==1){
+                // Check for a successful status or handle errors
+                if (isset($decodedResponse['payment_preimage'])) {
+                    // Assuming 'payment_preimage' presence indicates a successful payment
+                    echo json_encode(['success' => true, 'details' => $decodedResponse,'show_confetti'=>$show_confetti]);
+                } else {
+                    // Handle different errors based on your API response structure
+                    echo json_encode(['success' => false, 'details' => $decodedResponse,'remaining_attempts'=>$remaining_attempts]);
+                }
+                 wp_die();
             }
         
-            wp_die();
+           
         } else {
             // No payment option is configured
             echo json_encode(['error' => 'No payment system is configured.']);
@@ -379,13 +356,10 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
     } 
 
 
-    wp_die();
+    //wp_die();
     
 }
 
-// Register the new AJAX action
-//add_action('wp_ajax_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice');        // If the user is logged in
-//add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice'); // If the user is not logged in
 
 function bitc_save_quiz_results() {
     global $wpdb;
@@ -506,8 +480,7 @@ add_action('wp_ajax_nopriv_bitc_save_quiz_results', 'bitc_save_quiz_results');
 
 
 function bitc_export_csv_results(){
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
+   
     global $wpdb;
     // Specify your table name
     $table1_name = $wpdb->prefix . 'bitcoin_quiz_results';
@@ -587,16 +560,22 @@ function getBolt11() {
     global $wpdb;
     $table_name = $wpdb->prefix.'bitcoin_invoice_code';
     $quiz_id = $_POST['quizID'];
+   
+
+
     /*Generate invoice code for admin and send the payment*/
     if(isset($_POST) && !empty($_POST['adminEmail']!="") && !empty($_POST['sendAmountToAdmin']!="")){
+        //echo "coing";die;
             $amount = $_POST['sendAmountToAdmin'];
             $email = $_POST['adminEmail'];
 
-            if ($sendAmountToAdmin !== 0) {
+            if ($amount !== 0) {
                 $purl = getPayUrl($email);
                 if (!$purl) {                  
                      echo json_encode(array("success"=>false,"details"=>'Invalid URL generated'));
                 }
+
+                //print_r($purl);
 
                 $lnurlDetails = getUrl($purl);
                 if (!$lnurlDetails || !$lnurlDetails['callback']) {
@@ -620,7 +599,6 @@ function getBolt11() {
                 );
                     /*write your send request payment here*/
                     bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,0);
-                    echo json_encode(array("success"=>true,"details"=>"OK seems like its done"));
 
                     /*send request end here*/
                    
@@ -632,7 +610,6 @@ function getBolt11() {
                 echo json_encode(array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.'));
             }
        
-
     }
     /*admin code end*/
 
@@ -641,7 +618,7 @@ function getBolt11() {
        
             $amount  = $_POST['sendAmountToUser'];
             $email = $_POST['userEmail'];
-            if ($sendAmountToUser !== 0) {
+            if ($amount !== 0) {
                 $purl = getPayUrl($email);
                 if (!$purl) {                  
                      echo json_encode(array("success"=>false,"details"=>'Invalid URL generated'));
@@ -669,7 +646,6 @@ function getBolt11() {
                 );
                     /*write your send request payment here*/
                     bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,1);
-                 echo json_encode(array("success"=>true,"details"=>"OK seems like its done"));
 
 
                     /*send request end here*/
