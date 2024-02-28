@@ -560,9 +560,6 @@ function getBolt11() {
     global $wpdb;
     $table_name = $wpdb->prefix.'bitcoin_invoice_code';
     $quiz_id = $_POST['quizID'];
-   
-
-
     /*Generate invoice code for admin and send the payment*/
     if(isset($_POST) && !empty($_POST['adminEmail']!="") && !empty($_POST['sendAmountToAdmin']!="")){
         //echo "coing";die;
@@ -598,7 +595,7 @@ function getBolt11() {
                     array('%s')
                 );
                     /*write your send request payment here*/
-                    bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,0);
+                 bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,0);
 
                     /*send request end here*/
                    
