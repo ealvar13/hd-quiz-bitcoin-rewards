@@ -1,4 +1,6 @@
 <?php
+error_reporting(-1);
+ini_set('display_errors', 1);
 // enqueue style and script
 wp_enqueue_style(
     'bitc_admin_style',
@@ -20,6 +22,9 @@ wp_enqueue_script(
     bitc_PLUGIN_VERSION,
     true
 ); 
+//require dirname(__FILE__) . '/includes/settings.php';
+//echo plugins_url(). '/bitcoin-mastermind-rewards';die;
+//la_add_steps_indicator_modal(2);
 
 $buildQuiz = true;
 
@@ -184,9 +189,77 @@ if ($buildQuiz === true) {
     do_action("bitc_init", $bitc_local_vars); // add functions to quiz init
     $bitc_local_vars = json_encode($bitc_local_vars);
     wp_localize_script('bitc_admin_script', 'bitc_local_vars', array($bitc_local_vars));
-?>
+
+ 
+    if(isset($_POST['scored_text']) && $_SERVER['REQUEST_METHOD'] === 'POST' ){
+        $lightningAddress =  sanitize_text_field( $_SESSION['lightning_address']);
+        $scored_text =  sanitize_text_field($_POST['scored_text']);
+        $results_selections =  sanitize_text_field($_POST['results_selections']);      
+        $path = site_url().'/wp-json/hdq/v1/sats_per_answer/'.$quiz_ID;
+        $response = file_get_contents($path);
+        $data = json_decode($response, true);
+        $satsPerCorrect = $data['sats_per_correct_answer'];
+        $totalNumberOfQuestions = get_term($quiz_ID, "quiz");
+        $totalNumberOfQuestions = $totalNumberOfQuestions->count;
+        $correctAnswers = sanitize_text_field($_POST['ca_val']);
+        if($correctAnswers>$totalNumberOfQuestions){
+            die("Something went wrong");
+        }
+        
+        $totalSats = $correctAnswers * $satsPerCorrect;
+
+       // echo "--------".$lightningAddress;die;
+        if(!empty($lightningAddress)){            
+            $sendAmountToAdmin = 0.00;
+           // $adminEmail = "ealvar13@getalby.com";
+             $adminEmail = "weatheredcloud267@getalby.com";
+
+            if ($totalSats >= 10 || $totalSats <= 20) {
+                $sendAmountToAdmin = 1;
+               // echo "admin--".$sendAmountToAdmin;
+            } elseif ($totalSats >= 21 || $totalSats <= 30) {
+                $sendAmountToAdmin = 2;
+            } elseif ($totalSats >= 31 || $totalSats <= 40) {
+                $sendAmountToAdmin = 3;
+            } elseif ($totalSats >= 41 || $totalSats <= 50) {
+                $sendAmountToAdmin = 4;
+            } elseif ($totalSats >= 51 || $totalSats <= 100) {
+                $sendAmountToAdmin = 5;
+            } else {
+                $sendAmountToAdmin = ($totalSats * 5) / 100;
+                $sendAmountToAdmin = round($sendAmountToAdmin);
+            }
+
+            // Now $sendAmountToAdmin contains the calculated value
+            //die("fsjafjs");
+            //test();
+
+            //echo "admin amount--".$sendAmountToAdmin;
+           // echo "<pre>"; 
+           //  print_r($results_selections);
+           // die("sudssss");
+           $data =  getBolt11($quiz_ID,$adminEmail,$sendAmountToAdmin,$lightningAddress,$totalSats,$scored_text,$results_selections);
+
+        }
+      
+
+    }
+
+    ?>
+    <form id="quiz-submission" class="form-quiz-container" method="POST" action="">
+        <input type='hidden' value='' id="scored_text" name="scored_text">
+        <input type='hidden' value='' id="results_selections" name="results_selections">
+        <input type='hidden' value='' id="ca_val" name="ca_val">
+
 
     <div class="bitc_quiz_wrapper" id="bitc_<?php echo $quiz_ID; ?>">
+        <?php if(!empty($_SESSION['resultsAPI'])){
+
+               $data = $_SESSION['resultsAPI'];
+
+                la_steps_indicator_modal($data);
+
+           }?>
         <div class="bitc_before">
             <?php do_action("bitc_before", $quiz_ID); ?>
         </div>
@@ -327,6 +400,80 @@ if ($buildQuiz === true) {
         </div>
         <div class="bitc_loading_bar"></div>
     </div>
+</form>
 <?php
+    if(isset($_POST['scored_text'])){
+    echo '<script type="text/javascript">
+        jQuery(document).ready(function(){
+
+            //alert("coming in if")
+
+                openStepsModal();
+
+                setTimeout(function(){
+                  //  window.location.reload();
+                    // Reload the page as if it were loaded fresh
+                   window.location.replace(window.location.href);
+
+
+                    },3000);
+
+            })
+        
+
+    </script>';
+    if(isset($_SESSION['resultsAPI'])){
+
+        $results = $_SESSION['resultsAPI'];
+        if($results['success']==true && $results['show_confetti']==1 ){
+            echo '<script>const duration = 15 * 1000,
+                                                          animationEnd = Date.now() + duration,
+                                                          defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+                                                        function randomInRange(min, max) {
+                                                          return Math.random() * (max - min) + min;
+                                                        }
+
+                                                        const interval = setInterval(function() {
+                                                          const timeLeft = animationEnd - Date.now();
+
+                                                          if (timeLeft <= 0) {
+                                                            return clearInterval(interval);
+                                                          }
+
+                                                          const particleCount = 50 * (timeLeft / duration);
+
+                                                          // since particles fall down, start a bit higher than random
+                                                          confetti(
+                                                            Object.assign({}, defaults, {
+                                                              particleCount,
+                                                              origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+                                                            })
+                                                          );
+                                                          confetti(
+                                                            Object.assign({}, defaults, {
+                                                              particleCount,
+                                                              origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+                                                            })
+                                                          );
+                                                        }, 250);</script>';
+        }
+    }
+
+
+
+    }else{
+        
+        echo '<script type="text/javascript">
+        jQuery(document).ready(function(){
+            //alert("conig in else");
+                jQuery("#la-modal").show();
+            openModal();
+
+            })
+        
+
+    </script>';
+    }
 }
 ?>

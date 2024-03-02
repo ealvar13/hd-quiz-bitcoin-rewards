@@ -194,7 +194,16 @@ add_action('wp_ajax_store_lightning_address', 'store_lightning_address_in_sessio
 add_action('wp_ajax_nopriv_store_lightning_address', 'store_lightning_address_in_session'); // If the user is not logged in
 
 // Modal to display the steps of the payment process
-function la_steps_indicator_modal() {
+function la_steps_indicator_modal($data=null) {
+
+    //echo "<pre>";print_r($data);
+    $results_msg ="Payment Successfull";
+    if(!empty($data)){
+        if($data['success']==false){
+            $results_msg = $data['details'];
+        }
+    }
+   
     ?>
     <div id="steps-modal" class="la-modal">
         <div class="la-modal-content">
@@ -203,9 +212,10 @@ function la_steps_indicator_modal() {
             <div id="steps-indicator" class="steps-indicator">
                 <div id="step-calculating" class="step">Calculating Rewards</div>
                 <div id="step-generating" class="step">Using your Lightning Address to generate Bolt 11 Invoice</div>
-                <div id="step-reward" class="step">You earned <span id="satoshis-sent-display" class="reward-calculation">Calculating...</span> Satoshis.</div>
+                <!-- <div id="step-reward" class="step">You earned <span id="satoshis-sent-display" class="reward-calculation">Calculating...</span> Satoshis.</div> -->
+                 <div id="step-reward" class="step">You earned <?php  if(!empty($data)): echo $data['details']['amount'];endif; ?>  Satoshis.</div> 
                 <div id="step-sending" class="step">Sending Reward Payment</div>
-                <div id="step-result" class="step">Awaiting Result...</div>
+                <div id="step-result" class="step"><?php echo $results_msg; ?> </div>
             </div>
             <button id="close-steps-modal" class="la-start-quiz">Close</button>
             <div class="la-powered-by">Powered by <a href="https://velascommerce.com/bitcoin-mastermind/" target="_blank" class="la-powered-link">Bitcoin Mastermind</a></div>
@@ -214,14 +224,14 @@ function la_steps_indicator_modal() {
     <?php
 }
 
-function la_add_steps_indicator_modal($quiz_id) {
-    // Call the steps indicator modal function
-    la_steps_indicator_modal();
-}
+// function la_add_steps_indicator_modal($quiz_id) {
+//     // Call the steps indicator modal function
+//     la_steps_indicator_modal();
+// }
 
-// Add the above function to the 'bitc_after' hook
-add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
-function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
+//// Add the above function to the 'bitc_after' hook
+//add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
+function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti,$scoretext=null,$results_selections=null) {
         global $wpdb;
         $table_name3 = $wpdb->prefix . 'bitcoin_invoice_code';
         $query_result = $wpdb->get_row(
@@ -242,7 +252,9 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
 
        // echo $remaining_attempts;die;
         if ($countingData['remaining_attempts']<=0) {
-            echo json_encode(['success' => false,'remaining_attempts'=>$remaining_attempts,'details'=>'Maximum attempts reached for this Lightning Address.']);
+           // echo json_encode(['success' => false,'remaining_attempts'=>$remaining_attempts,'details'=>'Maximum attempts reached for this Lightning Address.']);
+            $results = array('success' => false,'remaining_attempts'=>$remaining_attempts,'details'=>'Maximum attempts reached for this Lightning Address.');
+            $_SESSION['resultsAPI']= $results;
             wp_die();
         }
 
@@ -277,7 +289,9 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
 
             if (is_wp_error($response)) {
                 error_log('Payment request error: ' . $response->get_error_message());
-                echo json_encode(['error' => 'Payment request failed', 'details' => $response->get_error_message()]);
+                //echo json_encode(['error' => 'Payment request failed', 'details' => $response->get_error_message()]);
+                $results = array('success' => false,'error' => 'Payment request failed', 'details' => $response->get_error_message());
+                $_SESSION['resultsAPI']= $results;
             } else {
                 $responseBody = wp_remote_retrieve_body($response);
                 error_log('BTCPay Server response: ' . $responseBody);
@@ -290,9 +304,22 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
                 if($show_confetti==1){
 
                     if (isset($decodedResponse['status']) && $decodedResponse['status'] === 'Complete') {
-                        echo json_encode(['success' => true, 'details' => $decodedResponse,'show_confetti'=>$show_confetti]);
+                       // echo json_encode(['success' => true, 'details' => $decodedResponse,'show_confetti'=>$show_confetti]);
+                        $results = array('success' => true, 'details' => $decodedResponse,'show_confetti'=>$show_confetti);
+                        $_SESSION['resultsAPI']= $results;
+
+
+                         if($scoretext!=""){
+                                bitc_save_quiz_results($email,$scoretext,$results['details']['amount'],'',1,$results['details']['amount'],$quiz_id,$results_selections);
+                            }
+
                     } else {
-                        echo json_encode(['success' => false, 'details' => $decodedResponse,'remaining_attempts'=>$remaining_attempts]);
+                        //echo json_encode(['success' => false, 'details' => $decodedResponse,'remaining_attempts'=>$remaining_attempts]);
+                        $results = array('success'=>false,'details' => $decodedResponse,'remaining_attempts'=>$remaining_attempts);
+                        $_SESSION['resultsAPI']= $results;
+                        if($scoretext!=""){
+                             bitc_save_quiz_results($email,$scoretext,0,'',0,0,$quiz_id,$results_selections);
+                        }
                     }
 
                 }
@@ -301,7 +328,9 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
         } elseif (!empty($albyAccessToken)) {
             // Alby is configured, process payment using Alby
             if (empty($bolt11)) {
-                echo json_encode(['error' => 'Invoice is required.']);
+            
+            $results = array('success'=>false,'error' => 'Invoice is required.');
+            $_SESSION['resultsAPI']= $results;
                 wp_die();
             }
             
@@ -325,7 +354,11 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
             
             if (is_wp_error($response)) {
                 error_log('Alby payment request error: ' . $response->get_error_message());
-                echo json_encode(['error' => 'Alby payment request failed', 'details' => $response->get_error_message()]);
+
+                $results = array('success'=>false,'error' => 'Alby payment request failed', 'details' => $response->get_error_message());
+                $_SESSION['resultsAPI']= $results;
+
+                //echo json_encode([]);
                 wp_die();
             }
         
@@ -334,24 +367,44 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
             // Decode JSON response
             $decodedResponse = json_decode($responseBody, true);
 
+
            // echo "<pre>";print_r($decodedResponse);die;
             if($show_confetti==1){
                 // Check for a successful status or handle errors
                 if (isset($decodedResponse['payment_preimage'])) {
                     // Assuming 'payment_preimage' presence indicates a successful payment
-                    echo json_encode(['success' => true, 'details' => $decodedResponse,'show_confetti'=>$show_confetti]);
+                    $results =  array('success' => true, 'details' => $decodedResponse,'show_confetti'=>$show_confetti);
+                    $_SESSION['resultsAPI']= $results;
+
+                    if($scoretext!=""){
+                        bitc_save_quiz_results($email,$scoretext,$results['details']['amount'],'',1,$results['details']['amount'],$quiz_id,$results_selections);
+                    }
+
+                    
+
+                    
                 } else {
                     // Handle different errors based on your API response structure
-                    echo json_encode(['success' => false, 'details' => $decodedResponse,'remaining_attempts'=>$remaining_attempts]);
+                    $results =  array('success' => false, 'details' => $decodedResponse,'remaining_attempts'=>$remaining_attempts);
+                    $_SESSION['resultsAPI']= $results;
+                    if($scoretext!=""){
+                         bitc_save_quiz_results($email,$scoretext,0,'',0,0,$quiz_id,$results_selections);
+                    }
+
                 }
-                 wp_die();
+                 //wp_die();
+
             }
         
            
         } else {
             // No payment option is configured
-            echo json_encode(['error' => 'No payment system is configured.']);
+            $results =  array('error' => 'No payment system is configured.');
+            //return $results;
+            $_SESSION['resultsAPI']= $results;
+
         } 
+
 
     } 
 
@@ -360,61 +413,66 @@ function bitc_pay_bolt11_invoice($bolt11,$quiz_id,$email,$show_confetti) {
     
 }
 
+                          
 
-function bitc_save_quiz_results() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
-    $table_name2 = $wpdb->prefix . 'bitcoin_survey_results';
+function bitc_save_quiz_results($lightning_address,$scoretext,$totalsats,$quizname=null,$payment_sucessfull=null,$satoshisToSend=null,$quizID=null,$results_details_selections=null) {
+    //die("sud");
+    //$results_details_selections = urlencode($results_details_selections);
+    if(isset($results_details_selections) && !empty($results_details_selections)){
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+        $table_name2 = $wpdb->prefix . 'bitcoin_survey_results';
 
-    // Decode the URL-encoded string
-$decodedString = urldecode($_POST['selected_results']);
 
 
-// Remove any trailing commas
-$dataString = rtrim($decodedString, ',');
 
-// Explode the string into key-value pairs
-$pairs = explode('&', $dataString);
+        // Initialize an empty array to store the data
+        $dataArray = array();
 
-// Initialize an empty associative array
-$resultArray = [];
+        // Use parse_str to convert the string into an associative array
+        parse_str($results_details_selections, $dataArray);
 
-// Loop through each key-value pair
-foreach ($pairs as $pair) {
-    // Explode the pair into key and value
-    list($key, $value) = explode('=', $pair);
+        // Initialize a new array to store the final result
+        $resultArray = array();
 
-    // URL-decode and assign to the result array
-    $resultArray[urldecode($key)] = urldecode($value);
-}
-// Initialize an empty associative array
-$dataResults = array();
+        // Iterate over the parsed array to create the desired structure
+        foreach ($dataArray as $key => $value) {
+            // Extract the index from the key
+            $index = filter_var($key, FILTER_SANITIZE_NUMBER_INT);
 
-// Loop through each key-value pair in the provided array
-foreach ($resultArray as $key => $value) {
-    // Extract the numeric key from the string
-    preg_match('/(\d+)/', $key, $matches);
-    $numericKey = $matches[0];
+            // Check if the key is a "key" or "value" entry
+            if (strpos($key, 'key') !== false) {
+                // If it's a "key" entry, use the value as the key in the result array
+                $resultArray[$value] = null;
+            } else {
+                // If it's a "value" entry, use the index to find the corresponding key
+                $keyIndex = "dataArray{$index}key";
+                $resultArray[$dataArray[$keyIndex]] = $value;
+            }
+        }
 
-    // Set the key-value pair in the result array
-    $dataResults[$resultArray["dataArray[$numericKey][key]"]] = $resultArray["dataArray[$numericKey][value]"];
-}
+
+
+
+        // Display the resulting array
+       //echo "<pre>"; print_r($resultArray);die("test");
+
+
     // Get current user information
     $current_user = wp_get_current_user();
 
     // Collect data from the AJAX request
     $user_id = is_user_logged_in() ? $current_user->user_login : '0';
-    $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
-    $quiz_result = isset($_POST['quiz_result']) ? sanitize_text_field($_POST['quiz_result']) : '';
-    $satoshis_earned = isset($_POST['satoshis_earned']) ? intval($_POST['satoshis_earned']) : 0;
-    $quiz_id = isset($_POST['quiz_id']) ? sanitize_text_field($_POST['quiz_id']) : '';
+    $quiz_result = $scoretext;
+    $satoshis_earned = $totalsats;
+    $quiz_id = $quizID;
 
     // Fetch quiz name using the term associated with the quiz ID
     $quiz_term = get_term_by('id', $quiz_id, 'quiz');
     $quiz_name = $quiz_term ? $quiz_term->name : 'Unknown Quiz';
 
-    $send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
-    $satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;
+    $send_success = $payment_sucessfull;
+    $satoshis_sent = $satoshisToSend;
 
     // Insert data into the database
     $insert_result = $wpdb->insert(
@@ -436,7 +494,9 @@ foreach ($resultArray as $key => $value) {
     $last_insert_id = $wpdb->insert_id;
     $quiz_settings = get_bitc_quiz($quiz_id);
 
-    foreach($dataResults as $key=>$value){
+   // echo "<pre>";print_r($dataResults);die("sud");
+
+    foreach($resultArray as $key=>$value){
         $get_question_name = sanitize_text_field(get_the_title($key));
         $question = get_bitc_question($key);
         $answers = $question["answers"]["value"];
@@ -466,17 +526,19 @@ foreach ($resultArray as $key => $value) {
 
     if ($insert_result !== false) {
         // Success, send back the inserted data
-        echo json_encode(array('success' => true, 'satoshis_sent' => $satoshis_sent));
+        return true;
     } else {
         // Error in insertion
-        echo json_encode(array('success' => false, 'error' => 'Unable to save quiz results.'));
+        return false;
     }
 
-    wp_die();
+   // wp_die();
+
+    }
 }
 
-add_action('wp_ajax_bitc_save_quiz_results', 'bitc_save_quiz_results');
-add_action('wp_ajax_nopriv_bitc_save_quiz_results', 'bitc_save_quiz_results');
+//add_action('wp_ajax_bitc_save_quiz_results', 'bitc_save_quiz_results');
+//add_action('wp_ajax_nopriv_bitc_save_quiz_results', 'bitc_save_quiz_results');
 
 
 function bitc_export_csv_results(){
@@ -556,27 +618,39 @@ function getUrl($path) {
         return null;
     }
 }
-function getBolt11() {
+function getBolt11($quiz_id,$adminEmail,$sendAmountToAdmin,$email,$sendAmountToUser,$scored_text,$results_selections) {
+
+        // echo "Admin details--".$sendAmountToAdmin;
+        // echo "User details--".$sendAmountToUser;
+
+        //die("-------".$adminEmail);
     global $wpdb;
     $table_name = $wpdb->prefix.'bitcoin_invoice_code';
-    $quiz_id = $_POST['quizID'];
+
+    //die("function accessed");
+    
     /*Generate invoice code for admin and send the payment*/
-    if(isset($_POST) && !empty($_POST['adminEmail']!="") && !empty($_POST['sendAmountToAdmin']!="")){
+    if(!empty($adminEmail) && !empty($sendAmountToAdmin)){
         //echo "coing";die;
-            $amount = $_POST['sendAmountToAdmin'];
-            $email = $_POST['adminEmail'];
+            $amount = $sendAmountToAdmin;
+            $email = $adminEmail;
 
             if ($amount !== 0) {
                 $purl = getPayUrl($email);
                 if (!$purl) {                  
-                     echo json_encode(array("success"=>false,"details"=>'Invalid URL generated'));
+                     //echo json_encode(array("success"=>false,"details"=>'Invalid URL generated'));
+
+                     $results = array("success"=>false,"details"=>'Invalid URL generated');
+                     $_SESSION['resultsAPI']= $results;
                 }
 
                 //print_r($purl);
 
                 $lnurlDetails = getUrl($purl);
                 if (!$lnurlDetails || !$lnurlDetails['callback']) {
-                    echo json_encode(array("success"=>false,"details"=>'LNURL details not found'));
+                    //echo json_encode(array("success"=>false,"details"=>'LNURL details not found'));
+                     $results = array("success"=>false,"details"=>'LNURL details not found');
+                     $_SESSION['resultsAPI']= $results;
                 }
 
                 $minAmount = $lnurlDetails['minSendable'];
@@ -595,35 +669,45 @@ function getBolt11() {
                     array('%s')
                 );
                     /*write your send request payment here*/
-                 bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,0);
+                 bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,0,null,null);
 
                     /*send request end here*/
                    
                 } else {
                    
-                     echo json_encode(array("success"=>false,"details"=>"Payment request generation failed: " . ($prData['reason'] ?? 'unknown reason')));
+                     //echo json_encode(array("success"=>false,"details"=>"Payment request generation failed: " . ($prData['reason'] ?? 'unknown reason')));
+                     $results = array("success"=>false,"details"=>"Payment request generation failed: " . ($prData['reason'] ?? 'unknown reason'));
+                     $_SESSION['resultsAPI']= $results;
+
                 }
+
+
             } else {
-                echo json_encode(array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.'));
+               // echo json_encode(array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.'));
+                $results = array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.');
+                $_SESSION['resultsAPI']= $results;
             }
        
     }
     /*admin code end*/
 
     /*Generate invoice code for user and send the payment*/
-    if(isset($_POST) && !empty($_POST['userEmail']!="") && !empty($_POST['sendAmountToUser']!="")){
+    if(!empty($email) && !empty($sendAmountToUser)){
        
-            $amount  = $_POST['sendAmountToUser'];
-            $email = $_POST['userEmail'];
+            $amount  = $sendAmountToUser;
             if ($amount !== 0) {
                 $purl = getPayUrl($email);
                 if (!$purl) {                  
-                     echo json_encode(array("success"=>false,"details"=>'Invalid URL generated'));
+                    // echo json_encode(array("success"=>false,"details"=>'Invalid URL generated'));
+                    $results = array("success"=>false,"details"=>'Invalid URL generated');
+                    $_SESSION['resultsAPI']= $results;
                 }
 
                 $lnurlDetails = getUrl($purl);
                 if (!$lnurlDetails || !$lnurlDetails['callback']) {
-                    echo json_encode(array("success"=>false,"details"=>'LNURL details not found'));
+                 //   echo json_encode(array("success"=>false,"details"=>'LNURL details not found'));
+                    $results = array("success"=>false,"details"=>'LNURL details not found');
+                    $_SESSION['resultsAPI']= $results;
                 }
 
                 $minAmount = $lnurlDetails['minSendable'];
@@ -642,20 +726,25 @@ function getBolt11() {
                     array('%s')
                 );
                     /*write your send request payment here*/
-                    bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,1);
+                   // echo"<pre>";print_r($results_selections);
+                    bitc_pay_bolt11_invoice(strtoupper($prData['pr']),$quiz_id,$email,1,$scored_text,$results_selections);
 
 
                     /*send request end here*/
                    
                 } else {
                    
-                     echo json_encode(array("success"=>false,"details"=>"Payment request generation failed: " . ($prData['reason'] ?? 'unknown reason')));
+                    // echo json_encode(array("success"=>false,"details"=>"Payment request generation failed: " . ($prData['reason'] ?? 'unknown reason')));
+                    $results = array("success"=>false,"details"=>"Payment request generation failed: " . ($prData['reason'] ?? 'unknown reason'));
+                    $_SESSION['resultsAPI']= $results;
                 }
             } else {
-                echo json_encode(array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.'));
+                //echo json_encode(array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.'));
+                $results = array("success"=>false,"details"=>'Seems like the amount you want to send the admin is less than 1.');
+                $_SESSION['resultsAPI']= $results;
             }
     }
     /*user code end*/
 }
-add_action('wp_ajax_generate_invoice_code', 'getBolt11');
-add_action('wp_ajax_nopriv_generate_invoice_code', 'getBolt11');
+//add_action('wp_ajax_generate_invoice_code', 'getBolt11');
+//add_action('wp_ajax_nopriv_generate_invoice_code', 'getBolt11');

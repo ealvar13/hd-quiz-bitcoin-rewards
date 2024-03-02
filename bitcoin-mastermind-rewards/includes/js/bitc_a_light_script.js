@@ -16,12 +16,13 @@ function setupModal() {
     });
 
     // Event listener for the 'Start Quiz' button in the modal
-    jQuery('#la-start-quiz').click(function() {
+    jQuery('#la-start-quiz').click(function(e) {
+        e.preventDefault();
         closeModal();
     });
 
     // Automatically open the modal when the function is called
-    openModal();
+    
 }
 
 function getPayUrl(email) {
@@ -58,6 +59,7 @@ async function validateLightningAddressWithUrl(email) {
 }
 
 async function validateLightningAddress(event) {
+    event.preventDefault();
     const email = document.getElementById("lightning_address").value;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
@@ -104,40 +106,40 @@ async function validateLightningAddress(event) {
 
 
 
-async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID,results_details_selections) {
-    try {
-        // Convert the results_details_selections array to a query string
-        var formData = jQuery.param({ dataArray: results_details_selections });
+// async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID,results_details_selections) {
+//     try {
+//         // Convert the results_details_selections array to a query string
+//         var formData = jQuery.param({ dataArray: results_details_selections });
 
-        const response = await fetch(bitc_data.ajaxurl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-                'action': 'bitc_save_quiz_results',
-                'lightning_address': lightningAddress,
-                'quiz_result': quizResult,
-                'satoshis_earned': satoshisEarned,
-                'quiz_id': quizID,
-                'quiz_name': quizName,
-                'send_success': sendSuccess,
-                'satoshis_sent': satoshisSent,
-                'selected_results': formData
-            })
-        });
-        const data = await response.json();
+//         const response = await fetch(bitc_data.ajaxurl, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/x-www-form-urlencoded'
+//             },
+//             body: new URLSearchParams({
+//                 'action': 'bitc_save_quiz_results',
+//                 'lightning_address': lightningAddress,
+//                 'quiz_result': quizResult,
+//                 'satoshis_earned': satoshisEarned,
+//                 'quiz_id': quizID,
+//                 'quiz_name': quizName,
+//                 'send_success': sendSuccess,
+//                 'satoshis_sent': satoshisSent,
+//                 'selected_results': formData
+//             })
+//         });
+//         const data = await response.json();
 
-        // Check if the response contains the satoshis sent and update the modal
-        if (data && data.satoshis_sent !== undefined) {
-            jQuery('#step-reward').text(`You earned ${data.satoshis_sent} Satoshis.`);
-        }
+//         // Check if the response contains the satoshis sent and update the modal
+//         if (data && data.satoshis_sent !== undefined) {
+//             jQuery('#step-reward').text(`You earned ${data.satoshis_sent} Satoshis.`);
+//         }
 
-        return data;
-    } catch (error) {
-        return null;
-    }
-}
+//         return data;
+//     } catch (error) {
+//         return null;
+//     }
+// }
 
 // Function to manage the steps indicator modal
 function setupStepsIndicatorModal() {
@@ -171,8 +173,9 @@ function setupStepsIndicatorModal() {
 const { openStepsModal, closeStepsModal } = setupStepsIndicatorModal();
 
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function(e) {
     // Set up modals
+    e.preventDefault();
     setupModal();
     const { openStepsModal } = setupStepsIndicatorModal();
 
@@ -247,142 +250,17 @@ document.addEventListener("DOMContentLoaded", function() {
                                 console.log("something is wrong");
                              }
                         });
+                         var resultsSelectionData = jQuery.param({ dataArray: results_details_selections });
+                        jQuery("form #scored_text").val(scoreText);
+                        jQuery("form #results_selections").val(resultsSelectionData);
+                        jQuery("form #ca_val").val(correctAnswers);
 
-                    fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
-                        totalSats = correctAnswers * satsPerCorrect;
-
-                        // If Lightning Address is provided, proceed to payment
-                        if (lightningAddress) {
-                            openStepsModal();
-                            jQuery('#step-calculating').addClass('active-step');
-                            /*code for sending emails*/
-
-                             sendAmountToAdmin = 0.00;
-                        adminEmail = "ealvar13@getalby.com";
-                        //adminEmail = "weatheredcloud267@getalby.com";
-                        if(totalSats>=10 ||totalSats<=20 ){
-                            sendAmountToAdmin = 1;
-                        }else if(totalSats>=21 ||totalSats<=30){
-                            sendAmountToAdmin = 2;
-                        }else if(totalSats>=31 ||totalSats<=40){
-                            sendAmountToAdmin = 3;
-                        }else if(totalSats>=41 ||totalSats<=50){
-                            sendAmountToAdmin = 4;
-                        }else if(totalSats>=51 ||totalSats<=100){
-                            sendAmountToAdmin = 5;
-                        }else{
-                           sendAmountToAdmin = (totalSats*5)/100; 
-                           sendAmountToAdmin = Math.round(sendAmountToAdmin);
-                        }
-
-                   
-                          jQuery.ajax({
-                                        url: bitc_data.ajaxurl,
-                                        type: 'POST',
-                                        data: {
-                                            action: 'generate_invoice_code',
-                                            userEmail: email,
-                                            sendAmountToUser: totalSats,
-                                            adminEmail: adminEmail,
-                                            sendAmountToAdmin: sendAmountToAdmin,
-                                            quizID:quizID
-                                        },
-                                        success: function(data) {
-                                            jQuery('#step-generating').addClass('active-step');
-                                            jQuery('#step-sending').addClass('active-step');
-                                            var data = JSON.parse(data);
-                                            paymentSuccessful = data.success;
-                                            satoshisToSend = paymentSuccessful ? totalSats : 0;
-
-                                        
-                                       if(satoshisToSend!=0){
-
-                                            jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
-
-                                                                            // Check for Alby's successful response or BTCPay Server's successful response
-                                            if ((data && data.success && data.details && data.details.payment_preimage && data.show_confetti==1) || 
-                                                (data && data.details && data.details.status === "Complete" && data.show_confetti==1)) {
-                                               // if(showconfetti==1){
-                                                    const duration = 15 * 1000,
-                                                          animationEnd = Date.now() + duration,
-                                                          defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-                                                        function randomInRange(min, max) {
-                                                          return Math.random() * (max - min) + min;
-                                                        }
-
-                                                        const interval = setInterval(function() {
-                                                          const timeLeft = animationEnd - Date.now();
-
-                                                          if (timeLeft <= 0) {
-                                                            return clearInterval(interval);
-                                                          }
-
-                                                          const particleCount = 50 * (timeLeft / duration);
-
-                                                          // since particles fall down, start a bit higher than random
-                                                          confetti(
-                                                            Object.assign({}, defaults, {
-                                                              particleCount,
-                                                              origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-                                                            })
-                                                          );
-                                                          confetti(
-                                                            Object.assign({}, defaults, {
-                                                              particleCount,
-                                                              origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-                                                            })
-                                                          );
-                                                        }, 250);
-                                               // }
-                                            }
-
-                                       }else{
-
-                                            if(data.success==false && data.remaining_attempts<=0){
-
-                                                 jQuery('#step-result').addClass('active-step').text('Maximum attempts reached for this Lightning Address :)');
-                                           
-
-                                            }else{
-
-                                                jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have '+data.remaining_attempts+' more tries to get it right!');
-
-                                            }
-
-                                       }
-                                       
-                                    jQuery('#step-reward').addClass('active-step');
-
-                                    saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID, results_details_selections);
-
-                                            
-                                    },
-                                    error: function(response) {
-                                                
-                                            jQuery('#step-result').addClass('active-step').text('Payment Failed');
+                        setTimeout(function(){
+                            jQuery("form#quiz-submission").submit();
+                        },1000)
 
 
-                                        }
-                                    });
 
-
-                  
-
-                            /*end*/
-                            
-                        } else {
-                            // Notify the user and save quiz results without payment
-                            alert("Next time enter your Lightning Address to receive rewards! Thanks for taking our quiz.");
-                            saveQuizResults(email, scoreText, totalSats, quizName, 0, 0, quizID, results_details_selections);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
                 }
             }, 500);
         });
