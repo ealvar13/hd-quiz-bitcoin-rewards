@@ -37,7 +37,7 @@ function bitc_enqueue_lightning_script() {
     $btcpay_api_key = get_option('bitc_btcpay_api_key', '');
 
     $script_path = plugin_dir_url(__FILE__) . 'js/bitc_a_light_script.js';
-    wp_enqueue_script('hdq-lightning-script', $script_path, array('jquery'), '1.0.0', true);
+    wp_enqueue_script('hdq-lightning-script', $script_path, array('jquery'), '', true);
 
     // Localize the script including the sats value and the BTCPay Server URL and API Key
     wp_localize_script('hdq-lightning-script', 'bitc_data', array(

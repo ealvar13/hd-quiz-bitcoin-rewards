@@ -409,8 +409,8 @@ document.addEventListener("DOMContentLoaded", function () {
 								/*code for sending emails*/
 
 								sendAmountToAdmin = 0.00;
-								//adminEmail = "ealvar13@getalby.com";
-								adminEmail = "erik@testnet-btcpay.velascommerce.com";
+								adminEmail = "ealvar13@getalby.com";
+								//adminEmail = "erik@testnet-btcpay.velascommerce.com";
 								if (totalSats >= 10 || totalSats <= 20) {
 									sendAmountToAdmin = 1;
 								} else if (totalSats >= 21 || totalSats <= 30) {
