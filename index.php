@@ -6,7 +6,7 @@
  * Author: ealvar13
  * License: GPL-2.0+
  * Author URI: https://github.com/ealvar13
- * Version: 0.1.0
+ * Version: 0.3.0
  */
 
 require dirname(__FILE__) . '/bitcoin-mastermind/index.php';
