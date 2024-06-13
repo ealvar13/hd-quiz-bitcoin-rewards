@@ -315,6 +315,25 @@ function setupStepsIndicatorModal() {
 	};
 }
 
+// Function to calculate admin Payout
+
+function calculateAdminPayout(totalSats) {
+	console.log("Total Sats 🌶️", totalSats);
+	if (totalSats >= 10 && totalSats <= 20) {
+		return 1;
+	} else if (totalSats >= 21 && totalSats <= 30) {
+		return 2;
+	} else if (totalSats >= 31 && totalSats <= 40) {
+		return 3;
+	} else if (totalSats >= 41 && totalSats <= 50) {
+		return 4;
+	} else if (totalSats >= 51 && totalSats <= 100) {
+		return 5;
+	} else {
+		return Math.round((totalSats * 5) / 100);
+	}
+}
+
 // Call setupStepsIndicatorModal and store the returned functions
 const { openStepsModal, closeStepsModal } = setupStepsIndicatorModal();
 
@@ -410,21 +429,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 								sendAmountToAdmin = 0.00;
 								adminEmail = "ealvar13@getalby.com";
-								//adminEmail = "erik@testnet-btcpay.velascommerce.com";
-								if (totalSats >= 10 || totalSats <= 20) {
-									sendAmountToAdmin = 1;
-								} else if (totalSats >= 21 || totalSats <= 30) {
-									sendAmountToAdmin = 2;
-								} else if (totalSats >= 31 || totalSats <= 40) {
-									sendAmountToAdmin = 3;
-								} else if (totalSats >= 41 || totalSats <= 50) {
-									sendAmountToAdmin = 4;
-								} else if (totalSats >= 51 || totalSats <= 100) {
-									sendAmountToAdmin = 5;
-								} else {
-									sendAmountToAdmin = (totalSats * 5) / 100;
-									sendAmountToAdmin = Math.round(sendAmountToAdmin);
-								}
+								sendAmountToAdmin = calculateAdminPayout(totalSats);
+								console.log("Admin Payout 🧨", sendAmountToAdmin);
 								console.log("Admin Email 🧨", adminEmail);
 								console.log("Send Amount to Admin 🧨", sendAmountToAdmin);
 								getBolt11(adminEmail, sendAmountToAdmin)
