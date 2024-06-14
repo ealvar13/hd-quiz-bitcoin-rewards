@@ -334,6 +334,25 @@ function calculateAdminPayout(totalSats) {
 	}
 }
 
+async function handleAdminPayout(totalSats, quizID) {
+	const adminEmail = "ealvar13@getalby.com"; // Admin email
+	let sendAmountToAdmin = calculateAdminPayout(totalSats);
+	console.log("Admin Email 🧨", adminEmail);
+	console.log("Send Amount to Admin 🧨", sendAmountToAdmin);
+
+	try {
+		let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
+		if (bolt11) {
+			let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0);
+			if (!paymentResponse.success) {
+				console.error('Admin payment failed:', paymentResponse.data);
+			}
+		}
+	} catch (error) {
+		console.error('Error generating or sending admin BOLT11:', error);
+	}
+}
+
 // Call setupStepsIndicatorModal and store the returned functions
 const { openStepsModal, closeStepsModal } = setupStepsIndicatorModal();
 
@@ -345,7 +364,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	let finishButton = document.querySelector(".bitc_finsh_button");
 	if (finishButton) {
-		finishButton.addEventListener("click", function () {
+		finishButton.addEventListener("click", async function () {
 			let lightningAddress = document.getElementById("lightning_address").value.trim();
 			let email = lightningAddress; // Use the trimmed Lightning Address
 			let quizName = '';
@@ -355,7 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			let scoreText, correctAnswers, satsPerCorrect, totalSats, paymentSuccessful, satoshisToSend;
 
 			// Fetch quiz results and calculate rewards
-			setTimeout(function () {
+			setTimeout(async function () {
 				let resultElement = document.querySelector('.bitc_result');
 				if (resultElement) {
 
@@ -417,7 +436,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 					fetch(`/wp-json/hdq/v1/sats_per_answer/${quizID}`)
 						.then(response => response.json())
-						.then(data => {
+						.then(async data => {
 							satsPerCorrect = parseInt(data.sats_per_correct_answer, 10);
 							totalSats = correctAnswers * satsPerCorrect;
 
@@ -433,17 +452,8 @@ document.addEventListener("DOMContentLoaded", function () {
 								console.log("Admin Payout 🧨", sendAmountToAdmin);
 								console.log("Admin Email 🧨", adminEmail);
 								console.log("Send Amount to Admin 🧨", sendAmountToAdmin);
-								getBolt11(adminEmail, sendAmountToAdmin)
-									.then(bolt11 => {
-										if (bolt11) {
-											sendPaymentRequest(bolt11, quizID, adminEmail, 0).then(paymentResponse => {
-
-												paymentSuccessful = paymentResponse.success;
-												satoshisToSend = paymentSuccessful ? totalSats : 0;
-											})
-										}
-									})
-
+								console.log("🚀 Calling handleAdminPayout");
+								await handleAdminPayout(totalSats, quizID);
 								/*end*/
 								// Reintegrate payment processing logic
 								getBolt11(email, totalSats)
