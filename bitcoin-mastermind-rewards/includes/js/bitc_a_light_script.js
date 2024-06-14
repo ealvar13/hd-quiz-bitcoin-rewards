@@ -337,8 +337,6 @@ function calculateAdminPayout(totalSats) {
 async function handleAdminPayout(totalSats, quizID) {
 	const adminEmail = "ealvar13@getalby.com"; // Admin email
 	let sendAmountToAdmin = calculateAdminPayout(totalSats);
-	console.log("Admin Email 🧨", adminEmail);
-	console.log("Send Amount to Admin 🧨", sendAmountToAdmin);
 
 	try {
 		let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
@@ -350,6 +348,37 @@ async function handleAdminPayout(totalSats, quizID) {
 		}
 	} catch (error) {
 		console.error('Error generating or sending admin BOLT11:', error);
+	}
+}
+
+async function handleUserPayout(email, totalSats, quizID, scoreText, results_details_selections) {
+	try {
+		let bolt11 = await getBolt11(email, totalSats);
+		if (bolt11) {
+			jQuery('#step-generating').addClass('active-step');
+			jQuery('#step-sending').addClass('active-step');
+
+			let remainingAttempts = await fetchRemainingTries(email, quizID);
+			let paymentResponse = await sendPaymentRequest(bolt11, quizID, email, 1);
+
+			let paymentSuccessful = paymentResponse.success;
+			let satoshisToSend = paymentSuccessful ? totalSats : 0;
+
+			if (satoshisToSend != 0) {
+				jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
+			} else {
+				if (remainingAttempts.remaining_attempts == 0) {
+					jQuery('#step-result').addClass('active-step').text('Better luck next time :)');
+				} else {
+					jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have ' + remainingAttempts.remaining_attempts + ' more tries to get it right!');
+				}
+			}
+			jQuery('#step-reward').addClass('active-step');
+
+			saveQuizResults(email, scoreText, totalSats, quizID, paymentSuccessful ? 1 : 0, satoshisToSend, results_details_selections);
+		}
+	} catch (error) {
+		console.error('Error generating or sending user BOLT11:', error);
 	}
 }
 
@@ -451,55 +480,12 @@ document.addEventListener("DOMContentLoaded", function () {
 								sendAmountToAdmin = calculateAdminPayout(totalSats);
 								console.log("Admin Payout 🧨", sendAmountToAdmin);
 								console.log("Admin Email 🧨", adminEmail);
-								console.log("Send Amount to Admin 🧨", sendAmountToAdmin);
 								console.log("🚀 Calling handleAdminPayout");
 								await handleAdminPayout(totalSats, quizID);
-								/*end*/
-								// Reintegrate payment processing logic
-								getBolt11(email, totalSats)
-									.then(bolt11 => {
-										if (bolt11) {
-											jQuery('#step-generating').addClass('active-step');
-											jQuery('#step-sending').addClass('active-step');
-											fetchRemainingTries(lightningAddress, quizID).then(response => {
-
-												sendPaymentRequest(bolt11, quizID, email, 1)
-
-													.then(paymentResponse => {
-														paymentSuccessful = paymentResponse.success;
-														satoshisToSend = paymentSuccessful ? totalSats : 0;
-														if (satoshisToSend != 0) {
-
-															jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
-
-														} else {
-															if (response.remaining_attempts == 0) {
-
-																jQuery('#step-result').addClass('active-step').text('Better luck next time :)');
-
-
-															} else {
-
-																jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have ' + response.remaining_attempts + ' more tries to get it right!');
-
-															}
-
-														}
-
-														jQuery('#step-reward').addClass('active-step');
-
-														saveQuizResults(email, scoreText, totalSats, quizName, paymentSuccessful ? 1 : 0, satoshisToSend, quizID, results_details_selections);
-													})
-											})
-
-												.catch(error => {
-													jQuery('#step-result').addClass('active-step').text('Payment Failed');
-												});
-										}
-									})
-									.catch(error => {
-										console.error('Error generating BOLT11:', error);
-									});
+								console.log("User Payout 🧨", totalSats);
+								console.log("User Email 🧨", lightningAddress);
+								console.log("🚀 Calling handleUserPayout");
+								await handleUserPayout(lightningAddress, totalSats, quizID, scoreText, results_details_selections);
 							} else {
 								// Notify the user and save quiz results without payment
 								alert("Next time enter your Lightning Address to receive rewards! Thanks for taking our quiz.");
