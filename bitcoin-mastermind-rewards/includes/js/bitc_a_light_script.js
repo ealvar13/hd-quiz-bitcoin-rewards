@@ -106,27 +106,27 @@ async function validateLightningAddress(event) {
 	event.preventDefault(); // Stop the form submission in either case
 }
 
-	function getPayUrl(email) {
-		try {
-			const parts = email.split('@');
-			const domain = parts[1];
-			const username = parts[0];
-			const transformUrl = `https://${domain}/.well-known/lnurlp/${username}`;
-			return transformUrl;
-		} catch (error) {
-			return null;
-		}
+function getPayUrl(email) {
+	try {
+		const parts = email.split('@');
+		const domain = parts[1];
+		const username = parts[0];
+		const transformUrl = `https://${domain}/.well-known/lnurlp/${username}`;
+		return transformUrl;
+	} catch (error) {
+		return null;
 	}
+}
 
-	async function getUrl(path) {
-		try {
-			const response = await fetch(path);
-			const data = await response.json();
-			return data;
-		} catch (error) {
-			return null;
-		}
+async function getUrl(path) {
+	try {
+		const response = await fetch(path);
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		return null;
 	}
+}
 
 async function getBolt11(email, amount) {
 	try {
@@ -329,20 +329,50 @@ function calculateAdminPayout(totalSats) {
 	}
 }
 
-async function handleAdminPayout(totalSats, quizID) {
-	const adminEmail = "ealvar13@getalby.com"; // Admin email
-	let sendAmountToAdmin = calculateAdminPayout(totalSats);
+// async function handleAdminPayout(totalSats, quizID) {
+// 	const adminEmail = "ealvar13@getalby.com"; // Admin email
+// 	let sendAmountToAdmin = calculateAdminPayout(totalSats);
 
+// 	try {
+// 		let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
+// 		if (bolt11) {
+// 			let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0);
+// 			if (!paymentResponse.success) {
+// 				console.error('Admin payment failed:', paymentResponse.data);
+// 			}
+// 		}
+// 	} catch (error) {
+// 		console.error('Error generating or sending admin BOLT11:', error);
+// 	}
+// }
+
+async function handleAdminPayout(totalSats, quizID) {
 	try {
-		let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
-		if (bolt11) {
-			let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0);
-			if (!paymentResponse.success) {
-				console.error('Admin payment failed:', paymentResponse.data);
+		let response = await jQuery.ajax({
+			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
+			type: 'POST',
+			data: {
+				action: 'calculateAdminPayout', // This action corresponds to the AJAX handler we defined in PHP
+				totalSats: totalSats,
 			}
+		});
+
+		if (response.success) {
+			const sendAmountToAdmin = response.data;
+			const adminEmail = "ealvar13@getalby.com"; // Admin email
+
+			let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
+			if (bolt11) {
+				let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0);
+				if (!paymentResponse.success) {
+					console.error('Admin payment failed:', paymentResponse.data);
+				}
+			}
+		} else {
+			throw new Error(response.data);
 		}
 	} catch (error) {
-		console.error('Error generating or sending admin BOLT11:', error);
+		console.error('Error calculating or sending admin BOLT11:', error);
 	}
 }
 
