@@ -74,3 +74,35 @@ function get_url($url) {
     }
     return json_decode(wp_remote_retrieve_body($response));
 }
+
+// Function to calculate admin payout
+function calculateAdminPayout($totalSats) {
+    if ($totalSats >= 10 && $totalSats <= 20) {
+        return 1;
+    } else if ($totalSats >= 21 && $totalSats <= 30) {
+        return 2;
+    } else if ($totalSats >= 31 && $totalSats <= 40) {
+        return 3;
+    } else if ($totalSats >= 41 && $totalSats <= 50) {
+        return 4;
+    } else if ($totalSats >= 51 && $totalSats <= 100) {
+        return 5;
+    } else {
+        return round(($totalSats * 5) / 100);
+    }
+}
+
+// Register AJAX handler for admin payout calculation
+add_action('wp_ajax_calculateAdminPayout', 'calculateAdminPayoutAjax');
+add_action('wp_ajax_nopriv_calculateAdminPayout', 'calculateAdminPayoutAjax'); // Allow non-logged-in users to access this if necessary
+
+function calculateAdminPayoutAjax() {
+    if (!isset($_POST['totalSats'])) {
+        wp_send_json_error('Missing required parameter: totalSats');
+    }
+
+    $totalSats = intval($_POST['totalSats']);
+    $adminPayout = calculateAdminPayout($totalSats);
+
+    wp_send_json_success($adminPayout);
+}
