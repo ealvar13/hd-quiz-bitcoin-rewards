@@ -329,23 +329,6 @@ function calculateAdminPayout(totalSats) {
 	}
 }
 
-// async function handleAdminPayout(totalSats, quizID) {
-// 	const adminEmail = "ealvar13@getalby.com"; // Admin email
-// 	let sendAmountToAdmin = calculateAdminPayout(totalSats);
-
-// 	try {
-// 		let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
-// 		if (bolt11) {
-// 			let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0);
-// 			if (!paymentResponse.success) {
-// 				console.error('Admin payment failed:', paymentResponse.data);
-// 			}
-// 		}
-// 	} catch (error) {
-// 		console.error('Error generating or sending admin BOLT11:', error);
-// 	}
-// }
-
 async function handleAdminPayout(totalSats, quizID) {
 	try {
 		let response = await jQuery.ajax({
