@@ -106,56 +106,51 @@ async function validateLightningAddress(event) {
 	event.preventDefault(); // Stop the form submission in either case
 }
 
-function getPayUrl(email) {
-	try {
-		const parts = email.split('@');
-		const domain = parts[1];
-		const username = parts[0];
-		const transformUrl = `https://${domain}/.well-known/lnurlp/${username}`;
-		return transformUrl;
-	} catch (error) {
-		return null;
+	function getPayUrl(email) {
+		try {
+			const parts = email.split('@');
+			const domain = parts[1];
+			const username = parts[0];
+			const transformUrl = `https://${domain}/.well-known/lnurlp/${username}`;
+			return transformUrl;
+		} catch (error) {
+			return null;
+		}
 	}
-}
 
-async function getUrl(path) {
-	try {
-		const response = await fetch(path);
-		const data = await response.json();
-		return data;
-	} catch (error) {
-		return null;
+	async function getUrl(path) {
+		try {
+			const response = await fetch(path);
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			return null;
+		}
 	}
-}
 
 async function getBolt11(email, amount) {
 	try {
-		if (amount !== 0) {
-			const purl = getPayUrl(email);
-			if (!purl) throw new Error("Invalid URL generated");
-
-			const lnurlDetails = await getUrl(purl);
-			if (!lnurlDetails || !lnurlDetails.callback) throw new Error("LNURL details not found");
-
-			let minAmount = lnurlDetails.minSendable;
-			let payAmount = amount && amount * 1000 > minAmount ? amount * 1000 : minAmount;
-
-			const payquery = `${lnurlDetails.callback}?amount=${payAmount}`;
-
-			const prData = await getUrl(payquery);
-			if (prData && prData.pr) {
-				return prData.pr.toUpperCase();
-			} else {
-				throw new Error(`Payment request generation failed: ${prData.reason || 'unknown reason'}`);
+		let response = await jQuery.ajax({
+			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
+			type: 'POST',
+			data: {
+				action: 'getBolt11', // This action corresponds to the AJAX handler we defined in PHP
+				email: email,
+				amount: amount
 			}
+		});
+
+		if (response.success) {
+			return response.data; // The Bolt11 invoice
 		} else {
-			return null;
+			throw new Error(response.data);
 		}
 	} catch (error) {
 		console.error('Error generating BOLT11:', error);
 		return null;
 	}
 }
+
 
 function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti) {
 	//check_ajax_referer('lightning_payment');
@@ -401,6 +396,21 @@ document.addEventListener("DOMContentLoaded", function () {
 			let quizID = finishButton.getAttribute('data-id');
 
 			let scoreText, correctAnswers, satsPerCorrect, totalSats, paymentSuccessful, satoshisToSend;
+
+			// Call the new PHP function via AJAX
+			jQuery.ajax({
+				url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
+				type: 'POST',
+				data: {
+					action: 'print_message'
+				},
+				success: function (response) {
+					console.log(response); // Should print "you did it"
+				},
+				error: function (error) {
+					console.error('Error:', error);
+				}
+			});
 
 			// Fetch quiz results and calculate rewards
 			setTimeout(async function () {
