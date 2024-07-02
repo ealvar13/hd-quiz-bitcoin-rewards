@@ -31,7 +31,6 @@ function setupModal() {
 
 	// Automatically open the modal when the function is called
 	openModal();
-	console.log("Modal setup  🌶️ ");
 }
 
 function getPayUrl(email) {
@@ -40,7 +39,6 @@ function getPayUrl(email) {
 		const domain = parts[1];
 		const username = parts[0];
 		const transformUrl = `https://${escapeHtml(domain)}/.well-known/lnurlp/${escapeHtml(username)}`;
-		console.log("Received PayURL: 🌶️", transformUrl);
 		return transformUrl;
 	} catch (error) {
 		return null;
@@ -51,7 +49,6 @@ async function getUrl(path) {
 	try {
 		const response = await fetch(path);
 		const data = await response.json();
-		console.log("Received data from URL: 🌶️", data);
 		return data;
 	} catch (error) {
 		return null;
@@ -63,10 +60,8 @@ async function validateLightningAddressWithUrl(email) {
 	const responseData = await getUrl(transformUrl);
 
 	if (responseData && responseData.tag === "payRequest") {
-		console.log("Valid Lightning Address: 🌶️", email);
 		return true;
 	} else {
-		console.log("Not a Valid Lightning Address: 🌶️", email);
 		return false;
 	}
 }
@@ -179,29 +174,24 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti) {
 		.then(data => {
 
 			// Check for Alby's successful response or BTCPay Server's successful response
-			console.log("Raw payment response data: 🌶️", data);
 			if ((data && data.success && data.details && data.details.payment_preimage) ||
 				(data && data.details && data.details.status === "Complete")) {
-				console.log("Payment successful!! 🌶️", data.details);
 				if (showconfetti == 1) {
 					displayConfetti();
 				}
 
 				return { success: true, data: data.details };
 			} else {
-				console.error("Payment not successful!! 🧨 ", data.details || data);
 				return { success: false, data: data.details || data };
 			}
 		})
 		.catch(error => {
-			console.error("Error in payment request: ", error);
 			return { success: false, error: error };
 		});
 	wp_die(); // All ajax handlers should die when finished
 }
 
 function displayConfetti() {
-	console.log("Displaying confetti 🌶️");
 	const duration = 15 * 1000,
 		animationEnd = Date.now() + duration,
 		defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
@@ -322,7 +312,6 @@ function setupStepsIndicatorModal() {
 // Function to calculate admin Payout
 
 function calculateAdminPayout(totalSats) {
-	console.log("Total Sats 🌶️", totalSats);
 	if (totalSats >= 10 && totalSats <= 20) {
 		return 1;
 	} else if (totalSats >= 21 && totalSats <= 30) {
@@ -446,7 +435,6 @@ document.addEventListener("DOMContentLoaded", function () {
 					jQuery(".bitc_quiz .bitc_question").each(function (index, value) {
 						var question_type = jQuery(this).data('type');
 						var question_id = jQuery(this).attr('id');
-						console.log(question_type);
 						var fetch_numeric_ques_id = question_id.split('bitc_question_');
 						fetch_numeric_ques_id = fetch_numeric_ques_id[1];
 						var select_val = "";
@@ -510,13 +498,7 @@ document.addEventListener("DOMContentLoaded", function () {
 								sendAmountToAdmin = 0.00;
 								adminEmail = "ealvar13@getalby.com";
 								sendAmountToAdmin = calculateAdminPayout(totalSats);
-								console.log("Admin Payout 🧨", sendAmountToAdmin);
-								console.log("Admin Email 🧨", adminEmail);
-								console.log("🚀 Calling handleAdminPayout");
 								await handleAdminPayout(totalSats, quizID);
-								console.log("User Payout 🧨", totalSats);
-								console.log("User Email 🧨", lightningAddress);
-								console.log("🚀 Calling handleUserPayout");
 								await handleUserPayout(lightningAddress, totalSats, quizID, scoreText, results_details_selections);
 							} else {
 								// Notify the user and save quiz results without payment
