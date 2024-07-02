@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 }
 
 function print_message() {
-    echo "you did it 🚀 🚀 🚀 🍄 🤑";
+    echo "Sats Paid out.";
 }
 
 
