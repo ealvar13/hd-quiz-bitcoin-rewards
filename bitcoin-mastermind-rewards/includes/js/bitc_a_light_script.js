@@ -1,3 +1,12 @@
+function escapeHtml(unsafestr) {
+	return unsafestr
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+}
+
 // Function for the modal that displays user instructions at the start of the quiz
 function setupModal() {
 	// Function to open the modal
@@ -29,7 +38,7 @@ function getPayUrl(email) {
 		const parts = email.split('@');
 		const domain = parts[1];
 		const username = parts[0];
-		const transformUrl = `https://${domain}/.well-known/lnurlp/${username}`;
+		const transformUrl = `https://${escapeHtml(domain)}/.well-known/lnurlp/${escapeHtml(username)}`;
 		return transformUrl;
 	} catch (error) {
 		return null;
@@ -85,7 +94,7 @@ async function validateLightningAddress(event) {
 		type: 'POST',
 		data: {
 			action: 'store_lightning_address',
-			address: email,
+			address: escapeHtml(email),
 			quiz_id: quizID // Correctly pass quiz_id
 		},
 		success: function (response) {
@@ -130,7 +139,7 @@ async function getBolt11(email, amount) {
 			type: 'POST',
 			data: {
 				action: 'getBolt11', // This action corresponds to the AJAX handler we defined in PHP
-				email: email,
+				email: escapeHtml(email),
 				amount: amount
 			}
 		});
@@ -156,7 +165,7 @@ function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti) {
 		},
 		body: new URLSearchParams({
 			'action': 'pay_bolt11_invoice',
-			'bolt11': bolt11,
+			'bolt11': escapeHtml(bolt11),
 			'quiz_id': quizID,
 			'lightning_address': lightningAddress
 		})
@@ -249,11 +258,11 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
 			},
 			body: new URLSearchParams({
 				'action': 'bitc_save_quiz_results',
-				'lightning_address': lightningAddress,
-				'quiz_result': quizResult,
+				'lightning_address': escapeHtml(lightningAddress),
+				'quiz_result': escapeHtml(quizResult),
 				'satoshis_earned': satoshisEarned,
 				'quiz_id': quizID,
-				'quiz_name': quizName,
+				'quiz_name': escapeHtml(quizName),
 				'send_success': sendSuccess,
 				'satoshis_sent': satoshisSent,
 				'selected_results': formData
@@ -263,7 +272,7 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
 
 		// Check if the response contains the satoshis sent and update the modal
 		if (data && data.satoshis_sent !== undefined) {
-			jQuery('#step-reward').text(`You earned ${data.satoshis_sent} Satoshis.`);
+			jQuery('#step-reward').text(`You earned ${escapeHtml(data.satoshis_sent.toString())} Satoshis.`);
 		}
 
 		return data;
