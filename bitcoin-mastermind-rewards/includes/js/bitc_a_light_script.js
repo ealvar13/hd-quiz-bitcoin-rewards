@@ -140,7 +140,8 @@ async function getBolt11(email, amount) {
 			data: {
 				action: 'getBolt11', // This action corresponds to the AJAX handler we defined in PHP
 				email: escapeHtml(email),
-				amount: amount
+				amount: amount,
+				nonce: bitc_data.nonce // Include the nonce here
 			}
 		});
 
