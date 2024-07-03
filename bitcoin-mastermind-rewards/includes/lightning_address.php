@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Enqueue the front-end stylesheet
 function bitc_enqueue_lightning_la_style() {
     wp_enqueue_style(
-        'bitc_front_end_style', 
+        'bitc_front_end_style',
         plugin_dir_url(dirname(__FILE__)) . 'includes/css/bitc_a_light_la_style.css',
         array(),
         bitc_A_LIGHT_PLUGIN_VERSION
@@ -25,9 +25,9 @@ add_action('wp_enqueue_scripts', 'bitc_enqueue_lightning_la_style');
 
 // Enqueue the JavaScript file
 function bitc_enqueue_lightning_script() {
-    global $post; 
-    $quiz_id = $post->ID; 
-    
+    global $post;
+    $quiz_id = $post->ID;
+
     // Get the Satoshi value for the current quiz
     $sats_field = "sats_per_answer_for_" . $quiz_id;
     $sats_value = get_option($sats_field, 0); // Default to 0 if not set
@@ -45,6 +45,7 @@ function bitc_enqueue_lightning_script() {
         'satsPerAnswer' => $sats_value,
         'btcpayUrl' => $btcpay_url,
         'btcpayApiKey' => $btcpay_api_key,
+        'nonce' => wp_create_nonce('bitc_nonce') // Add this line to pass the nonce
     ));
 }
 add_action('wp_enqueue_scripts', 'bitc_enqueue_lightning_script');
@@ -77,7 +78,7 @@ function should_enable_rewards($quiz_id, $lightning_address) {
 
     // Check if rewards are enabled for this quiz
     $rewards_enabled = get_option("enable_bitcoin_reward_for_" . $quiz_id) === 'yes';
-    
+
     // Fetch quiz name using the term associated with the quiz ID
     $quiz_term = get_term_by('id', $quiz_id, 'quiz');
     if (!$quiz_term) {
@@ -120,14 +121,14 @@ function la_modal_html($quiz_id) {
 
 
 /**
- * Check if rewards are and should be enabled. 
+ * Check if rewards are and should be enabled.
  * If so, display a user input form to collect the Lightning Address at the start of the quiz.
  * Display quiz instructions in a modal.
  */
 function la_input_lightning_address_on_quiz_start($quiz_id) {
     // Call the modal HTML function
     la_modal_html($quiz_id);
-    
+
     if (should_enable_rewards($quiz_id, '')) {
         echo '<div class="bitc_input_container">';
             echo '<label for="lightning_address" class="bitc_input_label">Enter your Lightning Address: </label>';
@@ -152,7 +153,7 @@ function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
 
     $count = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM $table_name WHERE lightning_address = %s AND quiz_id = %d",
-        $lightning_address, 
+        $lightning_address,
         $quiz_id
     ));
 
@@ -172,11 +173,11 @@ function count_attempts_by_lightning_address_ajax() {
         $lightning_address = $_POST['lightningAddress'];
         $quiz_id = $_POST['quizID'];
     }
-    
+
 
     $count = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM $table_name WHERE lightning_address = %s AND quiz_id = %d",
-        $lightning_address, 
+        $lightning_address,
         $quiz_id
     ));
 
@@ -318,17 +319,17 @@ function bitc_pay_bolt11_invoice() {
             echo json_encode(['error' => 'Invoice is required.']);
             wp_die();
         }
-        
+
         // Alby endpoint for processing payments
         $url = 'https://api.getalby.com/payments/bolt11';
-        
+
         // Prepare the headers and body for the POST request to Alby
         $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $albyAccessToken,
         ];
-        $body = json_encode(['invoice' => $bolt11]); 
-        
+        $body = json_encode(['invoice' => $bolt11]);
+
         // Send payment request to Alby
         $response = wp_remote_post($url, [
             'headers' => $headers,
@@ -336,18 +337,18 @@ function bitc_pay_bolt11_invoice() {
             'body' => $body,
             'data_format' => 'body',
         ]);
-        
+
         if (is_wp_error($response)) {
             error_log('Alby payment request error: ' . $response->get_error_message());
             echo json_encode(['error' => 'Alby payment request failed', 'details' => $response->get_error_message()]);
             wp_die();
         }
-    
+
         $responseBody = wp_remote_retrieve_body($response);
-    
+
         // Decode JSON response
         $decodedResponse = json_decode($responseBody, true);
-    
+
         // Check for a successful status or handle errors
         if (isset($decodedResponse['payment_preimage'])) {
             // Assuming 'payment_preimage' presence indicates a successful payment
@@ -356,12 +357,12 @@ function bitc_pay_bolt11_invoice() {
             // Handle different errors based on your API response structure
             echo json_encode(['success' => false, 'details' => $decodedResponse]);
         }
-    
+
         wp_die();
     } else {
         // No payment option is configured
         echo json_encode(['error' => 'No payment system is configured.']);
-    }    
+    }
 
     wp_die();
 }
@@ -494,7 +495,7 @@ function bitc_export_csv_results(){
     global $wpdb;
     // Specify your table name
     $table1_name = $wpdb->prefix . 'bitcoin_quiz_results';
-    $table2_name = $wpdb->prefix . 'bitcoin_survey_results';    
+    $table2_name = $wpdb->prefix . 'bitcoin_survey_results';
     // Fetch data from the first table
     $data1 = $wpdb->get_results("SELECT * FROM $table1_name", ARRAY_A);
 
