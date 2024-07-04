@@ -132,7 +132,9 @@ async function getUrl(path) {
 	}
 }
 
-async function getBolt11(email, amount) {
+async function getBolt11(email, amount, nonce) {
+	console.log('🚀 3. getBolt11 javascript function called in bitc_a_light_script.js');
+	console.log('3. Nonce in bitc_data:', nonce);
 	try {
 		let response = await jQuery.ajax({
 			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
@@ -141,10 +143,10 @@ async function getBolt11(email, amount) {
 				action: 'getBolt11', // This action corresponds to the AJAX handler we defined in PHP
 				email: escapeHtml(email),
 				amount: amount,
-				nonce: bitc_data.nonce // Include the nonce here
+				nonce: nonce // Include the nonce here
 			}
 		});
-
+		console.log('AJAX response:', response);
 		if (response.success) {
 			return response.data; // The Bolt11 invoice
 		} else {
@@ -328,7 +330,7 @@ function calculateAdminPayout(totalSats) {
 	}
 }
 
-async function handleAdminPayout(totalSats, quizID) {
+async function handleAdminPayout(totalSats, quizID, nonce) {
 	try {
 		let response = await jQuery.ajax({
 			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
@@ -343,7 +345,7 @@ async function handleAdminPayout(totalSats, quizID) {
 			const sendAmountToAdmin = response.data;
 			const adminEmail = "ealvar13@getalby.com"; // Admin email
 
-			let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
+			let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin, nonce);
 			if (bolt11) {
 				let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0);
 				if (!paymentResponse.success) {
@@ -358,9 +360,9 @@ async function handleAdminPayout(totalSats, quizID) {
 	}
 }
 
-async function handleUserPayout(email, totalSats, quizID, scoreText, results_details_selections) {
+async function handleUserPayout(email, totalSats, quizID, scoreText, results_details_selections, nonce) {
 	try {
-		let bolt11 = await getBolt11(email, totalSats);
+		let bolt11 = await getBolt11(email, totalSats, nonce);
 		if (bolt11) {
 			jQuery('#step-generating').addClass('active-step');
 			jQuery('#step-sending').addClass('active-step');
@@ -401,6 +403,31 @@ document.addEventListener("DOMContentLoaded", function () {
 	let finishButton = document.querySelector(".bitc_finsh_button");
 	if (finishButton) {
 		finishButton.addEventListener("click", async function () {
+
+			// Request nonce
+			let nonce = await jQuery.ajax({
+				url: bitc_data.ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'generate_bolt11_nonce'
+				}
+			}).then(response => {
+				if (response.success) {
+					return response.data;
+				} else {
+					throw new Error('Nonce generation failed');
+				}
+			}).catch(error => {
+				console.error('Error generating nonce:', error);
+				return null;
+			});
+
+			if (!nonce) {
+				alert('Could not generate nonce. Please try again.');
+				return;
+			}
+
+			console.log('🚀 2.Received nonce within the addEventListener:', nonce);
 			let lightningAddress = document.getElementById("lightning_address").value.trim();
 			let email = lightningAddress; // Use the trimmed Lightning Address
 			let quizName = '';
@@ -408,21 +435,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			let quizID = finishButton.getAttribute('data-id');
 
 			let scoreText, correctAnswers, satsPerCorrect, totalSats, paymentSuccessful, satoshisToSend;
-
-			// Call the new PHP function via AJAX
-			jQuery.ajax({
-				url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
-				type: 'POST',
-				data: {
-					action: 'print_message'
-				},
-				success: function (response) {
-					console.log(response); // Should print "you did it"
-				},
-				error: function (error) {
-					console.error('Error:', error);
-				}
-			});
 
 			// Fetch quiz results and calculate rewards
 			setTimeout(async function () {
@@ -499,8 +511,8 @@ document.addEventListener("DOMContentLoaded", function () {
 								sendAmountToAdmin = 0.00;
 								adminEmail = "ealvar13@getalby.com";
 								sendAmountToAdmin = calculateAdminPayout(totalSats);
-								await handleAdminPayout(totalSats, quizID);
-								await handleUserPayout(lightningAddress, totalSats, quizID, scoreText, results_details_selections);
+								await handleAdminPayout(totalSats, quizID, nonce);
+								await handleUserPayout(lightningAddress, totalSats, quizID, scoreText, results_details_selections, nonce);
 							} else {
 								// Notify the user and save quiz results without payment
 								alert("Next time enter your Lightning Address to receive rewards! Thanks for taking our quiz.");
