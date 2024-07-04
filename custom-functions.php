@@ -4,8 +4,14 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-function print_message() {
-	echo "Sats Paid out.";
+// Register AJAX handler for generating nonce
+add_action('wp_ajax_generate_bolt11_nonce', 'generate_bolt11_nonce');
+add_action('wp_ajax_nopriv_generate_bolt11_nonce', 'generate_bolt11_nonce');
+
+function generate_bolt11_nonce() {
+    $nonce = wp_create_nonce('get_bolt11_nonce');
+    error_log('🚀 1. Nonce generated in custom-functions.php : ' . $nonce);
+    wp_send_json_success($nonce);
 }
 
 
@@ -16,11 +22,6 @@ add_action('wp_ajax_nopriv_getBolt11', 'getBolt11'); // Allow non-logged-in user
 
 function getBolt11() {
 
-	// Check nonce
-	if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'bitc_nonce')) {
-		wp_send_json_error('Invalid nonce');
-		wp_die();
-	}
 	// Check if the required parameters are provided
 	if (!isset($_POST['email']) || !isset($_POST['amount'])) {
 		wp_send_json_error('Missing required parameters');

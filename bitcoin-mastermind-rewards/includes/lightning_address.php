@@ -45,7 +45,6 @@ function bitc_enqueue_lightning_script() {
         'satsPerAnswer' => $sats_value,
         'btcpayUrl' => $btcpay_url,
         'btcpayApiKey' => $btcpay_api_key,
-        'nonce' => wp_create_nonce('bitc_nonce') // Add this line to pass the nonce
     ));
 }
 add_action('wp_enqueue_scripts', 'bitc_enqueue_lightning_script');
