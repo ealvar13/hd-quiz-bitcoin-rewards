@@ -35,6 +35,7 @@ function getBolt11() {
 	// Validate nonce
     if (!wp_verify_nonce($received_nonce, 'get_bolt11_nonce')) {
         wp_send_json_error('Invalid nonce');
+        wp_die();
     }
 
 	$email = sanitize_email($_POST['email']);
