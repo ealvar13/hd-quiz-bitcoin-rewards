@@ -4,15 +4,7 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-// Register AJAX handler for generating nonce
-add_action('wp_ajax_generate_bolt11_nonce', 'generate_bolt11_nonce');
-add_action('wp_ajax_nopriv_generate_bolt11_nonce', 'generate_bolt11_nonce');
 
-function generate_bolt11_nonce() {
-    $nonce = wp_create_nonce('get_bolt11_nonce');
-    error_log('🚀 1. Nonce generated in custom-functions.php : ' . $nonce);
-    wp_send_json_success($nonce);
-}
 
 
 // Register AJAX handler for generating Bolt11 invoice
@@ -22,9 +14,6 @@ add_action('wp_ajax_nopriv_getBolt11', 'getBolt11'); // Allow non-logged-in user
 
 function getBolt11() {
 
-	error_log('🚀 4. In custom-functions.php - getBolt11 function');
-	$received_nonce = sanitize_text_field($_POST['nonce']);
-	error_log('🚀 5. Nonce received: ' . $received_nonce);
 
 
 	// Check if the required parameters are provided
@@ -32,11 +21,6 @@ function getBolt11() {
 		wp_send_json_error('Missing required parameters');
 	}
 
-	// Validate nonce
-    if (!wp_verify_nonce($received_nonce, 'get_bolt11_nonce')) {
-        wp_send_json_error('Invalid nonce');
-        wp_die();
-    }
 
 	$email = sanitize_email($_POST['email']);
 	$amount = intval($_POST['amount']);
