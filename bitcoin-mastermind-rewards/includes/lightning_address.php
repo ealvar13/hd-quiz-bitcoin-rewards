@@ -247,8 +247,19 @@ function la_add_steps_indicator_modal($quiz_id) {
 add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
 
 function bitc_pay_bolt11_invoice() {
-    global $wpdb;
+    //global $wpdb;
 
+
+    error_log('🚀 4. Nonce received in custom-functions.php : ' . $_POST['nonce']);
+
+
+    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'get_bolt11_nonce' ) ) {
+        wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+        error_log('🚀 5. Nonce verification failed in custom-functions.php');
+        wp_die();
+    }
+
+    error_log('🚀 5. Nonce verified in custom-functions.php');
     // Retrieve quiz_id from POST data
     $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
 

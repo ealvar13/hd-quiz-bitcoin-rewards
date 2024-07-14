@@ -5,6 +5,16 @@ if (!defined('ABSPATH')) {
 }
 
 
+// Register AJAX handler for generating nonce
+add_action('wp_ajax_generate_bolt11_nonce', 'generate_bolt11_nonce');
+add_action('wp_ajax_nopriv_generate_bolt11_nonce', 'generate_bolt11_nonce');
+
+function generate_bolt11_nonce() {
+    $nonce = wp_create_nonce('get_bolt11_nonce');
+    error_log('🚀 1. Nonce generated in custom-functions.php : ' . $nonce);
+    wp_send_json_success($nonce);
+}
+
 
 
 // Register AJAX handler for generating Bolt11 invoice
