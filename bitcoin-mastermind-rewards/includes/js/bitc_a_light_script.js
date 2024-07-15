@@ -132,9 +132,8 @@ async function getUrl(path) {
 	}
 }
 
-async function getBolt11(email, amount, nonce) {
+async function getBolt11(email, amount) {
 	console.log('🚀 3. getBolt11 javascript function called in bitc_a_light_script.js');
-	console.log('3. Nonce in bitc_data:', nonce);
 	try {
 		let response = await jQuery.ajax({
 			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
@@ -143,7 +142,6 @@ async function getBolt11(email, amount, nonce) {
 				action: 'getBolt11', // This action corresponds to the AJAX handler we defined in PHP
 				email: escapeHtml(email),
 				amount: amount,
-				nonce: nonce // Include the nonce here
 			}
 		});
 		console.log('AJAX response:', response);
@@ -159,40 +157,40 @@ async function getBolt11(email, amount, nonce) {
 }
 
 
-function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti) {
-	//check_ajax_referer('lightning_payment');
-	return fetch(bitc_data.ajaxurl, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded'
-		},
-		body: new URLSearchParams({
-			'action': 'pay_bolt11_invoice',
-			'bolt11': escapeHtml(bolt11),
-			'quiz_id': quizID,
-			'lightning_address': lightningAddress
-		})
-	})
-		.then(response => response.json())
-		.then(data => {
+// function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti) {
+// 	//check_ajax_referer('lightning_payment');
+// 	return fetch(bitc_data.ajaxurl, {
+// 		method: 'POST',
+// 		headers: {
+// 			'Content-Type': 'application/x-www-form-urlencoded'
+// 		},
+// 		body: new URLSearchParams({
+// 			'action': 'pay_bolt11_invoice',
+// 			'bolt11': escapeHtml(bolt11),
+// 			'quiz_id': quizID,
+// 			'lightning_address': lightningAddress
+// 		})
+// 	})
+// 		.then(response => response.json())
+// 		.then(data => {
 
-			// Check for Alby's successful response or BTCPay Server's successful response
-			if ((data && data.success && data.details && data.details.payment_preimage) ||
-				(data && data.details && data.details.status === "Complete")) {
-				if (showconfetti == 1) {
-					displayConfetti();
-				}
+// 			// Check for Alby's successful response or BTCPay Server's successful response
+// 			if ((data && data.success && data.details && data.details.payment_preimage) ||
+// 				(data && data.details && data.details.status === "Complete")) {
+// 				if (showconfetti == 1) {
+// 					displayConfetti();
+// 				}
 
-				return { success: true, data: data.details };
-			} else {
-				return { success: false, data: data.details || data };
-			}
-		})
-		.catch(error => {
-			return { success: false, error: error };
-		});
-	wp_die(); // All ajax handlers should die when finished
-}
+// 				return { success: true, data: data.details };
+// 			} else {
+// 				return { success: false, data: data.details || data };
+// 			}
+// 		})
+// 		.catch(error => {
+// 			return { success: false, error: error };
+// 		});
+// 	wp_die(); // All ajax handlers should die when finished
+// }
 
 function displayConfetti() {
 	const duration = 15 * 1000,
@@ -249,7 +247,130 @@ async function fetchRemainingTries(lightningAddress, quizID) {
 		return null;
 	}
 }
-async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizName, sendSuccess, satoshisSent, quizID, results_details_selections) {
+
+async function handleAdminPayout(totalSats, quizID, nonce) {
+	try {
+		let response = await jQuery.ajax({
+			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
+			type: 'POST',
+			data: {
+				action: 'calculateAdminPayout', // This action corresponds to the AJAX handler we defined in PHP
+				totalSats: totalSats,
+			}
+		});
+
+		if (response.success) {
+			const sendAmountToAdmin = response.data;
+			const adminEmail = "praveen@getalby.com"; // Admin email
+
+			let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
+			if (bolt11) {
+				let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0, 0, 0, 0, nonce);
+				if (!paymentResponse.success) {
+					console.error('Admin payment failed:', paymentResponse.data);
+				}
+			}
+		} else {
+			throw new Error(response.data);
+		}
+	} catch (error) {
+		console.error('Error calculating or sending admin BOLT11:', error);
+	}
+}
+
+async function handleUserPayout(email, totalSats, quizID, scoreText, results_details_selections, nonce) {
+	try {
+		let bolt11 = await getBolt11(email, totalSats);
+		if (bolt11) {
+			jQuery('#step-generating').addClass('active-step');
+			jQuery('#step-sending').addClass('active-step');
+
+			let remainingAttempts = await fetchRemainingTries(email, quizID);
+			//let paymentResponse = await sendPaymentRequest(bolt11, quizID, email, 1);
+			let paymentResponse = await sendPaymentRequest(bolt11, quizID, email, 1, scoreText, totalSats, results_details_selections, nonce);
+
+			let paymentSuccessful = paymentResponse.success;
+			let satoshisToSend = paymentSuccessful ? totalSats : 0;
+
+			if (satoshisToSend != 0) {
+				jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
+			} else {
+				if (remainingAttempts.remaining_attempts == 0) {
+					jQuery('#step-result').addClass('active-step').text('Better luck next time :)');
+				} else {
+					jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have ' + remainingAttempts.remaining_attempts + ' more tries to get it right!');
+				}
+			}
+			jQuery('#step-reward').addClass('active-step');
+
+			//saveQuizResults(email, scoreText, totalSats, quizID, paymentSuccessful ? 1 : 0, satoshisToSend, results_details_selections);
+			console.log('🍎 Sending Following Data through calling saveQuizResults: ');
+			console.log('🍎 Lightning Address:', email);
+			console.log('🍎 Score:', scoreText);
+			console.log('🍎 Total Sats:', totalSats);
+			console.log('🍎 Payment Successful:', paymentSuccessful);
+			console.log('🍎 Satoshis to Send:', satoshisToSend);
+			console.log('🍎 Quiz ID:', quizID);
+			console.log('🍎 Results Details:', results_details_selections);
+		}
+	} catch (error) {
+		console.error('Error generating or sending user BOLT11:', error);
+	}
+}
+
+async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti, scoreText, totalSats, results_details_selections, nonce) {
+	try {
+		const response = await fetch(bitc_data.ajaxurl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: new URLSearchParams({
+				'action': 'pay_bolt11_invoice',
+				'bolt11': escapeHtml(bolt11),
+				'quiz_id': quizID,
+				'lightning_address': lightningAddress,
+				'nonce': nonce
+			})
+		});
+
+		const data = await response.json();
+
+		// Check for Alby's successful response or BTCPay Server's successful response
+		if ((data && data.success && data.details && data.details.payment_preimage) ||
+			(data && data.details && data.details.status === "Complete")) {
+			if (showconfetti == 1) {
+				displayConfetti();
+			}
+
+			const paymentSuccessful = true;
+			const satoshisToSend = totalSats;
+
+			await saveQuizResults(lightningAddress, scoreText, totalSats, quizID, paymentSuccessful ? 1 : 0, satoshisToSend, results_details_selections);
+			return { success: true, data: data.details };
+		} else {
+			const paymentSuccessful = false;
+			const satoshisToSend = 0;
+
+			await saveQuizResults(lightningAddress, scoreText, totalSats, quizID, paymentSuccessful ? 1 : 0, satoshisToSend, results_details_selections);
+			return { success: false, data: data.details || data };
+		}
+	} catch (error) {
+		await saveQuizResults(lightningAddress, scoreText, totalSats, quizID, 0, 0, results_details_selections);
+		return { success: false, error: error };
+	}
+}
+
+async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizID, sendSuccess, satoshisSent, results_details_selections) {
+	console.log('🍎 Receiving data inside saveQuizResults: ');
+	console.log(' 🍎 lightningAddress ', lightningAddress);
+	console.log(' 🍎 quizResult ', quizResult)
+	console.log(' 🍎 satoshisEarned ', satoshisEarned);
+	console.log(' 🍎 sendSuccess ', sendSuccess);
+	console.log(' 🍎 satoshisSent ', satoshisSent);
+	console.log(' 🍎 quizID ', quizID);
+	console.log(' 🍎 results_details_selections ', results_details_selections);
+
 	try {
 		// Convert the results_details_selections array to a query string
 		var formData = jQuery.param({ dataArray: results_details_selections });
@@ -265,7 +386,6 @@ async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, qui
 				'quiz_result': escapeHtml(quizResult),
 				'satoshis_earned': satoshisEarned,
 				'quiz_id': quizID,
-				'quiz_name': escapeHtml(quizName),
 				'send_success': sendSuccess,
 				'satoshis_sent': satoshisSent,
 				'selected_results': formData
@@ -330,66 +450,7 @@ function calculateAdminPayout(totalSats) {
 	}
 }
 
-async function handleAdminPayout(totalSats, quizID, nonce) {
-	try {
-		let response = await jQuery.ajax({
-			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
-			type: 'POST',
-			data: {
-				action: 'calculateAdminPayout', // This action corresponds to the AJAX handler we defined in PHP
-				totalSats: totalSats,
-			}
-		});
 
-		if (response.success) {
-			const sendAmountToAdmin = response.data;
-			const adminEmail = "ealvar13@getalby.com"; // Admin email
-
-			let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin, nonce);
-			if (bolt11) {
-				let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0);
-				if (!paymentResponse.success) {
-					console.error('Admin payment failed:', paymentResponse.data);
-				}
-			}
-		} else {
-			throw new Error(response.data);
-		}
-	} catch (error) {
-		console.error('Error calculating or sending admin BOLT11:', error);
-	}
-}
-
-async function handleUserPayout(email, totalSats, quizID, scoreText, results_details_selections, nonce) {
-	try {
-		let bolt11 = await getBolt11(email, totalSats, nonce);
-		if (bolt11) {
-			jQuery('#step-generating').addClass('active-step');
-			jQuery('#step-sending').addClass('active-step');
-
-			let remainingAttempts = await fetchRemainingTries(email, quizID);
-			let paymentResponse = await sendPaymentRequest(bolt11, quizID, email, 1);
-
-			let paymentSuccessful = paymentResponse.success;
-			let satoshisToSend = paymentSuccessful ? totalSats : 0;
-
-			if (satoshisToSend != 0) {
-				jQuery('#step-result').addClass('active-step').text(paymentSuccessful ? 'Payment Successful! Enjoy your free sats.' : 'Payment Failed');
-			} else {
-				if (remainingAttempts.remaining_attempts == 0) {
-					jQuery('#step-result').addClass('active-step').text('Better luck next time :)');
-				} else {
-					jQuery('#step-result').addClass('active-step').text('What went wrong? Don’t worry you still have ' + remainingAttempts.remaining_attempts + ' more tries to get it right!');
-				}
-			}
-			jQuery('#step-reward').addClass('active-step');
-
-			saveQuizResults(email, scoreText, totalSats, quizID, paymentSuccessful ? 1 : 0, satoshisToSend, results_details_selections);
-		}
-	} catch (error) {
-		console.error('Error generating or sending user BOLT11:', error);
-	}
-}
 
 // Call setupStepsIndicatorModal and store the returned functions
 const { openStepsModal, closeStepsModal } = setupStepsIndicatorModal();
@@ -516,7 +577,7 @@ document.addEventListener("DOMContentLoaded", function () {
 							} else {
 								// Notify the user and save quiz results without payment
 								alert("Next time enter your Lightning Address to receive rewards! Thanks for taking our quiz.");
-								saveQuizResults(email, scoreText, totalSats, quizName, 0, 0, quizID, results_details_selections);
+								//saveQuizResults(email, scoreText, totalSats, quizName, 0, 0, quizID, results_details_selections);
 							}
 						})
 						.catch(error => {

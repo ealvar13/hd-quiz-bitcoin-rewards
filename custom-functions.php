@@ -22,20 +22,13 @@ add_action('wp_ajax_nopriv_getBolt11', 'getBolt11'); // Allow non-logged-in user
 
 function getBolt11() {
 
-	error_log('🚀 4. In custom-functions.php - getBolt11 function');
-	$received_nonce = sanitize_text_field($_POST['nonce']);
-	error_log('🚀 5. Nonce received: ' . $received_nonce);
-
 
 	// Check if the required parameters are provided
 	if (!isset($_POST['email']) || !isset($_POST['amount'])) {
 		wp_send_json_error('Missing required parameters');
 	}
 
-	// Validate nonce
-    if (!wp_verify_nonce($received_nonce, 'get_bolt11_nonce')) {
-        wp_send_json_error('Invalid nonce');
-    }
+
 
 	$email = sanitize_email($_POST['email']);
 	$amount = intval($_POST['amount']);
