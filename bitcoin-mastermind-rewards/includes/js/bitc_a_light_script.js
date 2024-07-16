@@ -133,7 +133,6 @@ async function getUrl(path) {
 }
 
 async function getBolt11(email, amount) {
-	console.log('🚀 3. getBolt11 javascript function called in bitc_a_light_script.js');
 	try {
 		let response = await jQuery.ajax({
 			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
@@ -144,7 +143,7 @@ async function getBolt11(email, amount) {
 				amount: amount,
 			}
 		});
-		console.log('AJAX response:', response);
+		console.log('🍩 AJAX Lightning response:', response.data);
 		if (response.success) {
 			return response.data; // The Bolt11 invoice
 		} else {
@@ -303,15 +302,6 @@ async function handleUserPayout(email, totalSats, quizID, scoreText, results_det
 			}
 			jQuery('#step-reward').addClass('active-step');
 
-			//saveQuizResults(email, scoreText, totalSats, quizID, paymentSuccessful ? 1 : 0, satoshisToSend, results_details_selections);
-			console.log('🍎 Sending Following Data through calling saveQuizResults: ');
-			console.log('🍎 Lightning Address:', email);
-			console.log('🍎 Score:', scoreText);
-			console.log('🍎 Total Sats:', totalSats);
-			console.log('🍎 Payment Successful:', paymentSuccessful);
-			console.log('🍎 Satoshis to Send:', satoshisToSend);
-			console.log('🍎 Quiz ID:', quizID);
-			console.log('🍎 Results Details:', results_details_selections);
 		}
 	} catch (error) {
 		console.error('Error generating or sending user BOLT11:', error);
@@ -362,14 +352,6 @@ async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti
 }
 
 async function saveQuizResults(lightningAddress, quizResult, satoshisEarned, quizID, sendSuccess, satoshisSent, results_details_selections) {
-	console.log('🍎 Receiving data inside saveQuizResults: ');
-	console.log(' 🍎 lightningAddress ', lightningAddress);
-	console.log(' 🍎 quizResult ', quizResult)
-	console.log(' 🍎 satoshisEarned ', satoshisEarned);
-	console.log(' 🍎 sendSuccess ', sendSuccess);
-	console.log(' 🍎 satoshisSent ', satoshisSent);
-	console.log(' 🍎 quizID ', quizID);
-	console.log(' 🍎 results_details_selections ', results_details_selections);
 
 	try {
 		// Convert the results_details_selections array to a query string

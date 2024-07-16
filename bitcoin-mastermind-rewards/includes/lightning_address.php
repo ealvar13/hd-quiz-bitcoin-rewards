@@ -378,18 +378,6 @@ add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice'); // I
 
 function bitc_save_quiz_results() {
 
-	error_log("🍎 Receiving data in backend bitc_save_quiz_results: ");
-	error_log("🍎 lightning_address: " . $_POST['lightning_address']);
-	error_log("🍎 quiz_result: " . $_POST['quiz_result']);
-	error_log("🍎 satoshis_earned " . $_POST['satoshis_earned']);
-	error_log("🍎 send_success " . $_POST['send_success']);
-	error_log("🍎 satoshis_sent " . $_POST['satoshis_sent']);
-	error_log("🍎 quiz_id " . $_POST['quiz_id']);
-	error_log("🍎 selected_results " . $_POST['selected_results']);
-
-
-
-
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'bitcoin_quiz_results';
 	$table_name2 = $wpdb->prefix . 'bitcoin_survey_results';
