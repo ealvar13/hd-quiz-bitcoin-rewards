@@ -56,6 +56,7 @@ function getBolt11() {
 
 		$prData = get_url($payQuery);
 		if ($prData && isset($prData->pr)) {
+            error_log('🍩 Server Lightning response:: ' . json_encode($prData->pr));
 			wp_send_json_success(strtoupper($prData->pr));
 		} else {
 			throw new Exception("Payment request generation failed: " . ($prData->reason ?? 'unknown reason'));
