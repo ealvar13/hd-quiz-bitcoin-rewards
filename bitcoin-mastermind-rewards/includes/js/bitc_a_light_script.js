@@ -132,7 +132,7 @@ async function getUrl(path) {
 	}
 }
 
-async function getBolt11(email, amount) {
+async function getBolt11(email, amount, callerType) {
 	try {
 		let response = await jQuery.ajax({
 			url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
@@ -141,6 +141,7 @@ async function getBolt11(email, amount) {
 				action: 'getBolt11', // This action corresponds to the AJAX handler we defined in PHP
 				email: escapeHtml(email),
 				amount: amount,
+				callerType: callerType
 			}
 		});
 		console.log('🍩 AJAX Lightning response:', response.data);
@@ -226,7 +227,7 @@ async function handleAdminPayout(totalSats, quizID, nonce) {
 			const sendAmountToAdmin = response.data;
 			const adminEmail = "praveen@getalby.com"; // Admin email
 
-			let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin);
+			let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin, 'admin');
 			if (bolt11) {
 				let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0, 0, 0, 0, nonce);
 				if (!paymentResponse.success) {
@@ -243,7 +244,7 @@ async function handleAdminPayout(totalSats, quizID, nonce) {
 
 async function handleUserPayout(email, totalSats, quizID, scoreText, results_details_selections, nonce) {
 	try {
-		let bolt11 = await getBolt11(email, totalSats);
+		let bolt11 = await getBolt11(email, totalSats, 'user');
 		if (bolt11) {
 			jQuery('#step-generating').addClass('active-step');
 			jQuery('#step-sending').addClass('active-step');

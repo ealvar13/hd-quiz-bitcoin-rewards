@@ -32,11 +32,14 @@ function getBolt11() {
 
 	$email = sanitize_email($_POST['email']);
 	$amount = intval($_POST['amount']);
+    $callerType = sanitize_text_field($_POST['callerType']);
 
 	// Validate email format
 	if (!is_email($email)) {
 		wp_send_json_error('Invalid email format');
 	}
+
+
 
 	try {
 		$payUrl = get_pay_url($email);
@@ -57,6 +60,8 @@ function getBolt11() {
 		$prData = get_url($payQuery);
 		if ($prData && isset($prData->pr)) {
             error_log('🍩 Server Lightning response:: ' . json_encode($prData->pr));
+            $transient_key = ($callerType === 'admin') ? 'admin_bolt11' : 'user_bolt11' ;
+            set_transient($transient_key, $prData->pr, 600); // Store the Bolt11 invoice in transient for 10 minutes
 			wp_send_json_success(strtoupper($prData->pr));
 		} else {
 			throw new Exception("Payment request generation failed: " . ($prData->reason ?? 'unknown reason'));
