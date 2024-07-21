@@ -155,42 +155,6 @@ async function getBolt11(email, amount) {
 	}
 }
 
-
-// function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti) {
-// 	//check_ajax_referer('lightning_payment');
-// 	return fetch(bitc_data.ajaxurl, {
-// 		method: 'POST',
-// 		headers: {
-// 			'Content-Type': 'application/x-www-form-urlencoded'
-// 		},
-// 		body: new URLSearchParams({
-// 			'action': 'pay_bolt11_invoice',
-// 			'bolt11': escapeHtml(bolt11),
-// 			'quiz_id': quizID,
-// 			'lightning_address': lightningAddress
-// 		})
-// 	})
-// 		.then(response => response.json())
-// 		.then(data => {
-
-// 			// Check for Alby's successful response or BTCPay Server's successful response
-// 			if ((data && data.success && data.details && data.details.payment_preimage) ||
-// 				(data && data.details && data.details.status === "Complete")) {
-// 				if (showconfetti == 1) {
-// 					displayConfetti();
-// 				}
-
-// 				return { success: true, data: data.details };
-// 			} else {
-// 				return { success: false, data: data.details || data };
-// 			}
-// 		})
-// 		.catch(error => {
-// 			return { success: false, error: error };
-// 		});
-// 	wp_die(); // All ajax handlers should die when finished
-// }
-
 function displayConfetti() {
 	const duration = 15 * 1000,
 		animationEnd = Date.now() + duration,
