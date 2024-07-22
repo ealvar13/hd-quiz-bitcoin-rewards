@@ -290,6 +290,10 @@ async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti
 			})
 		});
 
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
 		const data = await response.json();
 
 		// Check for Alby's successful response or BTCPay Server's successful response
@@ -312,6 +316,7 @@ async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti
 			return { success: false, data: data.details || data };
 		}
 	} catch (error) {
+		console.error('Error in sendPaymentRequest:', error);
 		await saveQuizResults(lightningAddress, scoreText, totalSats, quizID, 0, 0, results_details_selections);
 		return { success: false, error: error };
 	}
