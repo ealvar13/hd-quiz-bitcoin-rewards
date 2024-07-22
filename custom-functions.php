@@ -10,7 +10,6 @@ add_action('wp_ajax_nopriv_generate_bolt11_nonce', 'generate_bolt11_nonce');
 
 function generate_bolt11_nonce() {
     $nonce = wp_create_nonce('get_bolt11_nonce');
-    error_log('🚀 1. Nonce generated in custom-functions.php : ' . $nonce);
     wp_send_json_success($nonce);
 }
 
@@ -59,7 +58,7 @@ function getBolt11() {
 
 		$prData = get_url($payQuery);
 		if ($prData && isset($prData->pr)) {
-            error_log('🍩 Server Lightning response:: ' . json_encode($prData->pr));
+            //error_log('🍩 Server Lightning response:: ' . json_encode($prData->pr));
             $transient_key = ($callerType === 'admin') ? 'admin_bolt11' : 'user_bolt11' ;
             set_transient($transient_key, $prData->pr, 600); // Store the Bolt11 invoice in transient for 10 minutes
 			wp_send_json_success(strtoupper($prData->pr));

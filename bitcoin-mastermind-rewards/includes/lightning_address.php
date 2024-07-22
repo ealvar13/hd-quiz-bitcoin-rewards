@@ -250,16 +250,39 @@ function bitc_pay_bolt11_invoice() {
 
 	if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'get_bolt11_nonce' ) ) {
 		wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
-		error_log('🚀 5. Nonce verification failed in custom-functions.php');
 		wp_die();
 
 	}
 
 	// Retrieve quiz_id from POST data
 	$quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
-
 	$lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
-	$quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+    $bolt11 = isset($_POST['bolt11']) ? strtolower(sanitize_text_field($_POST['bolt11'])) : '';
+    $callerType = isset($_POST['callerType']) ? sanitize_text_field($_POST['callerType']) : '';
+
+    error_log('❤️ 1. Lightning Address Posted from sendPaymentRequest ' . strtolower($bolt11));
+    error_log('❤️ 2. callerType Posted from sendPaymentRequest ' . $callerType);
+
+    $adminTransient = get_transient('admin_bolt11');
+    $userTransient = get_transient('user_bolt11');
+
+    if ($callerType === 'admin' ) {
+        error_log('❤️ 3. Transient setup in getBolt11 for admin ' . $adminTransient);
+    } else {
+        error_log('❤️ 3. Transient setup in getBolt11 for user ' . $userTransient);
+    }
+
+    // Check if the passed lightning address is already saved in one of the transients
+
+    if ($adminTransient === $bolt11 || $userTransient === $bolt11 ) {
+        error_log('❤️ 4. Transient match for admin ' . $adminTransient);
+        error_log (json_encode(['success' => true, 'details' => ['pr' => $bolt11]]));
+    }
+    else {
+        error_log('❤️ 4. Transient mismatch');
+        wp_die();
+    }
+
 
 	// Get attempt count and check if maximum retries have been exceeded
 	$attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
@@ -428,7 +451,6 @@ foreach ($resultArray as $key => $value) {
 	// Fetch quiz name using the term associated with the quiz ID
 	$quiz_term = get_term_by('id', $quiz_id, 'quiz');
 	$quiz_name = $quiz_term ? $quiz_term->name : 'Unknown Quiz';
-	error_log("🍎 quiz_name: " . $quiz_name);
 
 	$send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
 	$satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;

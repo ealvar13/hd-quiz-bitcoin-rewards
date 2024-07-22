@@ -229,7 +229,7 @@ async function handleAdminPayout(totalSats, quizID, nonce) {
 
 			let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin, 'admin');
 			if (bolt11) {
-				let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0, 0, 0, 0, nonce);
+				let paymentResponse = await sendPaymentRequest(bolt11, quizID, adminEmail, 0, 0, 0, 0, nonce, 'admin');
 				if (!paymentResponse.success) {
 					console.error('Admin payment failed:', paymentResponse.data);
 				}
@@ -251,7 +251,7 @@ async function handleUserPayout(email, totalSats, quizID, scoreText, results_det
 
 			let remainingAttempts = await fetchRemainingTries(email, quizID);
 			//let paymentResponse = await sendPaymentRequest(bolt11, quizID, email, 1);
-			let paymentResponse = await sendPaymentRequest(bolt11, quizID, email, 1, scoreText, totalSats, results_details_selections, nonce);
+			let paymentResponse = await sendPaymentRequest(bolt11, quizID, email, 1, scoreText, totalSats, results_details_selections, nonce, 'user');
 
 			let paymentSuccessful = paymentResponse.success;
 			let satoshisToSend = paymentSuccessful ? totalSats : 0;
@@ -273,7 +273,7 @@ async function handleUserPayout(email, totalSats, quizID, scoreText, results_det
 	}
 }
 
-async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti, scoreText, totalSats, results_details_selections, nonce) {
+async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti, scoreText, totalSats, results_details_selections, nonce, callerType) {
 	try {
 		const response = await fetch(bitc_data.ajaxurl, {
 			method: 'POST',
@@ -285,7 +285,8 @@ async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti
 				'bolt11': escapeHtml(bolt11),
 				'quiz_id': quizID,
 				'lightning_address': lightningAddress,
-				'nonce': nonce
+				'nonce': nonce,
+				'callerType': callerType
 			})
 		});
 
