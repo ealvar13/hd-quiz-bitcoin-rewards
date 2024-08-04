@@ -263,6 +263,7 @@ function bitc_pay_bolt11_invoice() {
     error_log('❤️ 1. Lightning Address Posted from sendPaymentRequest ' . strtolower($bolt11));
     error_log('❤️ 2. callerType Posted from sendPaymentRequest ' . $callerType);
 
+    // Set up transients for the admin and user
     $adminTransient = get_transient('admin_bolt11');
     $userTransient = get_transient('user_bolt11');
 
