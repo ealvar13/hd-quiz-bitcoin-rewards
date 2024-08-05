@@ -259,20 +259,42 @@ function bitc_pay_bolt11_invoice() {
 	$lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
     $bolt11 = isset($_POST['bolt11']) ? strtolower(sanitize_text_field($_POST['bolt11'])) : '';
     $callerType = isset($_POST['callerType']) ? sanitize_text_field($_POST['callerType']) : '';
+    //$totalPayout = $_POST['totalSats'];
+    $totalPayout = isset($_POST['totalSats']) ? sanitize_text_field($_POST['totalSats']) : '';
+
+    error_log('🍄 Total payout requested: ' . $totalPayout);
 
     error_log('❤️ 1. Lightning Address Posted from sendPaymentRequest ' . strtolower($bolt11));
     error_log('❤️ 2. callerType Posted from sendPaymentRequest ' . $callerType);
 
+    // Compare totalPayout to the quiz budget
+
+    $quizBudget = get_option('max_satoshi_budget_for_' . $quiz_id, 0);
+    error_log('🍄 Quiz budget: ' . $quizBudget);
+    $quizReward = get_option('sats_per_answer_for_' . $quiz_id, 0);
+    error_log('🍄 Quiz reward: ' . $quizReward);
+
+    $questions = bitc_get_quiz_question_count($quiz_id);
+    error_log('🍄 Question count: ' . $questions);
+
+    // Calculate the total payout
+    $totalPayoutCalculated = intval($questions) * intval($quizReward);
+    error_log('🚀 Calculated Total Payout: ' . $totalPayoutCalculated );
+
+    // Fail the payment if the calculated total payout is different from the total payout requested
+
+    if (intval($totalPayout) !== intval($totalPayoutCalculated) ) {
+        if ( $totalPayout != 0) {
+            error_log('🚀 Total payout mismatch. Calculated: ' . $totalPayoutCalculated . ' Requested: ' . $totalPayout);
+            echo json_encode(['error' => 'Total payout mismatch.']);
+            wp_die();
+        }
+    }
+
+
     // Set up transients for the admin and user
     $adminTransient = get_transient('admin_bolt11');
     $userTransient = get_transient('user_bolt11');
-
-    if ($callerType === 'admin' ) {
-        error_log('❤️ 3. Transient setup in getBolt11 for admin ' . $adminTransient);
-    } else {
-        error_log('❤️ 3. Transient setup in getBolt11 for user ' . $userTransient);
-    }
-
     // Check if the passed lightning address is already saved in one of the transients
 
     if ($adminTransient === $bolt11 || $userTransient === $bolt11 ) {

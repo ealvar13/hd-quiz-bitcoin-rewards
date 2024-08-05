@@ -813,3 +813,21 @@ if (!function_exists('str_contains')) {
         return $needle !== '' && mb_strpos($haystack, $needle) !== false;
     }
 }
+
+// Function to return the number of questions in a quiz
+function bitc_get_quiz_question_count($quiz_id)
+{
+    $args = array(
+        'post_type' => 'post_type_questionna',
+        'tax_query' => array(
+            array(
+                'taxonomy' => 'quiz',
+                'field' => 'term_id',
+                'terms' => $quiz_id
+            )
+        ),
+        'posts_per_page' => -1
+    );
+    $query = new WP_Query($args);
+    return $query->post_count;
+}
