@@ -262,34 +262,20 @@ function bitc_pay_bolt11_invoice() {
     //$totalPayout = $_POST['totalSats'];
     $totalPayout = isset($_POST['totalSats']) ? sanitize_text_field($_POST['totalSats']) : '';
 
-    error_log('🍄 Total payout requested: ' . $totalPayout);
-
-    //error_log('❤️ 1. Lightning Address Posted from sendPaymentRequest ' . strtolower($bolt11));
-    //error_log('❤️ 2. callerType Posted from sendPaymentRequest ' . $callerType);
-
     // Compare totalPayout to the quiz budget
 
     $quizBudget = get_option('max_satoshi_budget_for_' . $quiz_id, 0);
-    //error_log('🍄 Quiz budget: ' . $quizBudget);
+
     $quizReward = get_option('sats_per_answer_for_' . $quiz_id, 0);
-    //error_log('🍄 Quiz reward: ' . $quizReward);
+
 
     $questions = bitc_get_quiz_question_count($quiz_id);
-    //error_log('🍄 Question count: ' . $questions);
+
 
     // Calculate the total payout
     $totalPayoutCalculated = intval($questions) * intval($quizReward);
-    error_log('🚀 Calculated Total earnable Payout: ' . $totalPayoutCalculated );
 
     // Fail the payment if the calculated total payout is different from the total payout requested
-
-    // if (intval($totalPayout) !== intval($totalPayoutCalculated) ) {
-    //     if ( $totalPayout != 0) {
-    //         error_log('🚀 Total payout mismatch. Calculated: ' . $totalPayoutCalculated . ' Requested: ' . $totalPayout);
-    //         echo json_encode(['error' => 'Total payout mismatch.']);
-    //         wp_die();
-    //     }
-    // }
 
     if (intval($totalPayout) > intval($totalPayoutCalculated)) {
         // Log an error and reject the request if the requested payout is more than the calculated payout.
@@ -305,11 +291,9 @@ function bitc_pay_bolt11_invoice() {
     // Check if the passed lightning address is already saved in one of the transients
 
     if ($adminTransient === $bolt11 || $userTransient === $bolt11 ) {
-       // error_log('❤️ 4. Transient match for admin ' . $adminTransient);
         error_log (json_encode(['success' => true, 'details' => ['pr' => $bolt11]]));
     }
     else {
-        error_log('❤️ 4. Transient mismatch');
         wp_die();
     }
 

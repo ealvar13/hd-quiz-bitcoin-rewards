@@ -58,7 +58,6 @@ function getBolt11() {
 
 		$prData = get_url($payQuery);
 		if ($prData && isset($prData->pr)) {
-            //error_log('🍩 Server Lightning response:: ' . json_encode($prData->pr));
             $transient_key = ($callerType === 'admin') ? 'admin_bolt11' : 'user_bolt11' ;
             set_transient($transient_key, $prData->pr, 600); // Store the Bolt11 invoice in transient for 10 minutes
 			wp_send_json_success(strtoupper($prData->pr));
