@@ -144,7 +144,6 @@ async function getBolt11(email, amount, callerType) {
                 callerType: callerType
             }
         });
-        console.log('🍩 AJAX Lightning response:', response.data);
         if (response.success) {
             return response.data; // The Bolt11 invoice
         } else {
@@ -433,7 +432,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     throw new Error('Nonce generation failed');
                 }
             }).catch(error => {
-                console.error('Error generating nonce:', error);
                 return null;
             });
 
@@ -442,7 +440,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            console.log('🚀 2.Received nonce within the addEventListener:', nonce);
             let lightningAddress = document.getElementById("lightning_address").value.trim();
             let email = lightningAddress; // Use the trimmed Lightning Address
             let quizName = '';
