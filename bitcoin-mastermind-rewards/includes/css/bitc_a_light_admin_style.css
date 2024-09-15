@@ -636,3 +636,9 @@ label.non-block {
 .bitc_a_light_table .fail {
 	border-left: 2px solid #e26262 !important;
 }
+
+input::placeholder {
+    color: #999; 
+    font-style: italic;
+    opacity: 1; 
+}

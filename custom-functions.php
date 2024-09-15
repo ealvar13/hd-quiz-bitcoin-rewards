@@ -111,12 +111,35 @@ add_action('wp_ajax_calculateAdminPayout', 'calculateAdminPayoutAjax');
 add_action('wp_ajax_nopriv_calculateAdminPayout', 'calculateAdminPayoutAjax'); // Allow non-logged-in users to access this if necessary
 
 function calculateAdminPayoutAjax() {
-	if (!isset($_POST['totalSats'])) {
-		wp_send_json_error('Missing required parameter: totalSats');
-	}
+    // Check if totalSats parameter is present
+    if (!isset($_POST['totalSats'])) {
+        wp_send_json_error('Missing required parameter: totalSats');
+    }
 
-	$totalSats = intval($_POST['totalSats']);
-	$adminPayout = calculateAdminPayout($totalSats);
+    // Check if adminEmail parameter is present
+    if (!isset($_POST['adminEmail'])) {
+        wp_send_json_error('Missing required parameter: adminEmail');
+    }
 
-	wp_send_json_success($adminPayout);
+    // Retrieve and sanitize inputs
+    $totalSats = intval($_POST['totalSats']);
+    $clientAdminEmail = sanitize_email($_POST['adminEmail']);
+
+    // Set the expected admin email on the server
+    $expectedAdminEmail = 'ealvar13@getalby.com'; // Replace with your actual admin email
+
+    // Verify that the provided admin email matches the expected value
+    if ($clientAdminEmail !== $expectedAdminEmail) {
+        wp_send_json_error('Unauthorized request: Admin email does not match');
+        return; // Abort the function execution
+    }
+
+    // Calculate the payout if emails match
+    $adminPayout = calculateAdminPayout($totalSats);
+
+    // Send the payout amount as the response
+    wp_send_json_success($adminPayout);
 }
+
+add_action('wp_ajax_calculateAdminPayout', 'calculateAdminPayoutAjax');
+add_action('wp_ajax_nopriv_calculateAdminPayout', 'calculateAdminPayoutAjax');

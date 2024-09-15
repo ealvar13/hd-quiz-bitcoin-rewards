@@ -213,18 +213,20 @@ async function fetchRemainingTries(lightningAddress, quizID) {
 
 async function handleAdminPayout(totalSats, quizID, nonce) {
     try {
+        const adminEmail = "ealvar13@getalby.com"; // Admin email - should match the server's expected email
+
         let response = await jQuery.ajax({
             url: `${window.location.origin}/wp-admin/admin-ajax.php`, // Directly set the AJAX URL
             type: 'POST',
             data: {
                 action: 'calculateAdminPayout', // This action corresponds to the AJAX handler we defined in PHP
                 totalSats: totalSats,
+                adminEmail: adminEmail // Send the admin email as part of the request
             }
         });
 
         if (response.success) {
             const sendAmountToAdmin = response.data;
-            const adminEmail = "praveen@getalby.com"; // Admin email
 
             let bolt11 = await getBolt11(adminEmail, sendAmountToAdmin, 'admin');
             if (bolt11) {

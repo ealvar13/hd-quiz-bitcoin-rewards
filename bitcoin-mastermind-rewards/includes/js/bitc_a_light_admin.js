@@ -4,12 +4,57 @@
       will probably still use them later
 */
 
-window.addEventListener("load", (event) => {
-	console.log("Bitcoin Mastermind Save Results Light INIT");
-	bitc_a_light_start();
+// Initialize when the window loads
+window.addEventListener("load", () => {
+    console.log("Bitcoin Mastermind Save Results Light INIT");
+    bitc_a_light_start();
     initializeFieldLogic();
+    initializeToggleFunctionality();
 });
 
+// Function to initialize toggle functionality between BTCPay and Alby settings
+function initializeToggleFunctionality() {
+    const btcpayRadio = document.getElementById('btcpay_radio');
+    const albyRadio = document.getElementById('alby_radio');
+    const selectedOptionInput = document.getElementById('selected_payout_option');
+    const btcpaySettings = document.getElementById('btcpay_settings');
+    const albySettings = document.getElementById('alby_settings');
+
+    if (btcpayRadio && albyRadio && selectedOptionInput && btcpaySettings && albySettings) {
+        // Function to update the hidden input value and toggle settings display
+        function updateSelectedOption() {
+            if (btcpayRadio.checked) {
+                selectedOptionInput.value = 'btcpay';
+                btcpaySettings.style.display = 'block';
+                albySettings.style.display = 'none';
+            } else if (albyRadio.checked) {
+                selectedOptionInput.value = 'alby';
+                albySettings.style.display = 'block';
+                btcpaySettings.style.display = 'none';
+            }
+        }
+
+        // Initialize the hidden input and settings display based on the current state
+        updateSelectedOption();
+
+        // Add event listeners to update the hidden input and settings display when the selection changes
+        btcpayRadio.addEventListener('change', updateSelectedOption);
+        albyRadio.addEventListener('change', updateSelectedOption);
+    } else {
+        console.error('Toggle elements not found. Please check your HTML structure.');
+    }
+}
+
+
+// Call the function when the window loads
+window.addEventListener("load", (event) => {
+    console.log("Bitcoin Mastermind Save Results Light INIT");
+    bitc_a_light_start();
+    initializeFieldLogic();
+    initializeToggleFunctionality();
+});
+
+// Function to initialize field logic 
 function initializeFieldLogic() {
     const joltzFields = document.querySelectorAll('[name="bitc_joltz_brand_id"], [name="bitc_joltz_brand_secret"]');
     const btcFields = document.querySelectorAll('[name="bitc_btcpay_url"], [name="bitc_btcpay_api_key"]');
