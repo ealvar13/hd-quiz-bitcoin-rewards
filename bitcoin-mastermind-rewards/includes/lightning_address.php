@@ -371,12 +371,66 @@ function bitc_pay_bolt11_invoice() {
         }
 
         wp_die();
-    } else {
-        // No payment option is configured
-        echo json_encode(['error' => 'No payment system is configured.']);
-    }
-
-    wp_die();
+    } elseif ($selected_payout_option === 'lnbits') {
+		// LNBits payment processing
+		$lnbits_url = get_option('lnbits_url', '');
+		$lnbits_api_key = get_option('lnbits_api_key', '');
+	
+		// Check if URL is empty and log a message for debugging
+		if (empty($lnbits_url)) {
+			error_log('LNBits URL is empty or not set correctly.');
+			echo json_encode(['error' => 'LNBits URL is not set.']);
+			wp_die();
+		}
+	
+		if (empty($bolt11)) {
+			echo json_encode(['error' => 'Invoice is required.']);
+			wp_die();
+		}
+	
+		// LNBits endpoint for processing payments
+		$url = rtrim($lnbits_url, '/') . '/api/v1/payments';
+	
+		// Log the constructed URL for debugging
+		error_log('Constructed LNBits URL: ' . $url);
+	
+		// Prepare the headers and body for the POST request to LNBits
+		$headers = [
+			'Content-Type' => 'application/json',
+			'X-Api-Key' => $lnbits_api_key,
+		];
+		$body = json_encode(['bolt11' => $bolt11]);
+	
+		// Send payment request to LNBits
+		$response = wp_remote_post($url, [
+			'headers' => $headers,
+			'timeout' => 45,
+			'body' => $body,
+			'data_format' => 'body',
+		]);
+	
+		if (is_wp_error($response)) {
+			error_log('LNBits payment request error: ' . $response->get_error_message());
+			echo json_encode(['error' => 'LNBits payment request failed', 'details' => $response->get_error_message()]);
+			wp_die();
+		}
+	
+		$response_body = wp_remote_retrieve_body($response);
+		$decoded_response = json_decode($response_body, true);
+	
+		// Check if the payment was successful by looking for 'payment_hash' and 'checking_id'
+		if (isset($decoded_response['payment_hash']) && isset($decoded_response['checking_id'])) {
+			echo json_encode(['success' => true, 'details' => $decoded_response]);
+		} else {
+			echo json_encode(['success' => false, 'details' => $decoded_response]);
+		}
+	} else {
+		// No payment option is configured
+		echo json_encode(['error' => 'No payment system is configured.']);
+	}
+	
+	wp_die();
+	
 }
 
 // Register the new AJAX action

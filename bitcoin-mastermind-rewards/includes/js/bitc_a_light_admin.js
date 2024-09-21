@@ -12,7 +12,7 @@ window.addEventListener("load", () => {
     initializeToggleFunctionality();
 });
 
-// Function to initialize toggle functionality between BTCPay and Alby settings
+// Function to initialize toggle functionality between BTCPay, Alby, and LNBits settings
 function initializeToggleFunctionality() {
     const btcpayRadio = document.getElementById('btcpay_radio');
     const albyRadio = document.getElementById('alby_radio');
@@ -29,12 +29,13 @@ function initializeToggleFunctionality() {
                 selectedOptionInput.value = 'btcpay';
                 btcpaySettings.style.display = 'block';
                 albySettings.style.display = 'none';
+                lnbitsSettings.style.display = 'none';
             } else if (albyRadio.checked) {
                 selectedOptionInput.value = 'alby';
                 albySettings.style.display = 'block';
                 btcpaySettings.style.display = 'none';
-            }
-            else if (lnbitsRadio.checked) {
+                lnbitsSettings.style.display = 'none';
+            } else if (lnbitsRadio.checked) {
                 selectedOptionInput.value = 'lnbits';
                 lnbitsSettings.style.display = 'block';
                 btcpaySettings.style.display = 'none';
@@ -54,9 +55,8 @@ function initializeToggleFunctionality() {
     }
 }
 
-
 // Call the function when the window loads
-window.addEventListener("load", (event) => {
+window.addEventListener("load", () => {
     console.log("Bitcoin Mastermind Save Results Light INIT");
     bitc_a_light_start();
     initializeFieldLogic();
@@ -66,8 +66,8 @@ window.addEventListener("load", (event) => {
 // Function to initialize field logic 
 function initializeFieldLogic() {
     const joltzFields = document.querySelectorAll('[name="bitc_joltz_brand_id"], [name="bitc_joltz_brand_secret"]');
-    const btcFields = document.querySelectorAll('[name="bitc_btcpay_url"], [name="bitc_btcpay_api_key"]');
-    const lnbitsFields = document.querySelectorAll('[name="bitc_lnbits_url"], [name="bitc_lnbits_api_key"]');
+    const btcFields = document.querySelectorAll('[name="btcpay_url"], [name="btcpay_api_key"]');
+    const lnbitsFields = document.querySelectorAll('[name="lnbits_url"], [name="lnbits_api_key"]');
     const saveButton = document.querySelector('#bitc_save_settings');
 
     function disableFields(fields) {
@@ -122,7 +122,6 @@ function initializeFieldLogic() {
         });
     });
 
-
     if (saveButton) {
         saveButton.addEventListener('click', function(e) {
             let joltzFilled = Array.from(joltzFields).some(input => input.value.trim() !== '');
@@ -139,7 +138,7 @@ function initializeFieldLogic() {
 }
 
 function bitc_a_light_start() {
-	bitc_a_light_load_active_tab();
+    bitc_a_light_load_active_tab();
 }
 
 // show the default tab on load

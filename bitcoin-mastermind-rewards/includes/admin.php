@@ -156,6 +156,32 @@ wp_enqueue_script(
                 </table>
                 </div>
                 
+                <?php
+                // Initialize variables for BTCPay Server settings
+                $opt_val_btcpay_url = get_option('btcpay_url', '');
+                $data_field_name_btcpay_url = 'btcpay_url';
+
+                $opt_val_btcpay_store_id = get_option('btcpay_store_id', '');
+                $data_field_name_btcpay_store_id = 'btcpay_store_id';
+
+                $opt_val_btcpay_api_key = get_option('btcpay_api_key', '');
+                $data_field_name_btcpay_api_key = 'btcpay_api_key';
+
+                // Initialize variables for Alby settings
+                $opt_val_alby_url = get_option('alby_url', '');
+                $data_field_name_alby_url = 'alby_url';
+
+                $opt_val_alby_token = get_option('alby_token', '');
+                $data_field_name_alby_token = 'alby_token';
+
+                // Initialize variables for LNBits settings
+                $opt_val_lnbits_url = get_option('lnbits_url', '');
+                $data_field_name_lnbits_url = 'lnbits_url';
+
+                $opt_val_lnbits_admin_key = get_option('lnbits_api_key', '');
+                $data_field_name_lnbits_admin_key = 'lnbits_api_key';
+                ?>
+
                 <div id="bitc_tab_settings" class="bitc_tab">
                     <form id="bitc_settings" method="post">
                         <input type="hidden" name="bitc_submit_hidden" value="Y">
@@ -173,6 +199,33 @@ wp_enqueue_script(
                                     $selected_payout_option = sanitize_text_field($_POST['wallet_selection']);
                                     // Save the selected payout option to the WordPress database
                                     update_option('selected_payout_option', $selected_payout_option);
+                                }
+
+                                // Save the BTCPay options
+                                if (isset($_POST['btcpay_url'])) {
+                                    update_option('btcpay_url', sanitize_text_field($_POST['btcpay_url']));
+                                }
+                                if (isset($_POST['btcpay_store_id'])) {
+                                    update_option('btcpay_store_id', sanitize_text_field($_POST['btcpay_store_id']));
+                                }
+                                if (isset($_POST['btcpay_api_key'])) {
+                                    update_option('btcpay_api_key', sanitize_text_field($_POST['btcpay_api_key']));
+                                }
+
+                                // Save the Alby options
+                                if (isset($_POST['alby_url'])) {
+                                    update_option('alby_url', sanitize_text_field($_POST['alby_url']));
+                                }
+                                if (isset($_POST['alby_token'])) {
+                                    update_option('alby_token', sanitize_text_field($_POST['alby_token']));
+                                }
+
+                                // Save the LNBits options
+                                if (isset($_POST['lnbits_url'])) {
+                                    update_option('lnbits_url', sanitize_text_field($_POST['lnbits_url']));
+                                }
+                                if (isset($_POST['lnbits_api_key'])) {
+                                    update_option('lnbits_api_key', sanitize_text_field($_POST['lnbits_api_key']));
                                 }
                             }
                         }
@@ -193,7 +246,7 @@ wp_enqueue_script(
                                 </span>
                             </label>
 
-                            <!-- Radio Buttons to Select Between BTCPay, Alby and LNBits -->
+                            <!-- Radio Buttons to Select Between BTCPay, Alby, and LNBits -->
                             <div class="bitc_row" style="grid-column: span 2;">
                                 <label>
                                     <input type="radio" name="wallet_selection" value="btcpay" id="btcpay_radio" <?php checked($current_payout_option, 'btcpay'); ?>>
@@ -212,59 +265,37 @@ wp_enqueue_script(
                             <!-- BTCPay Server Settings -->
                             <div id="btcpay_settings" style="display: <?php echo ($current_payout_option === 'btcpay') ? 'block' : 'none'; ?>;">
                                 <div class="bitc_row">
-                                    <label for="<?php echo $data_field_name_btcpay_url; ?>">BTCPay Server URL:
-                                        <span class="bitc_tooltip bitc_tooltip_question">?
-                                            <span class="bitc_tooltip_content">
-                                                <span>BTCPay Server can be easily used with Testnet. We recommend testing
-                                                    thoroughly with Testnet before using Mainnet and limiting the amount of funds
-                                                    available to the store selected for sending rewards.
-                                                </span>
-                                            </span>
-                                        </span>
-                                    </label>
+                                    <label for="<?php echo $data_field_name_btcpay_url; ?>">BTCPay Server URL:</label>
                                     <input type="text" id="<?php echo $data_field_name_btcpay_url; ?>" 
-                                        name="<?php echo $data_field_name_btcpay_url; ?>" 
-                                        value="<?php echo $opt_val_btcpay_url; ?>"
-                                        placeholder="BTCPay only TestNet recommended">
+                                        name="btcpay_url" 
+                                        value="<?php echo esc_attr($opt_val_btcpay_url); ?>">
                                 </div>
-
                                 <div class="bitc_row">
-                                    <label for="<?php echo $data_field_name_btcpay_store_id; ?>">BTCPay Server Store ID:</label>
+                                    <label for="<?php echo $data_field_name_btcpay_store_id; ?>">BTCPay Store ID:</label>
                                     <input type="text" id="<?php echo $data_field_name_btcpay_store_id; ?>" 
-                                        name="<?php echo $data_field_name_btcpay_store_id; ?>" 
-                                        value="<?php if(!empty($opt_val_btcpay_store_id)): echo $opt_val_btcpay_store_id; endif;?>" 
-                                        placeholder="BTCPay only TestNet recommended">
+                                        name="btcpay_store_id" 
+                                        value="<?php echo esc_attr($opt_val_btcpay_store_id); ?>">
                                 </div>
-
                                 <div class="bitc_row">
-                                    <label for="<?php echo $data_field_name_btcpay_api_key; ?>">BTCPay Server API Key:</label>
+                                    <label for="<?php echo $data_field_name_btcpay_api_key; ?>">BTCPay API Key:</label>
                                     <input type="password" id="<?php echo $data_field_name_btcpay_api_key; ?>" 
-                                        name="<?php echo $data_field_name_btcpay_api_key; ?>" 
-                                        value="<?php echo $opt_val_btcpay_api_key; ?>" 
-                                        placeholder="BTCPay only TestNet recommended">
+                                        name="btcpay_api_key" 
+                                        value="<?php echo esc_attr($opt_val_btcpay_api_key); ?>">
                                 </div>
                             </div>
 
                             <!-- Alby Wallet Settings -->
                             <div id="alby_settings" style="display: <?php echo ($current_payout_option === 'alby') ? 'block' : 'none'; ?>;">
                                 <div class="bitc_row">
-                                    <label for="<?php echo $data_field_name_alby_url; ?>">
-                                        Alby API Endpoint URL:
-                                        <span class="bitc_tooltip bitc_tooltip_question">?
-                                            <span class="bitc_tooltip_content">
-                                                <span>This is the recommended URL and should not need editing except in special cases</span>
-                                            </span>
-                                        </span>
-                                    </label>
+                                    <label for="<?php echo $data_field_name_alby_url; ?>">Alby API Endpoint URL:</label>
                                     <input type="text" id="<?php echo $data_field_name_alby_url; ?>" 
-                                        name="<?php echo $data_field_name_alby_url; ?>" 
-                                        value="<?php echo $opt_val_alby_url; ?>">
+                                        name="alby_url" 
+                                        value="<?php echo esc_attr($opt_val_alby_url); ?>">
                                 </div>
-
                                 <div class="bitc_row">
                                     <label for="<?php echo $data_field_name_alby_token; ?>">Alby Account Access Token:</label>
                                     <input type="password" id="<?php echo $data_field_name_alby_token; ?>" 
-                                        name="<?php echo $data_field_name_alby_token; ?>" 
+                                        name="alby_token" 
                                         value="<?php echo esc_attr($opt_val_alby_token); ?>">
                                 </div>
                             </div>
@@ -272,23 +303,33 @@ wp_enqueue_script(
                             <!-- LNBits Settings -->
                             <div id="lnbits_settings" style="display: <?php echo ($current_payout_option === 'lnbits') ? 'block' : 'none'; ?>;">
                                 <div class="bitc_row">
-                                    <label for="lnbits_api_key">LNBits API Key:</label>
-                                    <input type="password" id="lnbits_api_key" name="lnbits_api_key" value="<?php echo esc_attr(get_option('lnbits_api_key', '')); ?>" placeholder="LNBits API Key">
+                                    <label for="<?php echo $data_field_name_lnbits_url; ?>">
+                                        LNBits Server URL:
+                                        <span class="bitc_tooltip bitc_tooltip_question">?
+                                            <span class="bitc_tooltip_content">
+                                                <span>Add the main URL for your LNBits server, for example: https://demo.lnbits.com/</span>
+                                            </span>
+                                        </span>
+                                    </label>
+                                    <input type="text" id="<?php echo $data_field_name_lnbits_url; ?>" 
+                                        name="lnbits_url" 
+                                        value="<?php echo esc_attr($opt_val_lnbits_url); ?>">
                                 </div>
+
                                 <div class="bitc_row">
-                                    <label for="lnbits_url">LNBits URL:</label>
-                                    <input type="text" id="lnbits_url" name="lnbits_url" value="<?php echo esc_attr(get_option('lnbits_url', '')); ?>" placeholder="LNBits URL">
+                                    <label for="<?php echo $data_field_name_lnbits_admin_key; ?>">LNBits Admin Key:</label>
+                                    <input type="password" id="<?php echo $data_field_name_lnbits_admin_key; ?>" 
+                                        name="lnbits_api_key" 
+                                        value="<?php echo esc_attr($opt_val_lnbits_admin_key); ?>">
                                 </div>
                             </div>
 
                             <div class="bitc_row">
                                 <input type="submit" class="bitc_button2" id="bitc_save_settings" value="SAVE">
                             </div>
-
                         </div>
                     </form>
                 </div>
-
 
 
             <div id="bitc_tab_rewards" class="bitc_tab">

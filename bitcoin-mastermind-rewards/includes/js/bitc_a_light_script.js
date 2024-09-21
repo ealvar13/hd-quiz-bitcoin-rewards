@@ -298,9 +298,13 @@ async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti
 
         const data = await response.json();
 
-        // Check for Alby's successful response or BTCPay Server's successful response
-        if ((data && data.success && data.details && data.details.payment_preimage) ||
-            (data && data.details && data.details.status === "Complete")) {
+        // Check for successful response from each wallet type
+        if (
+            (data && data.success) || // Check for a general success flag
+            (data.details && data.details.payment_preimage) || // Alby specific check
+            (data.details && data.details.status === "Complete") || // BTCPay specific check
+            (data.details && data.details.payment_hash && data.details.checking_id) // LNBits specific check
+        ) {
             if (showconfetti == 1) {
                 displayConfetti();
             }
@@ -318,7 +322,6 @@ async function sendPaymentRequest(bolt11, quizID, lightningAddress, showconfetti
             return { success: false, data: data.details || data };
         }
     } catch (error) {
-        console.error('Error in sendPaymentRequest:', error);
         await saveQuizResults(lightningAddress, scoreText, totalSats, quizID, 0, 0, results_details_selections);
         return { success: false, error: error };
     }
