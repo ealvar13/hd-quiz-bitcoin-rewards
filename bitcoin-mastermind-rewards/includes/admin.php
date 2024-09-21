@@ -185,15 +185,15 @@ wp_enqueue_script(
                         <input type="hidden" name="selected_payout_option" id="selected_payout_option" value="<?php echo esc_attr($current_payout_option); ?>">
 
                         <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap: 2rem">
-                            <label style="grid-column: span 2;">Select Alby or BTCPay Server and click SAVE
+                            <label style="grid-column: span 2;">Select the wallet connection to enable and click SAVE
                                 <span class="bitc_tooltip bitc_tooltip_question">?
                                     <span class="bitc_tooltip_content">
-                                        <span>Only one option is allowed. If both are filled, the selected option will be used.</span>
+                                        <span>Only one option is allowed. If more than one option is filled, the selected option will be used.</span>
                                     </span>
                                 </span>
                             </label>
 
-                            <!-- Radio Buttons to Select Between BTCPay and Alby -->
+                            <!-- Radio Buttons to Select Between BTCPay, Alby and LNBits -->
                             <div class="bitc_row" style="grid-column: span 2;">
                                 <label>
                                     <input type="radio" name="wallet_selection" value="btcpay" id="btcpay_radio" <?php checked($current_payout_option, 'btcpay'); ?>>
@@ -202,6 +202,10 @@ wp_enqueue_script(
                                 <label>
                                     <input type="radio" name="wallet_selection" value="alby" id="alby_radio" <?php checked($current_payout_option, 'alby'); ?>>
                                     Alby Wallet
+                                </label>
+                                <label>
+                                    <input type="radio" name="wallet_selection" value="lnbits" id="lnbits_radio" <?php checked($current_payout_option, 'lnbits'); ?>>
+                                    LNBits
                                 </label>
                             </div>
 
@@ -265,9 +269,22 @@ wp_enqueue_script(
                                 </div>
                             </div>
 
+                            <!-- LNBits Settings -->
+                            <div id="lnbits_settings" style="display: <?php echo ($current_payout_option === 'lnbits') ? 'block' : 'none'; ?>;">
+                                <div class="bitc_row">
+                                    <label for="lnbits_api_key">LNBits API Key:</label>
+                                    <input type="password" id="lnbits_api_key" name="lnbits_api_key" value="<?php echo esc_attr(get_option('lnbits_api_key', '')); ?>" placeholder="LNBits API Key">
+                                </div>
+                                <div class="bitc_row">
+                                    <label for="lnbits_url">LNBits URL:</label>
+                                    <input type="text" id="lnbits_url" name="lnbits_url" value="<?php echo esc_attr(get_option('lnbits_url', '')); ?>" placeholder="LNBits URL">
+                                </div>
+                            </div>
+
                             <div class="bitc_row">
                                 <input type="submit" class="bitc_button2" id="bitc_save_settings" value="SAVE">
                             </div>
+
                         </div>
                     </form>
                 </div>

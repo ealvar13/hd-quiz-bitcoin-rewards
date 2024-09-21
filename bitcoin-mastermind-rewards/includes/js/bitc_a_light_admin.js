@@ -16,11 +16,13 @@ window.addEventListener("load", () => {
 function initializeToggleFunctionality() {
     const btcpayRadio = document.getElementById('btcpay_radio');
     const albyRadio = document.getElementById('alby_radio');
+    const lnbitsRadio = document.getElementById('lnbits_radio');
     const selectedOptionInput = document.getElementById('selected_payout_option');
     const btcpaySettings = document.getElementById('btcpay_settings');
     const albySettings = document.getElementById('alby_settings');
+    const lnbitsSettings = document.getElementById('lnbits_settings');
 
-    if (btcpayRadio && albyRadio && selectedOptionInput && btcpaySettings && albySettings) {
+    if (btcpayRadio && albyRadio && lnbitsRadio && selectedOptionInput && btcpaySettings && albySettings && lnbitsSettings) {
         // Function to update the hidden input value and toggle settings display
         function updateSelectedOption() {
             if (btcpayRadio.checked) {
@@ -32,6 +34,12 @@ function initializeToggleFunctionality() {
                 albySettings.style.display = 'block';
                 btcpaySettings.style.display = 'none';
             }
+            else if (lnbitsRadio.checked) {
+                selectedOptionInput.value = 'lnbits';
+                lnbitsSettings.style.display = 'block';
+                btcpaySettings.style.display = 'none';
+                albySettings.style.display = 'none';
+            }
         }
 
         // Initialize the hidden input and settings display based on the current state
@@ -40,6 +48,7 @@ function initializeToggleFunctionality() {
         // Add event listeners to update the hidden input and settings display when the selection changes
         btcpayRadio.addEventListener('change', updateSelectedOption);
         albyRadio.addEventListener('change', updateSelectedOption);
+        lnbitsRadio.addEventListener('change', updateSelectedOption);
     } else {
         console.error('Toggle elements not found. Please check your HTML structure.');
     }
@@ -58,6 +67,7 @@ window.addEventListener("load", (event) => {
 function initializeFieldLogic() {
     const joltzFields = document.querySelectorAll('[name="bitc_joltz_brand_id"], [name="bitc_joltz_brand_secret"]');
     const btcFields = document.querySelectorAll('[name="bitc_btcpay_url"], [name="bitc_btcpay_api_key"]');
+    const lnbitsFields = document.querySelectorAll('[name="bitc_lnbits_url"], [name="bitc_lnbits_api_key"]');
     const saveButton = document.querySelector('#bitc_save_settings');
 
     function disableFields(fields) {
@@ -99,14 +109,30 @@ function initializeFieldLogic() {
         });
     });
 
+    lnbitsFields.forEach(field => {
+        field.addEventListener('input', function() {
+            if (field.value.trim() !== '') {
+                disableFields([...joltzFields, ...btcFields]);
+            } else {
+                const otherFieldsFilled = Array.from(lnbitsFields).some(input => input.value.trim() !== '');
+                if (!otherFieldsFilled) {
+                    enableFields(btcFields);
+                }
+            }
+        });
+    });
+
+
     if (saveButton) {
         saveButton.addEventListener('click', function(e) {
             let joltzFilled = Array.from(joltzFields).some(input => input.value.trim() !== '');
             let btcFilled = Array.from(btcFields).some(input => input.value.trim() !== '');
+            let lnbitsFilled = Array.from(lnbitsFields).some(input => input.value.trim() !== '');
 
-            if (joltzFilled && btcFilled) {
+            // Prevent submission if conflicting fields are filled
+            if ((joltzFilled && btcFilled) || (joltzFilled && lnbitsFilled) || (btcFilled && lnbitsFilled)) {
                 e.preventDefault();
-                alert('Please fill out either Joltz or BTCPay Server details, not both.');
+                alert('Please fill out details for only one connection option at a time (Joltz, BTCPay Server, or LNBits).');
             }
         });
     }
