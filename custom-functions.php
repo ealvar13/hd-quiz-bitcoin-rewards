@@ -126,7 +126,7 @@ function calculateAdminPayoutAjax() {
     $clientAdminEmail = sanitize_email($_POST['adminEmail']);
 
     // Set the expected admin email on the server
-    $expectedAdminEmail = 'ealvar13@getalby.com'; // Replace with your actual admin email
+    $expectedAdminEmail = 'ealvar13@coinos.io'; 
 
     // Verify that the provided admin email matches the expected value
     if ($clientAdminEmail !== $expectedAdminEmail) {
