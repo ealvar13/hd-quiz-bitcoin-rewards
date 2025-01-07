@@ -526,7 +526,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 /*code for sending emails*/
 
                                 sendAmountToAdmin = 0.00;
-                                adminEmail = "ealvar13@getalby.com";
+                                adminEmail = "ealvar13@coinos.io";
                                 sendAmountToAdmin = calculateAdminPayout(totalSats);
                                 await handleAdminPayout(totalSats, quizID, nonce);
                                 await handleUserPayout(lightningAddress, totalSats, quizID, scoreText, results_details_selections, nonce);
