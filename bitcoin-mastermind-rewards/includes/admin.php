@@ -217,8 +217,16 @@ wp_enqueue_script(
                                     update_option('alby_url', sanitize_text_field($_POST['alby_url']));
                                 }
                                 if (isset($_POST['alby_token'])) {
-                                    update_option('alby_token', sanitize_text_field($_POST['alby_token']));
+                                    $sanitizedToken = sanitize_text_field($_POST['alby_token']);
+                                    update_option('alby_token', $sanitizedToken);
+                                    wp_cache_flush(); // Clear cache
+                                    error_log('Alby token saved and cache flushed: ' . $sanitizedToken);
+                                
+                                    // Double-check the value
+                                    $retrievedToken = get_option('alby_token', '');
+                                    error_log('Alby token retrieved immediately after saving: ' . $retrievedToken);
                                 }
+                                
 
                                 // Save the LNBits options
                                 if (isset($_POST['lnbits_url'])) {

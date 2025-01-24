@@ -334,8 +334,9 @@ function bitc_pay_bolt11_invoice() {
         }
     } elseif ($selected_payout_option === 'alby') {
         error_log('Selected payout option: ' . $selected_payout_option);
+		
 		// Alby payment processing
-        $albyAccessToken = get_option('bitc_alby_token', '');
+        $albyAccessToken = get_option('alby_token', '');
         if (empty($bolt11)) {
             echo json_encode(['error' => 'Invoice is required.']);
             wp_die();
