@@ -291,6 +291,7 @@ function bitc_pay_bolt11_invoice() {
 
     // Fetch the selected payout option from the database
     $selected_payout_option = get_option('selected_payout_option', 'btcpay'); // Default to 'btcpay' if not set
+	error_log('Selected payout option: ' . $selected_payout_option);
 
     // Handle payment based on the selected option
     if ($selected_payout_option === 'btcpay') {
@@ -332,12 +333,14 @@ function bitc_pay_bolt11_invoice() {
             }
         }
     } elseif ($selected_payout_option === 'alby') {
-        // Alby payment processing
+        error_log('Selected payout option: ' . $selected_payout_option);
+		// Alby payment processing
         $albyAccessToken = get_option('bitc_alby_token', '');
         if (empty($bolt11)) {
             echo json_encode(['error' => 'Invoice is required.']);
             wp_die();
         }
+		error_log('Selected access token: ' . $albyAccessToken);
 
         // Alby endpoint for processing payments
         $url = 'https://api.getalby.com/payments/bolt11';
@@ -346,6 +349,13 @@ function bitc_pay_bolt11_invoice() {
             'Authorization' => 'Bearer ' . $albyAccessToken,
         ];
         $body = json_encode(['invoice' => $bolt11]);
+
+		// Log the full API request details for debugging
+		error_log('Alby API Request Details: ' . json_encode([
+			'url' => $url,
+			'headers' => $headers,
+			'body' => json_decode($body, true), // Log the decoded body for better readability
+		]));
 
         // Send payment request to Alby
         $response = wp_remote_post($url, [
@@ -372,6 +382,7 @@ function bitc_pay_bolt11_invoice() {
 
         wp_die();
     } elseif ($selected_payout_option === 'lnbits') {
+		error_log('Selected payout option: ' . $selected_payout_option);
 		// LNBits payment processing
 		$lnbits_url = get_option('lnbits_url', '');
 		$lnbits_api_key = get_option('lnbits_api_key', '');
