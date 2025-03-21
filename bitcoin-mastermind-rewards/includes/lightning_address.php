@@ -97,6 +97,15 @@ function should_enable_rewards($quiz_id, $lightning_address) {
 	return $rewards_enabled && !$over_budget;
 }
 
+// 🔐 AJAX handler to generate secure BOLT11 nonce
+function generate_bolt11_nonce() {
+    $nonce = wp_create_nonce('get_bolt11_nonce');
+    wp_send_json_success($nonce);
+}
+add_action('wp_ajax_generate_bolt11_nonce', 'generate_bolt11_nonce');
+add_action('wp_ajax_nopriv_generate_bolt11_nonce', 'generate_bolt11_nonce');
+
+
 // Function to display the quiz rules modal at the start of the quiz
 function la_modal_html($quiz_id) {
 	?>
@@ -146,6 +155,7 @@ add_action('bitc_before', 'la_input_lightning_address_on_quiz_start', 10, 1);
 
 // Function to count the attempts a user's lightning address has made for a specific quiz
 function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
+	error_log("➡ checking retry limit");
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'bitcoin_quiz_results';
 
@@ -217,6 +227,349 @@ function store_lightning_address_in_session() {
 add_action('wp_ajax_store_lightning_address', 'store_lightning_address_in_session');        // If the user is logged in
 add_action('wp_ajax_nopriv_store_lightning_address', 'store_lightning_address_in_session'); // If the user is not logged in
 
+// Securely generate LNURL-pay URL
+function get_pay_url($email) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return null;
+    [$user, $domain] = explode('@', $email);
+    return "https://" . esc_attr($domain) . "/.well-known/lnurlp/" . esc_attr($user);
+}
+
+// Securely fetch URL data
+function fetch_url($url) {
+    $response = wp_remote_get($url);
+    if (is_wp_error($response)) return null;
+    return json_decode(wp_remote_retrieve_body($response), true);
+}
+
+// Generate BOLT11 invoice securely
+function generate_bolt11_invoice($email, $amount, $caller_type) {
+    $pay_url = get_pay_url($email);
+    if (!$pay_url) return null;
+
+    $lnurl_data = fetch_url($pay_url);
+    if (!$lnurl_data || $lnurl_data['tag'] !== 'payRequest') return null;
+
+    $callback_url = add_query_arg([
+        'amount' => intval($amount) * 1000, // Convert sats to millisats
+    ], $lnurl_data['callback']);
+
+    $invoice_response = fetch_url($callback_url);
+    return $invoice_response['pr'] ?? null;
+}
+
+function calculate_correct_answers($quiz_id, $user_answers_array) {
+	global $wpdb;
+
+	$correct_answers_count = 0;
+
+	// Get quiz settings
+	$quiz_settings = get_bitc_quiz($quiz_id);
+
+	// Loop through each submitted question/answer pair
+	foreach ($user_answers_array as $entry) {
+		$question_id = intval($entry['key']);
+		$selected_value = sanitize_text_field($entry['value']);
+
+		$question = get_bitc_question($question_id);
+		if (!$question || empty($question["answers"]["value"])) {
+			continue;
+		}
+
+		// Get correct answers based on quiz settings
+		$answers = $question["answers"]["value"];
+		$correct_answers = bitc_get_question_answers($answers, $question["selected"]["value"], $quiz_settings["randomize_answers"]["value"][0]);
+
+		// Check if user selected a correct answer
+		foreach ($correct_answers as $answer_option) {
+			if (!empty($answer_option['correct']) && $answer_option['correct'] == 1 && trim($answer_option['answer']) === trim($selected_value)) {
+				$correct_answers_count++;
+				break;
+			}
+		}
+	}
+
+	return $correct_answers_count;
+}
+
+
+// Calculate admin payout securely
+function calculate_admin_payout_server($total_sats) {
+	error_log("➡ calculating admin payout");
+    if ($total_sats <= 20) return 1;
+    if ($total_sats <= 30) return 2;
+    if ($total_sats <= 40) return 3;
+    if ($total_sats <= 50) return 4;
+    if ($total_sats <= 100) return 5;
+    return round($total_sats * 0.05);
+}
+
+// Calculate user payout securely
+function calculate_user_payout_server($selected_answers, $quiz_id) {
+    $sats_per_answer = get_option("sats_per_answer_for_" . $quiz_id, 0);
+    $quiz_settings = get_bitc_quiz($quiz_id);
+    $score = 0;
+
+    foreach ($selected_answers as $answer) {
+        $question_id = intval($answer['key']);
+        $selected_value = sanitize_text_field($answer['value']);
+
+        $question = get_bitc_question($question_id);
+        $correct_answers = bitc_get_question_answers(
+            $question["answers"]["value"],
+            $question["selected"]["value"],
+            $quiz_settings["randomize_answers"]["value"][0]
+        );
+
+        foreach ($correct_answers as $correct) {
+            if (!empty($correct['correct']) && $correct['correct'] == 1 && $selected_value === $correct['answer']) {
+                $score++;
+                break;
+            }
+        }
+    }
+
+    $total_sats = $score * intval($sats_per_answer);
+    return ['score' => $score, 'total_sats' => $total_sats];
+}
+
+
+function secure_quiz_payout_handler() {
+    error_log('✅ secure_quiz_payout_handler called');
+
+    if (!function_exists('generate_bolt11_invoice')) error_log("❌ generate_bolt11_invoice not found");
+    if (!function_exists('bitc_execute_payment')) error_log("❌ bitc_execute_payment not found");
+    if (!function_exists('bitc_save_quiz_results_internal')) error_log("❌ bitc_save_quiz_results_internal not found");
+
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'get_bolt11_nonce')) {
+        wp_send_json_error(['message' => 'Invalid nonce']);
+        exit;
+    }
+
+    // ✅ Input sanitization
+    $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+    $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
+    $selected_answers = isset($_POST['results_details_selections']) ? $_POST['results_details_selections'] : [];
+
+    // ✅ Basic validation
+    if (!$quiz_id || empty($lightning_address)) {
+        wp_send_json_error(['message' => 'Missing required data.']);
+        return;
+    }
+
+    // ✅ Check retry limits
+    $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
+    if (!empty($attempt_data['max_retries_exceeded'])) {
+        wp_send_json_error(['message' => 'Max attempts exceeded.']);
+        return;
+    }
+
+    // ✅ Calculate user payout server-side
+    $user_payout = calculate_user_payout_server($selected_answers, $quiz_id);
+    $score = $user_payout['score'];
+    $total_sats = $user_payout['total_sats'];
+
+    if ($total_sats <= 0) {
+        wp_send_json_error(['message' => 'No sats earned.']);
+        return;
+    }
+
+    // ✅ Calculate admin payout
+    $admin_email = "ealvar13@coinos.io";
+    $admin_sats = calculate_admin_payout_server($total_sats);
+
+    // ✅ Generate invoices
+    error_log("➡ generating user invoice");
+    $user_invoice = generate_bolt11_invoice($lightning_address, $total_sats, 'user');
+    error_log("➡ generating admin invoice");
+    $admin_invoice = generate_bolt11_invoice($admin_email, $admin_sats, 'admin');
+
+    if (empty($user_invoice) || empty($admin_invoice)) {
+        wp_send_json_error(['message' => 'Invoice generation failed.']);
+        return;
+    }
+
+    // ✅ Execute payments
+    error_log("➡ executing user payment");
+	$max_budget = get_option("max_satoshi_budget_for_" . $quiz_id, 0);
+	$total_sent_so_far = get_total_sent_for_quiz($quiz_id);
+
+	if (($total_sent_so_far + $total_sats) > $max_budget) {
+		wp_send_json_error(['message' => 'This quiz has exceeded its reward budget.']);
+		return;
+	}
+
+    $user_payment_result = bitc_execute_payment($user_invoice);
+    error_log("✅ user payment result: " . print_r($user_payment_result, true));
+
+    error_log("➡ executing admin payment");
+    $admin_payment_result = bitc_execute_payment($admin_invoice);
+    error_log("✅ admin payment result: " . print_r($admin_payment_result, true));
+
+    if (empty($user_payment_result['success'])) {
+        wp_send_json_error(['message' => 'User payment failed.']);
+        return;
+    }
+
+    if (empty($admin_payment_result['success'])) {
+        wp_send_json_error(['message' => 'Admin payment failed.']);
+        return;
+    }
+
+    // ✅ Save results
+    $score_text = $score . ' / ' . count($selected_answers);
+    error_log("➡ saving quiz results");
+    $save_result = bitc_save_quiz_results_internal(
+        $lightning_address,
+        $score_text,
+        $total_sats,
+        $quiz_id,
+        1,
+        $total_sats,
+        $selected_answers
+    );
+
+    if (!$save_result) {
+        wp_send_json_error(['message' => 'Saving quiz results failed.']);
+        return;
+    }
+
+    // ✅ Final response
+    $response_data = [
+        'message' => 'Payout successful',
+        'satoshis_sent' => $total_sats,
+        'score' => $score,
+    ];
+    error_log("✅ sending json: " . print_r($response_data, true));
+    wp_send_json_success($response_data);
+    exit;
+}
+
+
+add_action('wp_ajax_secure_quiz_payout', 'secure_quiz_payout_handler');
+add_action('wp_ajax_nopriv_secure_quiz_payout', 'secure_quiz_payout_handler');
+
+
+
+/**
+ * Securely executes payment using the configured payout option (BTCPay, Alby, or LNBits).
+ *
+ * @param string $bolt11 The BOLT11 invoice to be paid.
+ * @return array Payment result containing 'success' and 'details'.
+ */
+function bitc_execute_payment($bolt11) {
+    $selected_payout_option = get_option('selected_payout_option', 'btcpay'); // default to btcpay
+    error_log("➡ Executing payment using method: " . $selected_payout_option);
+
+    // Handle BTCPay Server payment
+    if ($selected_payout_option === 'btcpay') {
+        $btcpay_url = rtrim(get_option('bitc_btcpay_url', ''), '/');
+        $btcpay_api_key = get_option('bitc_btcpay_api_key', '');
+        $store_id = get_option('bitc_btcpay_store_id', '');
+        $crypto = 'BTC';
+
+        $url = "$btcpay_url/api/v1/stores/$store_id/lightning/$crypto/invoices/pay";
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'token ' . $btcpay_api_key,
+        ];
+        $body = json_encode(['BOLT11' => $bolt11]);
+
+        $response = wp_remote_post($url, [
+            'headers' => $headers,
+            'body' => $body,
+            'timeout' => 45,
+        ]);
+
+        if (is_wp_error($response)) {
+            return ['success' => false, 'details' => $response->get_error_message()];
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        return (isset($data['status']) && $data['status'] === 'Complete')
+            ? ['success' => true, 'details' => $data]
+            : ['success' => false, 'details' => $data];
+    }
+
+    // Handle Alby payment
+    if ($selected_payout_option === 'alby') {
+        $alby_token = get_option('alby_token', '');
+        $url = 'https://api.getalby.com/payments/bolt11';
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $alby_token,
+        ];
+        $body = json_encode(['invoice' => $bolt11]);
+
+        $response = wp_remote_post($url, [
+            'headers' => $headers,
+            'body' => $body,
+            'timeout' => 45,
+        ]);
+
+        if (is_wp_error($response)) {
+            return ['success' => false, 'details' => $response->get_error_message()];
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        return (isset($data['payment_preimage']))
+            ? ['success' => true, 'details' => $data]
+            : ['success' => false, 'details' => $data];
+    }
+
+    // Handle LNBits payment
+    if ($selected_payout_option === 'lnbits') {
+        $lnbits_url = rtrim(get_option('lnbits_url', ''), '/');
+        $lnbits_api_key = get_option('lnbits_api_key', '');
+        $url = "$lnbits_url/api/v1/payments";
+        $headers = [
+            'Content-Type' => 'application/json',
+            'X-Api-Key' => $lnbits_api_key,
+        ];
+        $body = json_encode(['bolt11' => $bolt11]);
+
+        $response = wp_remote_post($url, [
+            'headers' => $headers,
+            'body' => $body,
+            'timeout' => 45,
+        ]);
+
+        if (is_wp_error($response)) {
+            return ['success' => false, 'details' => $response->get_error_message()];
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        return (isset($data['payment_hash']) && isset($data['checking_id']))
+            ? ['success' => true, 'details' => $data]
+            : ['success' => false, 'details' => $data];
+    }
+
+    // Fallback: no configured payout system
+    return ['success' => false, 'details' => 'No valid payout system configured.'];
+}
+
+
+// Securely save quiz results internally
+function bitc_save_quiz_results_internal($address, $result, $earned, $quiz_id, $success, $sent, $selections) {
+    $_POST = [
+        'lightning_address' => $address,
+        'quiz_result' => $result,
+        'satoshis_earned' => $earned,
+        'quiz_id' => $quiz_id,
+        'send_success' => $success,
+        'satoshis_sent' => $sent,
+        'selected_results' => http_build_query(['dataArray' => $selections]),
+    ];
+
+    ob_start();
+    bitc_save_quiz_results();
+    $response = json_decode(ob_get_clean(), true);
+    return $response['success'] ?? false;
+}
+
+
 // Modal to display the steps of the payment process
 function la_steps_indicator_modal() {
 	?>
@@ -246,204 +599,6 @@ function la_add_steps_indicator_modal($quiz_id) {
 // Add the above function to the 'bitc_after' hook
 add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
 
-function bitc_pay_bolt11_invoice() {
-
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'get_bolt11_nonce')) {
-        wp_send_json_error(['message' => 'Invalid nonce']);
-        wp_die();
-    }
-
-    // Retrieve quiz_id from POST data
-    $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
-    $lightning_address = isset($_POST['lightning_address']) ? sanitize_text_field($_POST['lightning_address']) : '';
-    $bolt11 = isset($_POST['bolt11']) ? strtolower(sanitize_text_field($_POST['bolt11'])) : '';
-    $callerType = isset($_POST['callerType']) ? sanitize_text_field($_POST['callerType']) : '';
-    $totalPayout = isset($_POST['totalSats']) ? sanitize_text_field($_POST['totalSats']) : '';
-
-    // Compare totalPayout to the quiz budget
-    $quizBudget = get_option('max_satoshi_budget_for_' . $quiz_id, 0);
-    $quizReward = get_option('sats_per_answer_for_' . $quiz_id, 0);
-    $questions = bitc_get_quiz_question_count($quiz_id);
-    $totalPayoutCalculated = intval($questions) * intval($quizReward);
-
-    // Fail the payment if the calculated total payout is different from the total payout requested
-    if (intval($totalPayout) > intval($totalPayoutCalculated)) {
-        error_log('🚀 Total payout exceeds calculated amount. Calculated: ' . $totalPayoutCalculated . ' Requested: ' . $totalPayout);
-        echo json_encode(['error' => 'Total payout exceeds the calculated maximum.']);
-        wp_die();
-    }
-
-    // Set up transients for the admin and user
-    $adminTransient = get_transient('admin_bolt11');
-    $userTransient = get_transient('user_bolt11');
-    if ($adminTransient === $bolt11 || $userTransient === $bolt11) {
-        error_log(json_encode(['success' => true, 'details' => ['pr' => $bolt11]]));
-    } else {
-        wp_die();
-    }
-
-    // Get attempt count and check if maximum retries have been exceeded
-    $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
-    if ($attempt_data['max_retries_exceeded']) {
-        echo json_encode(['error' => 'Maximum attempts reached for this Lightning Address.']);
-        wp_die();
-    }
-
-    // Fetch the selected payout option from the database
-    $selected_payout_option = get_option('selected_payout_option', 'btcpay'); // Default to 'btcpay' if not set
-	error_log('Selected payout option: ' . $selected_payout_option);
-
-    // Handle payment based on the selected option
-    if ($selected_payout_option === 'btcpay') {
-        // BTCPay Server payment processing
-        $btcpayServerUrl = get_option('bitc_btcpay_url', '');
-        $apiKey = get_option('bitc_btcpay_api_key', '');
-        $storeId = get_option('bitc_btcpay_store_id', '');
-        $cryptoCode = "BTC";
-        $bolt11 = isset($_POST['bolt11']) ? sanitize_text_field($_POST['bolt11']) : '';
-
-        // Remove any trailing slashes and construct the correct URL
-        $btcpayServerUrl = rtrim($btcpayServerUrl, '/');
-        $url = $btcpayServerUrl . "/api/v1/stores/" . $storeId . "/lightning/" . $cryptoCode . "/invoices/pay";
-        $body = json_encode(['BOLT11' => $bolt11]);
-
-        // Send payment request to BTCPay Server
-        $response = wp_remote_post($url, [
-            'headers' => [
-                'Content-Type'  => 'application/json',
-                'Authorization' => 'token ' . $apiKey,
-            ],
-            'body' => $body,
-            'timeout'     => 45,
-            'data_format' => 'body',
-        ]);
-
-        if (is_wp_error($response)) {
-            error_log('Payment request error: ' . $response->get_error_message());
-            echo json_encode(['error' => 'Payment request failed', 'details' => $response->get_error_message()]);
-        } else {
-            $responseBody = wp_remote_retrieve_body($response);
-            error_log('BTCPay Server response: ' . $responseBody);
-            $decodedResponse = json_decode($responseBody, true);
-
-            if (isset($decodedResponse['status']) && $decodedResponse['status'] === 'Complete') {
-                echo json_encode(['success' => true, 'details' => $decodedResponse]);
-            } else {
-                echo json_encode(['success' => false, 'details' => $decodedResponse]);
-            }
-        }
-    } elseif ($selected_payout_option === 'alby') {
-        error_log('Selected payout option: ' . $selected_payout_option);
-		
-		// Alby payment processing
-        $albyAccessToken = get_option('alby_token', '');
-        if (empty($bolt11)) {
-            echo json_encode(['error' => 'Invoice is required.']);
-            wp_die();
-        }
-		error_log('Selected access token: ' . $albyAccessToken);
-
-        // Alby endpoint for processing payments
-        $url = 'https://api.getalby.com/payments/bolt11';
-        $headers = [
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . $albyAccessToken,
-        ];
-        $body = json_encode(['invoice' => $bolt11]);
-
-		// Log the full API request details for debugging
-		error_log('Alby API Request Details: ' . json_encode([
-			'url' => $url,
-			'headers' => $headers,
-			'body' => json_decode($body, true), // Log the decoded body for better readability
-		]));
-
-        // Send payment request to Alby
-        $response = wp_remote_post($url, [
-            'headers' => $headers,
-            'timeout'     => 45,
-            'body' => $body,
-            'data_format' => 'body',
-        ]);
-
-        if (is_wp_error($response)) {
-            error_log('Alby payment request error: ' . $response->get_error_message());
-            echo json_encode(['error' => 'Alby payment request failed', 'details' => $response->get_error_message()]);
-            wp_die();
-        }
-
-        $responseBody = wp_remote_retrieve_body($response);
-        $decodedResponse = json_decode($responseBody, true);
-
-        if (isset($decodedResponse['payment_preimage'])) {
-            echo json_encode(['success' => true, 'details' => $decodedResponse]);
-        } else {
-            echo json_encode(['success' => false, 'details' => $decodedResponse]);
-        }
-
-        wp_die();
-    } elseif ($selected_payout_option === 'lnbits') {
-		error_log('Selected payout option: ' . $selected_payout_option);
-		// LNBits payment processing
-		$lnbits_url = get_option('lnbits_url', '');
-		$lnbits_api_key = get_option('lnbits_api_key', '');
-	
-		// Check if URL is empty and log a message for debugging
-		if (empty($lnbits_url)) {
-			error_log('LNBits URL is empty or not set correctly.');
-			echo json_encode(['error' => 'LNBits URL is not set.']);
-			wp_die();
-		}
-	
-		if (empty($bolt11)) {
-			echo json_encode(['error' => 'Invoice is required.']);
-			wp_die();
-		}
-	
-		// LNBits endpoint for processing payments
-		$url = rtrim($lnbits_url, '/') . '/api/v1/payments';
-	
-		// Log the constructed URL for debugging
-		error_log('Constructed LNBits URL: ' . $url);
-	
-		// Prepare the headers and body for the POST request to LNBits
-		$headers = [
-			'Content-Type' => 'application/json',
-			'X-Api-Key' => $lnbits_api_key,
-		];
-		$body = json_encode(['bolt11' => $bolt11]);
-	
-		// Send payment request to LNBits
-		$response = wp_remote_post($url, [
-			'headers' => $headers,
-			'timeout' => 45,
-			'body' => $body,
-			'data_format' => 'body',
-		]);
-	
-		if (is_wp_error($response)) {
-			error_log('LNBits payment request error: ' . $response->get_error_message());
-			echo json_encode(['error' => 'LNBits payment request failed', 'details' => $response->get_error_message()]);
-			wp_die();
-		}
-	
-		$response_body = wp_remote_retrieve_body($response);
-		$decoded_response = json_decode($response_body, true);
-	
-		// Check if the payment was successful by looking for 'payment_hash' and 'checking_id'
-		if (isset($decoded_response['payment_hash']) && isset($decoded_response['checking_id'])) {
-			echo json_encode(['success' => true, 'details' => $decoded_response]);
-		} else {
-			echo json_encode(['success' => false, 'details' => $decoded_response]);
-		}
-	} else {
-		// No payment option is configured
-		echo json_encode(['error' => 'No payment system is configured.']);
-	}
-	
-	wp_die();
-	
-}
 
 // Register the new AJAX action
 add_action('wp_ajax_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice');        // If the user is logged in

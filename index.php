@@ -12,8 +12,6 @@
 require dirname(__FILE__) . '/bitcoin-mastermind/index.php';
 require dirname(__FILE__) . '/bitcoin-mastermind-rewards/index.php';
 require dirname(__FILE__) . '/bitcoin-mastermind-save-results-light/index.php';
-// Include custom functions file
-include_once plugin_dir_path(__FILE__) . 'custom-functions.php';
 
 
 
