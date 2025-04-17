@@ -45,6 +45,7 @@ function bitc_enqueue_lightning_script() {
 		'satsPerAnswer' => $sats_value,
 		'btcpayUrl' => $btcpay_url,
 		'btcpayApiKey' => $btcpay_api_key,
+		'save_quiz_results_nonce'    => wp_create_nonce('save_quiz_results_nonce'),
 	));
 }
 add_action('wp_enqueue_scripts', 'bitc_enqueue_lightning_script');
@@ -173,31 +174,40 @@ function count_attempts_by_lightning_address($lightning_address, $quiz_id) {
 }
 
 
-// Function to count the attempts a user's lightning address has made for a specific quiz
 function count_attempts_by_lightning_address_ajax() {
-	global $wpdb;
-	$table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+    global $wpdb;
 
-	if(!empty($_POST['lightningAddress']) && !empty($_POST['quizID'])){
-		$lightning_address = $_POST['lightningAddress'];
-		$quiz_id = $_POST['quizID'];
-	}
+    // Require parameters
+    if ( empty($_POST['lightningAddress']) || empty($_POST['quizID']) ) {
+        wp_send_json_error(['message' => 'Missing lightningAddress or quizID']);
+        return;
+    }
 
+    // Sanitize inputs
+    $lightning_address = sanitize_text_field($_POST['lightningAddress']);
+    $quiz_id           = intval($_POST['quizID']);
 
-	$count = $wpdb->get_var($wpdb->prepare(
-		"SELECT COUNT(*) FROM $table_name WHERE lightning_address = %s AND quiz_id = %d",
-		$lightning_address,
-		$quiz_id
-	));
+    // Count attempts
+    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+    $count = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$table_name} WHERE lightning_address = %s AND quiz_id = %d",
+        $lightning_address,
+        $quiz_id
+    ));
 
-	$max_retries = get_option("max_retries_for_" . $quiz_id, 0);
-	//$max_retries_exceeded = intval($count) >= $max_retries;
-	$remaining_attempts = $max_retries - $count;
-	echo json_encode(array('count' => intval($count), 'max_retries' => $max_retries,'remaining_attempts'=>$remaining_attempts));
-	die;
+    // Calculate remaining
+    $max_retries        = intval(get_option("max_retries_for_{$quiz_id}", 0));
+    $remaining_attempts = max(0, $max_retries - intval($count));
+
+    wp_send_json_success([
+        'count'              => intval($count),
+        'max_retries'        => $max_retries,
+        'remaining_attempts' => $remaining_attempts,
+    ]);
 }
 add_action('wp_ajax_count_attempts_by_lightning_address_ajax', 'count_attempts_by_lightning_address_ajax');
 add_action('wp_ajax_nopriv_count_attempts_by_lightning_address_ajax', 'count_attempts_by_lightning_address_ajax');
+
 
 
 
@@ -303,6 +313,71 @@ function calculate_admin_payout_server($total_sats) {
     return round($total_sats * 0.05);
 }
 
+// Updates quiz result data and answer details for a specific quiz attempt.
+function bitc_update_quiz_results_by_attempt_id($attempt_id, $score_text, $total_sats, $selected_answers) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bitcoin_quiz_results';
+    $table_name2 = $wpdb->prefix . 'bitcoin_survey_results';
+
+    // Update main quiz record
+    $wpdb->update(
+        $table_name,
+        [
+            'quiz_result' => $score_text,
+            'satoshis_earned' => $total_sats,
+            'send_success' => 1,
+            'satoshis_sent' => $total_sats
+        ],
+        ['unique_attempt_id' => $attempt_id],
+        ['%s', '%d', '%d', '%d'],
+        ['%s']
+    );
+
+    // Get updated row ID to update answers
+    $row_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT id FROM $table_name WHERE unique_attempt_id = %s",
+        $attempt_id
+    ));
+
+    if (!$row_id) return;
+
+    // Delete old survey answers just in case (optional)
+    $wpdb->delete($table_name2, ['result_id' => $row_id]);
+
+    $quiz_settings = get_bitc_quiz($wpdb->get_var($wpdb->prepare(
+        "SELECT quiz_id FROM $table_name WHERE id = %d",
+        $row_id
+    )));
+
+    foreach ($selected_answers as $item) {
+        $key = $item['key'];
+        $value = $item['value'];
+        $question_title = sanitize_text_field(get_the_title($key));
+        $question = get_bitc_question($key);
+        $correct_answer = "";
+
+        $ans_cor = bitc_get_question_answers($question["answers"]["value"], $question["selected"]["value"], $quiz_settings["randomize_answers"]["value"][0]);
+        foreach ($ans_cor as $val) {
+            if (!empty($val['correct']) && $val['correct'] == 1) {
+                $correct_answer .= $val['answer'] . ",";
+            }
+        }
+
+        $wpdb->insert(
+            $table_name2,
+            [
+                'result_id' => $row_id,
+                'question' => $question_title,
+                'selected' => $value,
+                'correct' => $correct_answer,
+                'quiz_name' => $question["quiz_name"] ?? 'Unknown',
+                'user_id' => '', // fill if available
+            ]
+        );
+    }
+}
+
+
 // Calculate user payout securely
 function calculate_user_payout_server($selected_answers, $quiz_id) {
     $sats_per_answer = get_option("sats_per_answer_for_" . $quiz_id, 0);
@@ -355,6 +430,28 @@ function secure_quiz_payout_handler() {
         wp_send_json_error(['message' => 'Missing required data.']);
         return;
     }
+
+	// 🔐 Validate attempt_id and prevent replays
+	$attempt_id = isset($_POST['attempt_id']) ? sanitize_text_field($_POST['attempt_id']) : '';
+
+	if (empty($attempt_id)) {
+		wp_send_json_error(['message' => 'Missing attempt ID.']);
+		return;
+	}
+
+	global $wpdb;
+
+	$already_paid = $wpdb->get_var($wpdb->prepare(
+		"SELECT send_success FROM {$wpdb->prefix}bitcoin_quiz_results 
+		WHERE unique_attempt_id = %s",
+		$attempt_id
+	));
+
+	if ($already_paid == 1) {
+		wp_send_json_error(['message' => 'This quiz attempt has already been rewarded.']);
+		return;
+	}
+
 
     // ✅ Check retry limits
     $attempt_data = count_attempts_by_lightning_address($lightning_address, $quiz_id);
@@ -415,23 +512,11 @@ function secure_quiz_payout_handler() {
         return;
     }
 
-    // ✅ Save results
-    $score_text = $score . ' / ' . count($selected_answers);
-    error_log("➡ saving quiz results");
-    $save_result = bitc_save_quiz_results_internal(
-        $lightning_address,
-        $score_text,
-        $total_sats,
-        $quiz_id,
-        1,
-        $total_sats,
-        $selected_answers
-    );
+    // ✅ Save complete results now that payout succeeded
+	$score_text = $score . ' / ' . count($selected_answers);
+	error_log("➡ saving quiz results post-payment");
 
-    if (!$save_result) {
-        wp_send_json_error(['message' => 'Saving quiz results failed.']);
-        return;
-    }
+	bitc_update_quiz_results_by_attempt_id($attempt_id, $score_text, $total_sats, $selected_answers);
 
     // ✅ Final response
     $response_data = [
@@ -599,13 +684,8 @@ function la_add_steps_indicator_modal($quiz_id) {
 // Add the above function to the 'bitc_after' hook
 add_action('bitc_after', 'la_add_steps_indicator_modal', 10, 1);
 
-
-// Register the new AJAX action
-add_action('wp_ajax_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice');        // If the user is logged in
-add_action('wp_ajax_nopriv_pay_bolt11_invoice', 'bitc_pay_bolt11_invoice'); // If the user is not logged in
-
 function bitc_save_quiz_results() {
-
+	check_ajax_referer('save_quiz_results_nonce','nonce');
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'bitcoin_quiz_results';
 	$table_name2 = $wpdb->prefix . 'bitcoin_survey_results';
@@ -660,6 +740,9 @@ foreach ($resultArray as $key => $value) {
 	$send_success = isset($_POST['send_success']) ? intval($_POST['send_success']) : 0;
 	$satoshis_sent = isset($_POST['satoshis_sent']) ? intval($_POST['satoshis_sent']) : 0;
 
+	// Generate a unique quiz attempt ID
+	$unique_attempt_id = uniqid('attempt_', true);
+
 	// Insert data into the database
 	$insert_result = $wpdb->insert(
 		$table_name,
@@ -671,7 +754,8 @@ foreach ($resultArray as $key => $value) {
 			'quiz_name' => $quiz_term ? $quiz_term->name : 'Unknown Quiz',
 			'send_success' => $send_success,
 			'satoshis_sent' => $satoshis_sent,
-			'quiz_id' => $quiz_id
+			'quiz_id' => $quiz_id,
+			'unique_attempt_id' => $unique_attempt_id
 		),
 		array('%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d')
 	);
@@ -710,7 +794,12 @@ foreach ($resultArray as $key => $value) {
 
 	if ($insert_result !== false) {
 		// Success, send back the inserted data
-		echo json_encode(array('success' => true, 'satoshis_sent' => $satoshis_sent));
+		echo json_encode(array(
+			'success' => true,
+			'satoshis_sent' => $satoshis_sent,
+			'attempt_id' => $unique_attempt_id
+		));
+		
 	} else {
 		// Error in insertion
 		echo json_encode(array('success' => false, 'error' => 'Unable to save quiz results.'));
@@ -762,7 +851,6 @@ function bitc_export_csv_results(){
 }
 
 add_action('wp_ajax_export_csv_results', 'bitc_export_csv_results');
-add_action('wp_ajax_nopriv_export_csv_results', 'bitc_export_csv_results');
 
 
 // Function to convert array to CSV string

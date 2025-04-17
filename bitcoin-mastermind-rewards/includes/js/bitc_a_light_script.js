@@ -104,15 +104,47 @@ document.addEventListener("DOMContentLoaded", () => {
     // Step 1: Validating & preparing results
     document.getElementById("step-calculating")?.classList.add("active-step");
 
-    // Step 2: Generating Invoice
-    document.getElementById("step-generating")?.classList.add("active-step");
-
     const resultsDetailsSelections = [...document.querySelectorAll(".bitc_question")].map((q) => ({
       key: q.id.replace("bitc_question_", ""),
       value: q.querySelector(".bitc_check_input:checked")?.title || q.querySelector(".bitc_label_answer")?.value || "",
     }));
 
-    // Get secure nonce
+    // Step 2: Generating Invoice
+    document.getElementById("step-generating")?.classList.add("active-step");
+
+    // 🔐 Save quiz results and get unique attempt ID
+    let saveResponse;
+    try {
+      saveResponse = await jQuery.ajax({
+        url: bitc_data.ajaxurl,
+        type: "POST",
+        dataType: "json",
+        data: {
+          action: "bitc_save_quiz_results",
+          nonce: bitc_data.save_quiz_results_nonce,
+          lightning_address: lightningAddress,
+          quiz_result: "0 / 0",
+          satoshis_earned: 0,
+          quiz_id: quizID,
+          send_success: 0,
+          satoshis_sent: 0,
+          selected_results: jQuery.param({ dataArray: resultsDetailsSelections }),
+        },
+      });
+    } catch (err) {
+      console.error("❌ Error saving quiz results:", err);
+      alert("Could not save quiz results. Please try again.");
+      return;
+    }
+
+    if (!saveResponse?.success || !saveResponse?.attempt_id) {
+      alert("Error saving quiz results. Please try again.");
+      return;
+    }
+
+    const attemptId = saveResponse.attempt_id;
+
+    // ✅ Generate secure nonce for payout
     let nonceResponse;
     try {
       nonceResponse = await jQuery.post(bitc_data.ajaxurl, { action: "generate_bolt11_nonce" });
@@ -142,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
           lightning_address: lightningAddress,
           quiz_id: quizID,
           results_details_selections: resultsDetailsSelections,
+          attempt_id: attemptId,
         },
       });
     } catch (err) {
@@ -151,20 +184,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Step 4: Show Reward
+    const satsDisplay = document.getElementById("satoshis-sent-display");
+
+    let sats = 0;
+    if (response?.success === true) {
+      sats = response.data?.satoshis_sent ?? 0;
+      if (satsDisplay) satsDisplay.textContent = sats;
+    }
+
     document.getElementById("step-reward")?.classList.add("active-step");
 
     // Step 5: Final Result
     const stepResult = document.getElementById("step-result");
     stepResult?.classList.add("active-step");
 
-    if (response?.success && response?.satoshis_sent !== undefined) {
-      const satsDisplay = document.getElementById("satoshis-sent-display");
-      if (satsDisplay) satsDisplay.textContent = response.satoshis_sent;
-      if (stepResult) stepResult.textContent = "✅ Payment Successful! Enjoy your free sats.";
+    if (response?.success === true) {
+      if (stepResult) stepResult.textContent = "✅ Payment Successful!";
       displayConfetti();
     } else {
       const errorMsg = response?.data?.message || response?.message || "❌ Something went wrong during payout.";
-      const satsDisplay = document.getElementById("satoshis-sent-display");
       if (satsDisplay) satsDisplay.textContent = "0 (Error)";
       if (stepResult) stepResult.textContent = `❌ ${errorMsg}`;
       alert(`Error: ${errorMsg}`);
