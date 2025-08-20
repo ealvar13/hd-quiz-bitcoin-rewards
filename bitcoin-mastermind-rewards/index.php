@@ -6,7 +6,7 @@
  * Author: ealvar13
  * License: GPL-2.0+
  * Author URI: https://github.com/ealvar13
- * Version: 0.1.0
+ * Version: 0.1.1
  */
 
 // Basic Security Check: If this file is called directly, abort.
@@ -53,7 +53,7 @@ add_action('init', 'bitc_br_check_hd_quiz_active');
 ------------------------------------------------------- */
 // require dirname(__FILE__) . '/includes/functions.php'; // commenting out for now, general functions for Bitcoin rewards
 require dirname(__FILE__) . '/includes/lightning_address.php';
-//require dirname(__FILE__) . '/includes/db_operations.php';
+require dirname(__FILE__) . '/includes/db_operations.php';
 require dirname(__FILE__) . '/includes/api_endpoints.php';
 
 /* Create Bitcoin Mastermind Bitcoin Rewards Settings page
@@ -72,11 +72,33 @@ function bitc_br_settings_page_callback() {
     require dirname(__FILE__) . '/includes/admin.php';
 }
 
+// DEBUG: Log columns in the wp_bitcoin_quiz_results table
+// add_action('admin_init', function () {
+//     if (current_user_can('manage_options')) {
+//         global $wpdb;
+//         $table = $wpdb->prefix . 'bitcoin_quiz_results';
+//         $columns = $wpdb->get_results("SHOW COLUMNS FROM $table", ARRAY_A);
+//         error_log("➡ Table columns in $table:");
+//         foreach ($columns as $column) {
+//             error_log(" - " . $column['Field']);
+//         }
+//     }
+// });
 
+// Activation: create tables and patch missing column
+function bitc_br_activate_plugin() {
+    error_log( '🔄 Plugin activation hook triggered' );
+    create_custom_bitcoin_table();
+    ensure_unique_attempt_column();
+}
+register_activation_hook( __FILE__, 'bitc_br_activate_plugin' );
+
+// **FALLBACK**: also patch missing column on every admin init
+add_action( 'admin_init', 'ensure_unique_attempt_column' );
 
 //add_action('admin_init','create_custom_bitcoin_table');
 
-// Hook the table creation function to plugin activation
-//register_activation_hook(__FILE__, 'create_custom_bitcoin_table');
+
 // Correct file path example
 //register_activation_hook(__DIR__ . '/index.php', 'create_custom_bitcoin_table');
+
