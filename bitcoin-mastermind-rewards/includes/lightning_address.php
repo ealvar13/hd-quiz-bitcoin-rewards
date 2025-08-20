@@ -757,7 +757,7 @@ foreach ($resultArray as $key => $value) {
 			'quiz_id' => $quiz_id,
 			'unique_attempt_id' => $unique_attempt_id
 		),
-		array('%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d')
+		array('%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d', '%s')
 	);
 
 	// Get the last insert ID
