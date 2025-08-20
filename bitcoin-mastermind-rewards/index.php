@@ -87,6 +87,7 @@ function bitc_br_settings_page_callback() {
 
 // Activation: create tables and patch missing column
 function bitc_br_activate_plugin() {
+    error_log( '🔄 Plugin activation hook triggered' );
     create_custom_bitcoin_table();
     ensure_unique_attempt_column();
 }

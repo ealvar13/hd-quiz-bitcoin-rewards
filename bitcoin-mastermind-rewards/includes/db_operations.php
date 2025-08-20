@@ -11,10 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function create_custom_bitcoin_table() {
     global $wpdb;
+    
+    error_log( '🔄 create_custom_bitcoin_table function called' );
+    
     $charset_collate = $wpdb->get_charset_collate();
 
     $quiz_table   = $wpdb->prefix . 'bitcoin_quiz_results';
     $survey_table = $wpdb->prefix . 'bitcoin_survey_results';
+    
+    error_log( "🔄 Attempting to create tables: {$quiz_table}, {$survey_table}" );
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -47,8 +52,27 @@ function create_custom_bitcoin_table() {
         ) {$charset_collate};
     ";
 
-    dbDelta( $sql_quiz );
-    dbDelta( $sql_survey );
+    error_log( "🔄 SQL for quiz table: " . $sql_quiz );
+    
+    $result_quiz = dbDelta( $sql_quiz );
+    $result_survey = dbDelta( $sql_survey );
+    
+    error_log( "🔄 dbDelta result for quiz table: " . print_r($result_quiz, true) );
+    error_log( "🔄 dbDelta result for survey table: " . print_r($result_survey, true) );
+    
+    // Check if table was actually created
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$quiz_table}'");
+    if ($table_exists) {
+        error_log( "✅ Table {$quiz_table} exists after creation attempt" );
+    } else {
+        error_log( "❌ Table {$quiz_table} does NOT exist after creation attempt" );
+        // Try alternative creation method
+        $create_result = $wpdb->query($sql_quiz);
+        error_log( "🔄 Direct wpdb->query result: " . $create_result );
+        if ($wpdb->last_error) {
+            error_log( "❌ SQL Error: " . $wpdb->last_error );
+        }
+    }
 
     error_log( '✅ create_custom_bitcoin_table triggered' );
 }
@@ -56,6 +80,14 @@ function create_custom_bitcoin_table() {
 function ensure_unique_attempt_column() {
     global $wpdb;
     $table = $wpdb->prefix . 'bitcoin_quiz_results';
+
+    // First check if the table exists
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$table}'");
+    if (!$table_exists) {
+        error_log( "❌ Table {$table} does not exist, cannot add column. Creating table first..." );
+        create_custom_bitcoin_table();
+        return;
+    }
 
     $exists = $wpdb->get_var(
         "SHOW COLUMNS FROM `{$table}` LIKE 'unique_attempt_id'"
@@ -66,6 +98,12 @@ function ensure_unique_attempt_column() {
             "ALTER TABLE `{$table}` 
              ADD COLUMN `unique_attempt_id` VARCHAR(255) DEFAULT NULL"
         );
-        error_log( "✅ unique_attempt_id column added to {$table}" );
+        if ($wpdb->last_error) {
+            error_log( "❌ Error adding column to {$table}: " . $wpdb->last_error );
+        } else {
+            error_log( "✅ unique_attempt_id column added to {$table}" );
+        }
+    } else {
+        error_log( "ℹ️ unique_attempt_id column already exists in {$table}" );
     }
 }
